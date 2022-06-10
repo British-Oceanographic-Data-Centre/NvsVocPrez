@@ -9,7 +9,7 @@ This version of VocPrez uses [FastAPI](https://fastapi.tiangolo.com/), not Flask
 
 To install (Linux):
 
-1. clone the repo - <https://github.com/surroundaustralia/NvsVocPrez>
+1. clone the repo - <https://github.com/British-Oceanographic-Data-Centre/NvsVocPrez>
 2. (optional) create a Python virtual environment & activate it
     * `~$ python3 -m venv venv`
     * `~$ source venv/bin/activate`
@@ -24,7 +24,7 @@ There is no test v. production difference in the running of FastAPI, as there is
 ### Config
 * all configuration variables are in `config.py` and have required default set
 * when run with `uvicorn`/`gunicorn`, `PORT` is usually set on the command line and `HOST` and `SYSTEM_URI` need not be changed from `config.py`
-* `SPARQL_ENDPOINT` in `config.py` is correct for NVS production deployment and is used by the <http://nvs.surroundaustralia.com> deployment and Nick's localhost testing too
+* `SPARQL_ENDPOINT` in `config.py` is correct for NVS production deployment, and can also be used with localhost.
 
 ### Running with gunicorn
 Gunicorn is run with uvicorn workers which then run the FastAPI application. This ensures multiple workers can be created as necissary and logging, stop/start handled better.
