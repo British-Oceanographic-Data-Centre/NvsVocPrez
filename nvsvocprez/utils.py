@@ -41,7 +41,7 @@ def sparql_construct(query: str, rdf_mediatype="text/turtle"):
         data=query,
         headers={"Content-Type": "application/sparql-query", "Accept": rdf_mediatype},
         auth=(config.SPARQL_USERNAME, config.SPARQL_PASSWORD),
-        timeout=60.0,
+        timeout=90.0,
     )
     if 200 <= r.status_code < 300:
         return True, r.content
