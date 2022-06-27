@@ -362,6 +362,7 @@ def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict):
             <{instance_uri}> ?p ?o .
             MINUS {{ <{instance_uri}> skos:member ?o . }}
             }}
+            UNION
             {{
             <{instance_uri}> skos:member ?m .
             ?m a skos:Concept .
