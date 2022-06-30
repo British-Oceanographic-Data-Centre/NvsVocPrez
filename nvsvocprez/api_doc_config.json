@@ -1,0 +1,67 @@
+{
+	"api_details":{
+	"description" : "The NVS technical and content governance is coordinated by a small team of data and semantic technology specialists at the National Oceanography Centre - British Oceanographic Data Centre (BODC).. ",
+	"title":"The NERC Vocabulary Server (NVS)",
+	"version":"0.0.1",
+	"contact":{
+		"name": "Alexandra Kokkinaki",
+		"url": "https://www.vocabnerc.ac.uk",
+		"email": "vocab.services@bodc.ac.uk"
+	},
+	"license_info":{
+		"name": "CC BY 4.0",
+		"url": "https://creativecommons.org/licenses/by/4.0/legalcode"
+	},
+	"docs_url":"/documentation"
+    },
+	"tags":[
+		{
+			"name": "Collections",
+			"description": "SKOS concept collections held in the NERC Vocabulary Server.",
+			"externalDocs": {
+				"description": "Find out more",
+				"url": "http://vocab.nerc.ac.uk/collection/"
+			}
+			
+		},
+		{
+			"name": "Schemas",
+			"description": "SKOS concept schemes managed by the NERC Vocabulary Server.",
+			"externalDocs": {
+				"description": "Find out more",
+				"url": "http://vocab.nerc.ac.uk/scheme/"
+			}
+			
+		}
+	
+	],
+	"paths":{
+		"/collection/": {
+			"get" : {
+				"tags":["Collections"],
+				"summary": "Retrieve all collections",
+				"description": "Retrieve all the collections in NVS"
+			}
+	
+		},
+		"/collection/{collection_id}/": {
+			"get" : {
+				"tags":["Collections"],
+				"summary": "Retrieve based on a collection id",
+				"description": "Retrieve details of a particular collection",
+				"openapi_extra":{
+				"parameters": [
+				  {
+				"in": "path",
+				"name": "collection_id",
+				"description": "The collection id for which to retrieve details",
+				"required": "True"
+				}
+			]
+				}
+			}
+	
+	
+		}
+	}
+}
