@@ -34,7 +34,7 @@
 			
 		},
 		{
-			"name": "Schemas",
+			"name": "Schemes",
 			"description": "SKOS concept schemes managed by the NERC Vocabulary Server.",
 			"externalDocs": {
 				"description": "Find out more",
@@ -112,13 +112,27 @@
 				"name": "collection_id",
 				"description": "The collection id for which to retrieve details",
 				"required": "True",
-				"schema": {
-					"title": "A test title",
-					"type": "Some content.."
-				  },
-				"example": "P01"
+				"example": "C30"
 				}
-			]
+			    ]
+				}
+			}
+		},
+		"/collection/{collection_id}/current/": {
+			"get" : {
+				"tags":["Collections"],
+				"summary": "Retrieve based on a collection id",
+				"description": "Retrieve details of a particular collection",
+				"openapi_extra":{
+					"parameters": [
+					{
+					"in": "path",
+					"name": "collection_id",
+					"description": "#JC",
+					"required": "True",
+					"example": "C30"
+					}
+					]
 				}
 			}
 		},
@@ -133,13 +147,34 @@
 					"in": "path",
 					"name": "collection_id",
 					"description": "#JC",
-					"required": "True"
+					"required": "True",
+					"example": "C30"
 					},
 				    {
 					"in": "path",
 					"name": "acc_dep_or_concept",
 					"description": "#JC",
-					"required": "False"
+					"required": "False",
+					"schema": {
+						"title": "Collection id Status",
+						"type": "status of the collection id",
+						"enum": ["accepted", "deprecated", "all", "None"]
+					  },
+					"example" :"accepted"
+					},
+					{
+					"in": "query",
+					"name": "_mediatype",
+					"description": "#JC",
+					"required": "True",
+					"example": "application/rdf+xml"
+					},
+					{
+					"in": "query",
+					"name": "_profile",
+					"description": "#JC",
+					"required": "False",
+					"example": "nvs"
 					}
 					]
 				}
@@ -156,27 +191,37 @@
 					"in": "path",
 					"name": "collection_id",
 					"description": "#JC",
-					"required": "True"
+					"required": "True",
+					"example": "C30"
 					},
 				    {
 					"in": "path",
 					"name": "concept_id",
 					"description": "#AK",
-					"required": "False"
+					"required": "False",
+					"example": "PURE"
 					},
 					{
 					"in": "path",
 					"name": "vnum",
 					"description": "#AK",
-					"required": "False"
+					"required": "False",
+					"example" :2
 					}
 					]
 				}
 			}
 		},
+		"/scheme/": {
+			"get" : {
+				"tags":["Schemes"],
+				"summary": "Retrieve all SKOS concept schemes",
+				"description": "Retrieve all the SKOS concept schemes in NVS"
+			}
+		},
 		"/scheme/{scheme_id}/": {
 			"get" : {
-				"tags":["Schemas"],
+				"tags":["Schemes"],
 				"summary": "#JC",
 				"description": "#JC",
 				"openapi_extra":{
@@ -191,9 +236,26 @@
 				}
 			}
 		},
+		"/scheme/{scheme_id}/current/": {
+			"get" : {
+				"tags":["Schemes"],
+				"summary": "#JC",
+				"description": "#JC",
+				"openapi_extra":{
+					"parameters": [
+					{
+					"in": "path",
+					"name": "scheme_id",
+					"description": "#JC",
+					"required": "True"
+					}
+					]
+				}
+			}
+		},
 		"/scheme/{scheme_id}/current/{acc_dep}/": {
 			"get" : {
-				"tags":["Schemas"],
+				"tags":["Schemes"],
 				"summary": "#JC",
 				"description": "#JC",
 				"openapi_extra":{
@@ -214,6 +276,7 @@
 				}
 			}
 		},
+		
 			"/mapping/{int_ext}/{mapping_id}/": {
 				"get" : {
 					"tags":["Mappings"],
@@ -257,7 +320,39 @@
 				"get" : {
 					"tags":["SPARQL"],
 					"summary": "Get a SPARQL query",
-					"description": "#JC"
+					"description": "#JC",
+					"responses":{
+						"200":{
+							"content":{
+								"text/turtle":{
+									"schema":
+										{"type": "string"}
+				  
+								}
+						      }
+					    }
+					},
+					"openapi_extra":{
+						"parameters": [
+						  {
+						"in": "query",
+						"name": "query",
+						"description": "HTML encoded sparql query",
+						"required": "True",
+						"example": "SELECT * WHERE {?sub ?pred ?obj .} LIMIT 10"
+						}
+						],
+						"responseBody":{
+							"content":{
+								"text/turtle":{
+									"schema":
+										{"type": "string"}
+				  
+								}
+							}
+						}
+						}
+					
 				},
 				"post" : {
 					"tags":["SPARQL"],

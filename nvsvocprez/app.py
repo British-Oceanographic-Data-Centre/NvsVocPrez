@@ -44,12 +44,11 @@ api_home_dir = Path(__file__).parent
 with open("api_doc_config.json", "r") as config_file:
 	doc_config = json.load(config_file)
 
-# print(doc_config)
 
 api_details = doc_config["api_details"]
 tags = doc_config["tags"]
 paths = doc_config["paths"]
-print(paths.keys(), '\n' * 10)
+
 
 api = fastapi.FastAPI(
 	title=api_details['title'],
@@ -76,7 +75,7 @@ acc_dep_map = {
 }
 
 
-@api.get("/", **paths["/"]["get"])
+@api.get("/", include_in_schema=False)
 @api.head("/", include_in_schema=False)
 def index(request: Request):
 	dcat_file = api_home_dir / "dcat.ttl"
@@ -340,7 +339,7 @@ def collections(request: Request):
 	return CollectionsRenderer().render()
 
 
-@api.get("/scheme/", tags =["Schemas"])
+@api.get("/scheme/",  **paths["/scheme/"]["get"])
 @api.head("/scheme/", include_in_schema=False)
 def conceptschemes(request: Request):
 	class ConceptSchemeRenderer(ContainerRenderer):
@@ -532,7 +531,7 @@ def collection_no_current(request: Request, collection_id):
 	return RedirectResponse(url=f"/collection/{collection_id}/current/")
 
 
-@api.get("/collection/{collection_id}/current/", include_in_schema=False)
+@api.get("/collection/{collection_id}/current/",**paths["/collection/{collection_id}/current/"]["get"])
 @api.get("/collection/{collection_id}/current/{acc_dep_or_concept}/",**paths["/collection/{collection_id}/current/{acc_dep_or_concept}/"]["get"])
 @api.head("/collection/{collection_id}/current/" , include_in_schema=False)
 @api.head("/collection/{collection_id}/current/{acc_dep_or_concept}/" , include_in_schema=False)
@@ -781,7 +780,7 @@ def scheme_no_current(request: Request, scheme_id):
 	return RedirectResponse(url=f"/scheme/{scheme_id}/current/")
 
 
-@api.get("/scheme/{scheme_id}/current/", include_in_schema=False)
+@api.get("/scheme/{scheme_id}/current/",**paths["/scheme/{scheme_id}/current/"]['get'])
 @api.get("/scheme/{scheme_id}/current/{acc_dep}/", **paths["/scheme/{scheme_id}/current/{acc_dep}/"]['get'])
 @api.head("/scheme/{scheme_id}/current/" , include_in_schema=False)
 @api.head("/scheme/{scheme_id}/current/{acc_dep}/" , include_in_schema=False)
@@ -2115,13 +2114,13 @@ def mapping(request: Request):
 	return MappingRenderer().render()
 
 
-@api.get("/about", **paths["/about/"]["get"])
+@api.get("/about",  include_in_schema=False)
 @api.head("/about", include_in_schema=False)
 def about(request: Request):
 	return templates.TemplateResponse("about.html", {"request": request})
 
 
-@api.get("/.well_known/", **paths["/.well_known/"]["get"])
+@api.get("/.well_known/",  include_in_schema=False)
 @api.head("/.well_known/", include_in_schema=False)
 def well_known(request: Request):
 	return RedirectResponse(url="/.well_known/void")
@@ -2166,7 +2165,7 @@ def well_known_void(
 
 @api.get("/contact", include_in_schema=False)
 @api.get("/contact-us" , include_in_schema=False)
-@api.get("/contact/", **paths["/contact/"]["get"])
+@api.get("/contact/", include_in_schema=False)
 @api.get("/contact-us/" , include_in_schema=False)
 @api.head("/contact", include_in_schema=False)
 @api.head("/contact-us", include_in_schema=False)
@@ -2398,7 +2397,7 @@ def endpoint_get(request: Request):
 			return Response(_get_sparql_service_description(accept), media_type=accept)
 
 
-@api.get("/cache-clear", **paths["/cache-clear"]["get"])
+@api.get("/cache-clear",  include_in_schema=False)
 def cache_clr(request: Request):
 	cache_clear()
 	return PlainTextResponse("Cache cleared")
