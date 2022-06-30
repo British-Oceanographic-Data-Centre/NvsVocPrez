@@ -44,11 +44,12 @@ api_home_dir = Path(__file__).parent
 with open("api_doc_config.json", "r") as config_file:
 	doc_config = json.load(config_file)
 
-print(doc_config)
+# print(doc_config)
 
 api_details = doc_config["api_details"]
 tags = doc_config["tags"]
 paths = doc_config["paths"]
+print(paths.keys(), '\n' * 10)
 
 api = fastapi.FastAPI(
 	title=api_details['title'],
@@ -75,8 +76,8 @@ acc_dep_map = {
 }
 
 
-@api.get("/")
-@api.head("/" , include_in_schema=False)
+@api.get("/", **paths["/"]["get"])
+@api.head("/", include_in_schema=False)
 def index(request: Request):
 	dcat_file = api_home_dir / "dcat.ttl"
 	sdo_file = api_home_dir / "sdo.ttl"
@@ -146,7 +147,7 @@ def index(request: Request):
 	return DatasetRenderer().render()
 
 
-@api.get("/collection/", **paths["/collection/"]["get"] )
+@api.get("/collection/", **paths["/collection/"]["get"])
 @api.head("/collection/" , include_in_schema=False)
 def collections(request: Request):
 	class CollectionsRenderer(ContainerRenderer):
@@ -531,8 +532,8 @@ def collection_no_current(request: Request, collection_id):
 	return RedirectResponse(url=f"/collection/{collection_id}/current/")
 
 
-@api.get("/collection/{collection_id}/current/")
-@api.get("/collection/{collection_id}/current/{acc_dep_or_concept}/")
+@api.get("/collection/{collection_id}/current/", include_in_schema=False)
+@api.get("/collection/{collection_id}/current/{acc_dep_or_concept}/",**paths["/collection/{collection_id}/current/{acc_dep_or_concept}/"]["get"])
 @api.head("/collection/{collection_id}/current/" , include_in_schema=False)
 @api.head("/collection/{collection_id}/current/{acc_dep_or_concept}/" , include_in_schema=False)
 def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
@@ -758,13 +759,13 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
 	return CollectionRenderer().render()
 
 
-@api.get("/collection/{collection_id}/current/{concept_id}/{vnum}/")
+@api.get("/collection/{collection_id}/current/{concept_id}/{vnum}/", **paths["/collection/{collection_id}/current/{concept_id}/{vnum}/"]['get'])
 @api.head("/collection/{collection_id}/current/{concept_id}/{vnum}/" , include_in_schema=False)
 def concept_with_version(request: Request, collection_id, concept_id, vnum: int):
 	return concept(request)
 
 
-@api.get("/collection/{collection_id}/current/{acc_dep_or_concept}")
+@api.get("/collection/{collection_id}/current/{acc_dep_or_concept}", include_in_schema=False)
 @api.head("/collection/{collection_id}/current/{acc_dep_or_concept}" , include_in_schema=False)
 def collection_concept_noslash(request: Request, collection_id, acc_dep_or_concept):
 	return RedirectResponse(
@@ -773,15 +774,15 @@ def collection_concept_noslash(request: Request, collection_id, acc_dep_or_conce
 
 
 @api.get("/scheme/{scheme_id}" , include_in_schema=False)
-@api.get("/scheme/{scheme_id}/")
+@api.get("/scheme/{scheme_id}/", **paths["/scheme/{scheme_id}/"]["get"] )
 @api.head("/scheme/{scheme_id}" , include_in_schema=False)
 @api.head("/scheme/{scheme_id}/" , include_in_schema=False)
 def scheme_no_current(request: Request, scheme_id):
 	return RedirectResponse(url=f"/scheme/{scheme_id}/current/")
 
 
-@api.get("/scheme/{scheme_id}/current/")
-@api.get("/scheme/{scheme_id}/current/{acc_dep}/")
+@api.get("/scheme/{scheme_id}/current/", include_in_schema=False)
+@api.get("/scheme/{scheme_id}/current/{acc_dep}/", **paths["/scheme/{scheme_id}/current/{acc_dep}/"]['get'])
 @api.head("/scheme/{scheme_id}/current/" , include_in_schema=False)
 @api.head("/scheme/{scheme_id}/current/{acc_dep}/" , include_in_schema=False)
 def scheme(
@@ -1203,15 +1204,15 @@ def scheme(
 	return SchemeRenderer().render()
 
 
-@api.get("/scheme/{scheme_id}/current/{acc_dep}")
+@api.get("/scheme/{scheme_id}/current/{acc_dep}", include_in_schema=False)
 @api.head("/scheme/{scheme_id}/current/{acc_dep}" , include_in_schema=False)
 def scheme_concept_noslash(request: Request, scheme_id, acc_dep):
 	return RedirectResponse(url=f"/scheme/{scheme_id}/current/{acc_dep}/")
 
 
-@api.get("/standard_name/")
+@api.get("/standard_name/", **paths["/standard_name/{acc_dep_or_concept}/"]["get"])
 @api.get("/standard_name/{acc_dep_or_concept}" , include_in_schema=False)
-@api.get("/standard_name/{acc_dep_or_concept}/")
+@api.get("/standard_name/{acc_dep_or_concept}/", **paths["/standard_name/{acc_dep_or_concept}/"]["get"])
 @api.head("/standard_name/" , include_in_schema=False)
 @api.head("/standard_name/{acc_dep_or_concept}" , include_in_schema=False)
 @api.head("/standard_name/{acc_dep_or_concept}/" , include_in_schema=False)
@@ -1999,7 +2000,7 @@ def concept(request: Request):
 	return ConceptRenderer(request).render()
 
 
-@api.get("/mapping/{int_ext}/{mapping_id}/")
+@api.get("/mapping/{int_ext}/{mapping_id}/", **paths["/mapping/{int_ext}/{mapping_id}/"]["get"])
 @api.head("/mapping/{int_ext}/{mapping_id}/", include_in_schema=False)
 def mapping(request: Request):
 
@@ -2012,7 +2013,7 @@ def mapping(request: Request):
 				f"{DATA_URI}/mapping/"
 				+ str(request.url).split("/mapping/")[1].split("?")[0]
 			)
-
+            
 			super().__init__(request, self.instance_uri, {"nvs": nvs}, "nvs")
 
 		def render(self):
@@ -2114,19 +2115,19 @@ def mapping(request: Request):
 	return MappingRenderer().render()
 
 
-@api.get("/about")
+@api.get("/about", **paths["/about/"]["get"])
 @api.head("/about", include_in_schema=False)
 def about(request: Request):
 	return templates.TemplateResponse("about.html", {"request": request})
 
 
-@api.get("/.well_known/")
+@api.get("/.well_known/", **paths["/.well_known/"]["get"])
 @api.head("/.well_known/", include_in_schema=False)
 def well_known(request: Request):
 	return RedirectResponse(url="/.well_known/void")
 
 
-@api.get("/.well_known/void")
+@api.get("/.well_known/void", include_in_schema=False)
 @api.head("/.well_known/void", include_in_schema=False)
 def well_known_void(
 	request: Request,
@@ -2165,8 +2166,8 @@ def well_known_void(
 
 @api.get("/contact", include_in_schema=False)
 @api.get("/contact-us" , include_in_schema=False)
-@api.get("/contact/")
-@api.get("/contact-us/")
+@api.get("/contact/", **paths["/contact/"]["get"])
+@api.get("/contact-us/" , include_in_schema=False)
 @api.head("/contact", include_in_schema=False)
 @api.head("/contact-us", include_in_schema=False)
 def contact(request: Request):
@@ -2174,7 +2175,7 @@ def contact(request: Request):
 
 
 @api.get("/sparql" , include_in_schema=False)
-@api.get("/sparql/")
+@api.get("/sparql/", **paths["/sparql/"]["get"])
 @api.head("/sparql", include_in_schema=False)
 @api.head("/sparql/", include_in_schema=False)
 def sparql(request: Request):
@@ -2269,32 +2270,10 @@ def _sparql_query2(q, mimetype="application/json"):
 		raise ex
 
 
-@api.post("/sparql/")
+@api.post("/sparql/", **paths["/sparql/"]["post"])
 @api.post("/sparql" , include_in_schema=False)
-@api.post("/endpoint")
+@api.post("/endpoint", include_in_schema=False)
 def endpoint_post(request: Request, query: str = fastapi.Form(...)):
-	"""
-	TESTS
-	Form POST:
-	curl -X POST -d query="PREFIX%20skos%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23%3E%0ASELECT%20* \
-	%20WHERE%20%7B%3Fs%20a%20skos%3AConceptScheme%20.%7D" http://localhost:5000/endpoint
-	Raw POST:
-	curl -X POST -H 'Content-Type: application/sparql-query' --data-binary @query.sparql http://localhost:5000/endpoint
-	using query.sparql:
-		PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-		SELECT * WHERE {?s a skos:ConceptScheme .}
-	GET:
-	curl http://localhost:5000/endpoint?query=PREFIX%20skos%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore \
-	%23%3E%0ASELECT%20*%20WHERE%20%7B%3Fs%20a%20skos%3AConceptScheme%20.%7D
-	GET CONSTRUCT:
-		PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-		PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-		CONSTRUCT {?s a rdf:Resource}
-		WHERE {?s a skos:ConceptScheme}
-	curl -H 'Accept: application/ld+json' http://localhost:5000/endpoint?query=PREFIX%20rdf%3A%20%3Chttp%3A%2F%2F \
-	www.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0APREFIX%20skos%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2F \
-	skos%2Fco23%3E%0ACONSTRUCT%20%7B%3Fs%20a%20rdf%3AResource%7D%0AWHERE%20%7B%3Fs%20a%20skos%3AConceptScheme%7D
-	"""
 	"""Pass on the SPARQL query to the underlying endpoint defined in config"""
 	if "application/x-www-form-urlencoded" in request.headers["content-type"]:
 		"""
@@ -2357,7 +2336,7 @@ def endpoint_post(request: Request, query: str = fastapi.Form(...)):
 		return PlainTextResponse(str(e), status_code=500)
 
 
-@api.get("/endpoint")
+@api.get("/endpoint", **paths["/sparql/"]["get"])
 @api.head("/endpoint", include_in_schema=False)
 def endpoint_get(request: Request):
 	if request.query_params.get("query") is not None:
@@ -2419,7 +2398,7 @@ def endpoint_get(request: Request):
 			return Response(_get_sparql_service_description(accept), media_type=accept)
 
 
-@api.get("/cache-clear")
+@api.get("/cache-clear", **paths["/cache-clear"]["get"])
 def cache_clr(request: Request):
 	cache_clear()
 	return PlainTextResponse("Cache cleared")

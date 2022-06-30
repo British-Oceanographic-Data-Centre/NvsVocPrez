@@ -16,6 +16,15 @@
     },
 	"tags":[
 		{
+			"name": "Landing Page",
+			"description": "Landing page for NVS.",
+			"externalDocs": {
+				"description": "Landing page for NVS",
+				"url": "http://vocab.nerc.ac.uk/"
+			}
+			
+		},
+		{
 			"name": "Collections",
 			"description": "SKOS concept collections held in the NERC Vocabulary Server.",
 			"externalDocs": {
@@ -32,10 +41,57 @@
 				"url": "http://vocab.nerc.ac.uk/scheme/"
 			}
 			
+		},
+		{
+			"name": "Mappings",
+			"description": "Retrieves collections for a mapping.",
+			"externalDocs": {
+				"description": "Find out more",
+				"url": "http://vocab.nerc.ac.uk/search_nvs/"
+			}
+		},
+		{
+			"name": "About",
+			"description": "Endpoints to contact or find out more about NVS",
+			"externalDocs": {
+				"description": "Find out more, or contact the team.",
+				"url": "http://vocab.nerc.ac.uk/about"
+			}
+			
+		},
+		{
+			"name": "SPARQL",
+			"description": "#JC",
+			"externalDocs": {
+				"description": "Find out more",
+				"url": "http://vocab.nerc.ac.uk/sparql/"
+			}		
+		},
+		{
+			"name": "Standard",
+			"description": "#AK",
+			"externalDocs": {
+				"description": "#AK",
+				"url": "http://vocab.nerc.ac.uk"
+			}		
+		},
+		{
+			"name": "Others",
+			"description": "#AK",
+			"externalDocs": {
+				"description": "#AK",
+				"url": "http://vocab.nerc.ac.uk"
+			}		
 		}
-	
 	],
 	"paths":{
+		"/": {
+			"get" : {
+				"tags":["Landing Page"],
+				"summary": "Landing page for NVS",
+				"description": "This is the Landing page for NVS"
+			}
+		},
 		"/collection/": {
 			"get" : {
 				"tags":["Collections"],
@@ -55,13 +111,194 @@
 				"in": "path",
 				"name": "collection_id",
 				"description": "The collection id for which to retrieve details",
+				"required": "True",
+				"schema": {
+					"title": "A test title",
+					"type": "Some content.."
+				  },
+				"example": "P01"
+				}
+			]
+				}
+			}
+		},
+		"/collection/{collection_id}/current/{acc_dep_or_concept}/": {
+			"get" : {
+				"tags":["Collections"],
+				"summary": "Retrieve based on a collection id",
+				"description": "Retrieve details of a particular collection",
+				"openapi_extra":{
+					"parameters": [
+					{
+					"in": "path",
+					"name": "collection_id",
+					"description": "#JC",
+					"required": "True"
+					},
+				    {
+					"in": "path",
+					"name": "acc_dep_or_concept",
+					"description": "#JC",
+					"required": "False"
+					}
+					]
+				}
+			}
+		},
+		"/collection/{collection_id}/current/{concept_id}/{vnum}/": {
+			"get" : {
+				"tags":["Collections"],
+				"summary": "#AK",
+				"description": "#AK",
+				"openapi_extra":{
+					"parameters": [
+					{
+					"in": "path",
+					"name": "collection_id",
+					"description": "#JC",
+					"required": "True"
+					},
+				    {
+					"in": "path",
+					"name": "concept_id",
+					"description": "#AK",
+					"required": "False"
+					},
+					{
+					"in": "path",
+					"name": "vnum",
+					"description": "#AK",
+					"required": "False"
+					}
+					]
+				}
+			}
+		},
+		"/scheme/{scheme_id}/": {
+			"get" : {
+				"tags":["Schemas"],
+				"summary": "#JC",
+				"description": "#JC",
+				"openapi_extra":{
+				"parameters": [
+				  {
+				"in": "path",
+				"name": "scheme_id",
+				"description": "#JC",
 				"required": "True"
 				}
 			]
 				}
 			}
+		},
+		"/scheme/{scheme_id}/current/{acc_dep}/": {
+			"get" : {
+				"tags":["Schemas"],
+				"summary": "#JC",
+				"description": "#JC",
+				"openapi_extra":{
+					"parameters": [
+					{
+					"in": "path",
+					"name": "scheme_id",
+					"description": "#JC",
+					"required": "True"
+					},
+				    {
+					"in": "path",
+					"name": "acc_dep",
+					"description": "#JC",
+					"required": "False"
+					}
+					]
+				}
+			}
+		},
+			"/mapping/{int_ext}/{mapping_id}/": {
+				"get" : {
+					"tags":["Mappings"],
+					"summary": "Retrieve a mapping",
+					"description": "Retrieves a mapping for a collection. #AK",
+					"openapi_extra":{
+					"parameters": [
+					  {
+					"in": "path",
+					"name": "int_ext",
+					"description": "#AK",
+					"required": "True"
+					},
+					{
+					"in": "path",
+					"name": "mapping_id",
+					"description": "#AK",
+					"required": "True"
+					}
+				]
+					}
+				}
+		},
+			"/about/": {
+				"get" : {
+					"tags":["About"],
+					"summary": "About page",
+					"description": "#JC"
+				}
 	
+		},
+			"/contact/": {
+				"get" : {
+					"tags":["About"],
+					"summary": "Contact Page",
+					"description": "#JC"
+				}
+
+		},
+			"/sparql/": {
+				"get" : {
+					"tags":["SPARQL"],
+					"summary": "Get a SPARQL query",
+					"description": "#JC"
+				},
+				"post" : {
+					"tags":["SPARQL"],
+					"summary": "Post a query for SPARQL to run",
+					"description": "#JC"
+				}
+			},
+
+			"/standard_name/{acc_dep_or_concept}/": {
+				"get" : {
+					"tags":["Standard"],
+					"summary": "#AK",
+					"description": "#AK",
+					"openapi_extra":{
+					"parameters": [
+						{
+						"in": "path",
+						"name": "acc_dep_or_concept",
+						"description": "#AK",
+						"required": "False"
+						}
+					]
+					}
+				}
+
+		},
+		"/.well_known/": {
+			"get" : {
+				"tags":["Others"],
+				"summary": "#AK",
+				"description": "#AK"
+			}
 	
-		}
-	}
+		},
+		"/cache-clear": {
+			"get" : {
+				"tags":["Others"],
+				"summary": "#JC",
+				"description": "#JC"
+			}
+	
+		}	
+}
 }
