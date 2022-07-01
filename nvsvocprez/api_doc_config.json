@@ -16,15 +16,6 @@
     },
 	"tags":[
 		{
-			"name": "Landing Page",
-			"description": "Landing page for NVS.",
-			"externalDocs": {
-				"description": "Landing page for NVS",
-				"url": "http://vocab.nerc.ac.uk/"
-			}
-			
-		},
-		{
 			"name": "Collections",
 			"description": "SKOS concept collections held in the NERC Vocabulary Server.",
 			"externalDocs": {
@@ -51,17 +42,8 @@
 			}
 		},
 		{
-			"name": "About",
-			"description": "Endpoints to contact or find out more about NVS",
-			"externalDocs": {
-				"description": "Find out more, or contact the team.",
-				"url": "http://vocab.nerc.ac.uk/about"
-			}
-			
-		},
-		{
 			"name": "SPARQL",
-			"description": "#JC",
+			"description": "Endpoints for interacting with Sparql",
 			"externalDocs": {
 				"description": "Find out more",
 				"url": "http://vocab.nerc.ac.uk/sparql/"
@@ -74,20 +56,11 @@
 				"description": "#AK",
 				"url": "http://vocab.nerc.ac.uk"
 			}		
-		},
-		{
-			"name": "Others",
-			"description": "#AK",
-			"externalDocs": {
-				"description": "#AK",
-				"url": "http://vocab.nerc.ac.uk"
-			}		
 		}
 	],
 	"paths":{
 		"/": {
 			"get" : {
-				"tags":["Landing Page"],
 				"summary": "Landing page for NVS",
 				"description": "This is the Landing page for NVS"
 			}
@@ -96,11 +69,36 @@
 			"get" : {
 				"tags":["Collections"],
 				"summary": "Retrieve all collections",
-				"description": "Retrieve all the collections in NVS"
+				"description": "This endpoint will return all the collections showing their ID, Title, Version, Version Date, Description, Governance and an External Link.",
+				"openapi_extra":{
+				"parameters": [
+					{
+						"in": "query",
+						"name": "_mediatype",
+						"description": "Select the media type to view the collections page.",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": ["text/turtle", "application/ld+json", "application/rdf+xml"]
+						  },
+						"example" : "text/turtle"	
+					},
+					{
+						"in": "query",
+						"name": "_profile",
+						"description": "Select the profile to use when making the request.",
+						"schema": {
+						  "type": "string",
+						  "enum": ["void", "nvs", "skos", "dd", "vocpub", "dcat", "sdo"]
+						},
+						"required": false,
+						"example": "nvs"
+					  }
+			  ]
 			}
-	
+		}
 		},
-		"/collection/{collection_id}/": {
+		"/collection/{collection_id}/current/": {
 			"get" : {
 				"tags":["Collections"],
 				"summary": "Retrieve based on a collection id",
@@ -110,37 +108,85 @@
 				  {
 				"in": "path",
 				"name": "collection_id",
-				"description": "The collection id for which to retrieve details",
-				"required": "True",
-				"schema": {
-					"title": "A test title",
-					"type": "Some content.."
+				"description": "The collection ID for the desired collection.",
+				"required": true,
+				"example": "C30"
+				},  {
+					"in": "query",
+					"name": "_profile",
+					"description": "Select the profile to use when making the request.",
+					"schema": {
+					  "type": "string",
+					  "enum": ["void", "nvs", "skos", "dd", "vocpub", "dcat", "sdo"]
+					},
+					"required": false,
+					"example": "nvs"
 				  },
-				"example": "P01"
-				}
+				  {
+						"in": "query",
+						"name": "_mediatype",
+						"description": "Select the media type for the collection that is being retrieved.",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": ["text/turtle", "application/ld+json", "application/rdf+xml"]
+						  },
+						"example" : "text/turtle"	
+					}
+					
 			]
 				}
+				
 			}
 		},
 		"/collection/{collection_id}/current/{acc_dep_or_concept}/": {
 			"get" : {
 				"tags":["Collections"],
-				"summary": "Retrieve based on a collection id",
+				"summary": "Retrieve based on a collection ID and status",
 				"description": "Retrieve details of a particular collection",
 				"openapi_extra":{
 					"parameters": [
 					{
 					"in": "path",
 					"name": "collection_id",
-					"description": "#JC",
-					"required": "True"
+					"description": "The collection ID for the desired collection.",
+					"required": "True",
+					"example": "C30"
 					},
 				    {
 					"in": "path",
 					"name": "acc_dep_or_concept",
-					"description": "#JC",
-					"required": "False"
-					}
+					"description": "Status of the desired collection.",
+					"required": "False",
+					"schema": {
+						"title": "Collection id Status",
+						"type": "status of the collection id",
+						"enum": ["accepted", "deprecated", "all", "None"]
+					  },
+					"example" :"accepted"
+					},
+					{
+						"in": "query",
+						"name": "_mediatype",
+						"description": "Select the media type for the collection that is being retrieved.",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": ["text/turtle", "application/ld+json", "application/rdf+xml"]
+						  },
+						"example" : "text/turtle"	
+					},
+					{
+						"in": "query",
+						"name": "_profile",
+						"description": "Select the profile to use when making the request.",
+						"schema": {
+						  "type": "string",
+						  "enum": ["void", "nvs", "skos", "dd", "vocpub", "dcat", "sdo"]
+						},
+						"required": false,
+						"example": "nvs"
+					  }
 					]
 				}
 			}
@@ -148,45 +194,124 @@
 		"/collection/{collection_id}/current/{concept_id}/{vnum}/": {
 			"get" : {
 				"tags":["Collections"],
-				"summary": "#AK",
-				"description": "#AK",
+				"summary": "Retrieve based on Collection & Concept ID, and version number.",
+				"description": "Retrieve details of a particular collection, with the added functionality of choosing a concept ID and a version number.",
 				"openapi_extra":{
 					"parameters": [
 					{
 					"in": "path",
 					"name": "collection_id",
-					"description": "#JC",
-					"required": "True"
+					"description": "Insert the collection ID here. For a full list of collection ID's, use the /collection/ endpoint.",
+					"required": true
 					},
 				    {
 					"in": "path",
 					"name": "concept_id",
-					"description": "#AK",
-					"required": "False"
+					"description": "Insert the Concept ID here. For a full list of concepts, view a vocabulary and then refer to the ID column. When viewing the concept, the available versions will also be visible.",
+					"required": true
 					},
 					{
 					"in": "path",
 					"name": "vnum",
-					"description": "#AK",
-					"required": "False"
-					}
+					"description": "Insert the desired version number for the concept.",
+					"required": false,
+					"example" : "1"
+					},
+					{
+						"in": "query",
+						"name": "_profile",
+						"description": "Select the profile to use when making the request.",
+						"schema": {
+						  "type": "string",
+						  "enum": ["void", "nvs", "skos", "dd", "vocpub", "dcat", "sdo"]
+						},
+						"required": false,
+						"example": "nvs"
+					  },
+					  {
+							"in": "query",
+							"name": "_mediatype",
+							"description": "Select the media type for the collection that is being retrieved.",
+							"required": false,
+							"schema": {
+								"type": "string",
+								"enum": ["text/turtle", "application/ld+json", "application/rdf+xml"]
+							  },
+							"example" : "text/turtle"	
+						}
 					]
 				}
 			}
 		},
-		"/scheme/{scheme_id}/": {
+		"/scheme/": {
 			"get" : {
 				"tags":["Schemas"],
-				"summary": "#JC",
-				"description": "#JC",
+				"summary": "Retrieve all schemes",
+				"description": "This endpoint will return all the schemes showing their ID, Title, Version, Version Date, Description, Governance and an External Link.",
+				"openapi_extra":{
+				"parameters": [
+					{
+						"in": "query",
+						"name": "_mediatype",
+						"description": "Select the media type to view the schemes page.",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": ["text/turtle", "application/ld+json", "application/rdf+xml"]
+						  },
+						"example" : "text/turtle"	
+					},
+					{
+						"in": "query",
+						"name": "_profile",
+						"description": "Select the profile to use when making the request.",
+						"schema": {
+						  "type": "string",
+						  "enum": ["void", "nvs", "skos", "dd", "vocpub", "dcat", "sdo"]
+						},
+						"required": false,
+						"example": "nvs"
+					  }
+			  ]
+			}
+		}
+		},
+		"/scheme/{scheme_id}/current/": {
+			"get" : {
+				"tags":["Schemas"],
+				"summary": "Retrieve based on a scheme ID",
+				"description": "A concept scheme is an aggregation of one or more SKOS concepts. Semantic links between these concepts can also be viewed as part of the concept scheme.",
 				"openapi_extra":{
 				"parameters": [
 				  {
 				"in": "path",
 				"name": "scheme_id",
-				"description": "#JC",
-				"required": "True"
-				}
+				"description": "Pass in the scheme ID here. A full list can be viewed at the /scheme/ endpoint.",
+				"required": true
+				},
+				{
+					"in": "query",
+					"name": "_mediatype",
+					"description": "Select the media type to view the schemes page.",
+					"required": false,
+					"schema": {
+						"type": "string",
+						"enum": ["text/turtle", "application/ld+json", "application/rdf+xml"]
+					  },
+					"example" : "text/turtle"	
+				},
+				{
+					"in": "query",
+					"name": "_profile",
+					"description": "Select the profile to use when making the request.",
+					"schema": {
+					  "type": "string",
+					  "enum": ["void", "nvs", "skos", "dd", "vocpub", "dcat", "sdo"]
+					},
+					"required": false,
+					"example": "nvs"
+				  }
+				
 			]
 				}
 			}
@@ -194,22 +319,50 @@
 		"/scheme/{scheme_id}/current/{acc_dep}/": {
 			"get" : {
 				"tags":["Schemas"],
-				"summary": "#JC",
-				"description": "#JC",
+				"summary": "Retrieve a scheme based on scheme id and its apprecated/deprecated status",
+				"description": "This endpoint is the same as the /scheme{scheme_id}/ endpoint, but gives the option to pass in an additional status. ",
 				"openapi_extra":{
 					"parameters": [
 					{
 					"in": "path",
 					"name": "scheme_id",
-					"description": "#JC",
-					"required": "True"
+					"description": "This is the ID for the desired scheme",
+					"required": true
 					},
 				    {
 					"in": "path",
 					"name": "acc_dep",
-					"description": "#JC",
-					"required": "False"
-					}
+					"description": "Given a scheme_id, this parameter allows for a status of the scheme to also be passed in.",
+					"required": false,
+					"schema": {
+						"title": "acc_dep",
+						"type": "status of the desired collection.",
+						"enum": ["accepted", "deprecated", "all", "None"]
+					  },
+					"example" :"accepted"
+					},
+					{
+						"in": "query",
+						"name": "_mediatype",
+						"description": "Select the media type to view the schemes page.",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": ["text/turtle", "application/ld+json", "application/rdf+xml"]
+						  },
+						"example" : "text/turtle"	
+					},
+					{
+						"in": "query",
+						"name": "_profile",
+						"description": "Select the profile to use when making the request.",
+						"schema": {
+						  "type": "string",
+						  "enum": ["void", "nvs", "skos", "dd", "vocpub", "dcat", "sdo"]
+						},
+						"required": false,
+						"example": "nvs"
+					  }
 					]
 				}
 			}
@@ -225,47 +378,114 @@
 					"in": "path",
 					"name": "int_ext",
 					"description": "#AK",
-					"required": "True"
+					"schema": {
+						"type": "string",
+						"enum": ["I", "E"]
+					  },
+					  "required": true,
+					  "example": "I"
 					},
 					{
 					"in": "path",
 					"name": "mapping_id",
 					"description": "#AK",
-					"required": "True"
-					}
+					"required": true,
+					"example" : "24"
+					},
+					{
+						"in": "query",
+						"name": "_mediatype",
+						"description": "Select the media type to view the schemes page.",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": ["text/turtle", "application/ld+json", "application/rdf+xml"]
+						  },
+						"example" : "text/turtle"	
+					},
+					{
+						"in": "query",
+						"name": "_profile",
+						"description": "Select the profile to use when making the request.",
+						"schema": {
+						  "type": "string",
+						  "enum": ["void", "nvs", "skos", "dd", "vocpub", "dcat", "sdo"]
+						},
+						"required": false,
+						"example": "nvs"
+					  }
 				]
 					}
 				}
 		},
 			"/about/": {
 				"get" : {
-					"tags":["About"],
 					"summary": "About page",
-					"description": "#JC"
+					"description": "Use this endpoint to view licencing and contact information"
 				}
 	
 		},
 			"/contact/": {
 				"get" : {
-					"tags":["About"],
 					"summary": "Contact Page",
-					"description": "#JC"
+					"description": "Use this endpoint to retrieve the E-mail, phone number and address for BODC."
 				}
 
-		},
-			"/sparql/": {
-				"get" : {
-					"tags":["SPARQL"],
-					"summary": "Get a SPARQL query",
-					"description": "#JC"
-				},
-				"post" : {
-					"tags":["SPARQL"],
-					"summary": "Post a query for SPARQL to run",
-					"description": "#JC"
-				}
+		}, 
+		"/sparql/" : {
+			"post": {
+				"tags": ["SPARQL"],
+				"summary": "Post a SPARQL query",
+				"description": "Retrieve results based on a SPARQL Query. \n\nAn example query may be: 'SELECT * WHERE { ?sub ?pred ?obj . } LIMIT 10'",
+				"openapi_extra":{
+					"produces": [
+						"text/html",
+						"application/json"
+					  ],
+					  
+					"responses": {
+						"200": {
+							"body": {
+									"application/json":{
+										"schema":{"type": "string"}
+										},
+										"text/html":{
+										"schema":{"type": "string"}
+										}
+		
+									}
+								}
+					
+						}	
+					}
+
 			},
+			"get" : {
+				"tags": ["SPARQL"],
+				"summary": "Get a SPARQL query",
+				"description": "Retrieve results based on a SPARQL Query",
+				"openapi_extra":{
+					"parameters":[
+					{
+					"in": "body",
+					"name": "Sparql query",
+					"description": "query result",
+					"required": true,
+					"media_type":"text/html",
+					"schema": {
+					  "type": "string"}
+				  },
+				  {
+					  "produces": [
+						"text/html",
+						"application/json"
+					]
+				  }
+				]
+				}
 
+			}
+		},
 			"/standard_name/{acc_dep_or_concept}/": {
 				"get" : {
 					"tags":["Standard"],
@@ -277,28 +497,14 @@
 						"in": "path",
 						"name": "acc_dep_or_concept",
 						"description": "#AK",
-						"required": "False"
-						}
-					]
+						"required": false
+						}]
 					}
 				}
+	
+			}
+				
+		}
+	}
 
-		},
-		"/.well_known/": {
-			"get" : {
-				"tags":["Others"],
-				"summary": "#AK",
-				"description": "#AK"
-			}
-	
-		},
-		"/cache-clear": {
-			"get" : {
-				"tags":["Others"],
-				"summary": "#JC",
-				"description": "#JC"
-			}
-	
-		}	
-}
-}
+
