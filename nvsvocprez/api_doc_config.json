@@ -459,31 +459,44 @@
 						}	
 					}
 
-			},
-			"get" : {
-				"tags": ["SPARQL"],
+			},"get" : {
+				"tags":["SPARQL"],
 				"summary": "Get a SPARQL query",
-				"description": "Retrieve results based on a SPARQL Query",
+				"description": "#JC",
 				"openapi_extra":{
-					"parameters":[
-					{
-					"in": "body",
-					"name": "Sparql query",
-					"description": "query result",
-					"required": true,
-					"media_type":"text/html",
-					"schema": {
-					  "type": "string"}
-				  },
-				  {
-					  "produces": [
-						"text/html",
-						"application/json"
-					]
-				  }
-				]
-				}
+					"parameters": [
 
+					  {
+					"in": "query",
+					"name": "query",
+					"description": "HTML encoded sparql query",
+					"required": "True",
+					"example": "SELECT * WHERE {?sub ?pred ?obj .} LIMIT 10"
+					},
+
+					{
+						"in": "header",
+						"name": "custom_accept",
+						"description": "The format of the header of the query",
+						"required": "True",
+						"schema": {
+
+							"enum": ["text/html", "text/turtle", "application/rdf+xml", "application/ld+json","application/n-triples", "application/sparql-results+json", "text/csv", "text/tab-separated-values"]
+						  },
+
+						"example": "application/rdf+xml"
+					}
+				],
+
+					"responseBody":{
+						"content":{
+							"application/json":{
+								"schema":
+									{"type": "string"}
+							}
+						}
+					}
+					}
 			}
 		},
 			"/standard_name/{acc_dep_or_concept}/": {
