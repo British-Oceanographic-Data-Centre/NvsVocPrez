@@ -56,7 +56,8 @@ api = fastapi.FastAPI(
 	contact=api_details['contact'],
 	license_info=api_details['license_info'],
 	openapi_tags=tags,
-	docs_url=api_details['docs_url']
+	docs_url=api_details['docs_url'],
+	swagger_ui_parameters={"defaultModelsExpandDepth": -1}
 	)
 
 templates = Jinja2Templates(str(api_home_dir / "view" / "templates"))
