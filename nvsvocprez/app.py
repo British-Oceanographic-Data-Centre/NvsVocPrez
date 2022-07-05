@@ -3,7 +3,6 @@ import json
 
 from typing import Optional, AnyStr, Literal
 from pathlib import Path
-from webbrowser import get
 import fastapi
 from fastapi import HTTPException, Query
 from fastapi.routing import APIRoute
@@ -2274,7 +2273,29 @@ def _sparql_query2(q, mimetype="application/json"):
 @api.post("/sparql/", **paths["/sparql/"]["post"])
 @api.post("/sparql" , include_in_schema=False)
 @api.post("/endpoint", include_in_schema=False)
-def endpoint_post(request: Request, query: str = Query(default=None, include_in_schema=False)):
+def endpoint_post(request: Request, query: str = fastapi.Form(...)):
+	"""
+    TESTS
+    Form POST:
+    curl -X POST -d query="PREFIX%20skos%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23%3E%0ASELECT%20* \
+    %20WHERE%20%7B%3Fs%20a%20skos%3AConceptScheme%20.%7D" http://localhost:5000/endpoint
+    Raw POST:
+    curl -X POST -H 'Content-Type: application/sparql-query' --data-binary @query.sparql http://localhost:5000/endpoint
+    using query.sparql:
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        SELECT * WHERE {?s a skos:ConceptScheme .}
+    GET:
+    curl http://localhost:5000/endpoint?query=PREFIX%20skos%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore \
+    %23%3E%0ASELECT%20*%20WHERE%20%7B%3Fs%20a%20skos%3AConceptScheme%20.%7D
+    GET CONSTRUCT:
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        CONSTRUCT {?s a rdf:Resource}
+        WHERE {?s a skos:ConceptScheme}
+    curl -H 'Accept: application/ld+json' http://localhost:5000/endpoint?query=PREFIX%20rdf%3A%20%3Chttp%3A%2F%2F \
+    www.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0APREFIX%20skos%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2F \
+    skos%2Fco23%3E%0ACONSTRUCT%20%7B%3Fs%20a%20rdf%3AResource%7D%0AWHERE%20%7B%3Fs%20a%20skos%3AConceptScheme%7D
+    """
 	"""Pass on the SPARQL query to the underlying endpoint defined in config"""
 	if "application/x-www-form-urlencoded" in request.headers["content-type"]:
 		"""
@@ -2403,20 +2424,6 @@ def endpoint_get(request: Request):
 def cache_clr(request: Request):
 	cache_clear()
 	return PlainTextResponse("Cache cleared")
-
-def use_route_names_as_operation_ids(app: fastapi.FastAPI) -> None:
-	"""
-	Simplify operation IDs so that generated API clients have simpler function
-	names.
-
-	Should be called only after all routes have been added.
-	"""
-	for route in app.routes:
-		if isinstance(route, APIRoute):
-			route.operation_id = "testing"
-			print("test")
-
-
 
 
 if __name__ == "__main__":

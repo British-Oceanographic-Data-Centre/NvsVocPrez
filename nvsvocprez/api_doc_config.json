@@ -558,7 +558,7 @@
 			"SPARQL"
 		  ],
 		  "summary": "Run a SPARQL query",
-		  "description": "To run a SPARQL query interactively, do not here enter query here, instead visit: 'https://www.vocab.nerc.ac.uk/sparql'."
+		  "description": "To run a SPARQL query interactively, do not enter query here, instead visit: 'https://www.vocab.nerc.ac.uk/sparql'."
 		},
 		"get": {
 		  "tags": [
