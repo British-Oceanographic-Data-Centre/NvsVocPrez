@@ -5,7 +5,7 @@ from typing import Optional, AnyStr, Literal
 from pathlib import Path
 from webbrowser import get
 import fastapi
-from fastapi import HTTPException, Header
+from fastapi import HTTPException, Query
 from fastapi.routing import APIRoute
 import uvicorn
 from starlette.requests import Request
@@ -1209,13 +1209,14 @@ def scheme_concept_noslash(request: Request, scheme_id, acc_dep):
 	return RedirectResponse(url=f"/scheme/{scheme_id}/current/{acc_dep}/")
 
 
-@api.get("/standard_name/", **paths["/standard_name/{acc_dep_or_concept}/"]["get"])
-@api.get("/standard_name/{acc_dep_or_concept}" , include_in_schema=False)
-@api.get("/standard_name/{acc_dep_or_concept}/", **paths["/standard_name/{acc_dep_or_concept}/"]["get"])
+@api.get("/standard_name/", **paths["/standard_name/{concept_id}/"]["get"])
+@api.get("/standard_name/{concept_id}" , include_in_schema=False)
+@api.get("/standard_name/{concept_id}/", **paths["/standard_name/{concept_id}/"]["get"])
 @api.head("/standard_name/" , include_in_schema=False)
-@api.head("/standard_name/{acc_dep_or_concept}" , include_in_schema=False)
-@api.head("/standard_name/{acc_dep_or_concept}/" , include_in_schema=False)
-def standard_name(request: Request, acc_dep_or_concept: str = None):
+@api.head("/standard_name/{concept_id}" , include_in_schema=False)
+@api.head("/standard_name/{concept_id}/" , include_in_schema=False)
+def standard_name(request: Request, concept_id: str = None):
+	acc_dep_or_concept = concept_id
 
 	if not exists_triple(request.url.path) and request.url.path != "/standard_name/":
 	  raise HTTPException(status_code=404)
@@ -2177,7 +2178,7 @@ def contact(request: Request):
 @api.get("/sparql/", **paths["/sparql/"]["get"])
 @api.head("/sparql", include_in_schema=False)
 @api.head("/sparql/", include_in_schema=False)
-def sparql(request: Request, custom_accept: str = Header("application/sparql-query")):
+def sparql(request: Request):
 	# queries to /sparql with an accept header set to a SPARQL return type or an RDF type
 	# are forwarded to /endpoint for a response
 	# all others (i.e. with no Accept header, an Accept header HTML or for an unsupported Accept header
@@ -2190,12 +2191,9 @@ def sparql(request: Request, custom_accept: str = Header("application/sparql-que
 	QUERY_RESPONSE_MEDIA_TYPES = (
 		["text/html"] + SPARQL_RESPONSE_MEDIA_TYPES + RDF_MEDIATYPES
 	)
-	accepts = get_accepts(request.headers["Accept"]) ####
-	custom_accept = get_accepts(request.headers["Custom_Accept"])
-	if custom_accept:
-		accepts = accepts + custom_accept
-
+	accepts = get_accepts(request.headers["Accept"])
 	accept = [x for x in accepts if x in QUERY_RESPONSE_MEDIA_TYPES][0]
+	
 	if accept == "text/html":
 		return templates.TemplateResponse("sparql.html", {"request": request})
 	else:
@@ -2276,7 +2274,7 @@ def _sparql_query2(q, mimetype="application/json"):
 @api.post("/sparql/", **paths["/sparql/"]["post"])
 @api.post("/sparql" , include_in_schema=False)
 @api.post("/endpoint", include_in_schema=False)
-def endpoint_post(request: Request, query: str = fastapi.Form(...)):
+def endpoint_post(request: Request, query: str = Query(default=None, include_in_schema=False)):
 	"""Pass on the SPARQL query to the underlying endpoint defined in config"""
 	if "application/x-www-form-urlencoded" in request.headers["content-type"]:
 		"""
@@ -2339,7 +2337,7 @@ def endpoint_post(request: Request, query: str = fastapi.Form(...)):
 		return PlainTextResponse(str(e), status_code=500)
 
 
-@api.get("/endpoint", **paths["/sparql/"]["get"])
+@api.get("/endpoint", include_in_schema=False)
 @api.head("/endpoint", include_in_schema=False)
 def endpoint_get(request: Request):
 	if request.query_params.get("query") is not None:

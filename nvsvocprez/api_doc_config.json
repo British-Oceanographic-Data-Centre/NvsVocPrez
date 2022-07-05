@@ -4,15 +4,15 @@
 	"title":"The NERC Vocabulary Server (NVS)",
 	"version":"0.0.1",
 	"contact":{
-		"name": "Alexandra Kokkinaki",
-		"url": "https://www.vocabnerc.ac.uk",
+		"name": "Vocab Services",
+		"url": "https://www.vocab.nerc.ac.uk",
 		"email": "vocab.services@bodc.ac.uk"
 	},
 	"license_info":{
 		"name": "CC BY 4.0",
 		"url": "https://creativecommons.org/licenses/by/4.0/legalcode"
 	},
-	"docs_url":"/documentation"
+	"docs_url":"/docs"
     },
 	"tags":[
 		{
@@ -25,7 +25,7 @@
 			
 		},
 		{
-			"name": "Schemas",
+			"name": "Schemes", 
 			"description": "SKOS concept schemes managed by the NERC Vocabulary Server.",
 			"externalDocs": {
 				"description": "Find out more",
@@ -35,7 +35,7 @@
 		},
 		{
 			"name": "Mappings",
-			"description": "Retrieves collections for a mapping.",
+			"description": "Retrieves a mapping for a concept.",
 			"externalDocs": {
 				"description": "Find out more",
 				"url": "http://vocab.nerc.ac.uk/search_nvs/"
@@ -43,7 +43,7 @@
 		},
 		{
 			"name": "SPARQL",
-			"description": "Endpoints for interacting with Sparql",
+			"description": "NVS Sparql Endpoint",
 			"externalDocs": {
 				"description": "Find out more",
 				"url": "http://vocab.nerc.ac.uk/sparql/"
@@ -51,10 +51,10 @@
 		},
 		{
 			"name": "Standard",
-			"description": "#AK",
+			"description": "Climate and Forecast Standard Names",
 			"externalDocs": {
-				"description": "#AK",
-				"url": "http://vocab.nerc.ac.uk"
+				"description": "Find out more",
+				"url": "http://vocab.nerc.ac.uk/standard_name/"
 			}		
 		}
 	],
@@ -161,7 +161,7 @@
 					"schema": {
 						"title": "Collection id Status",
 						"type": "status of the collection id",
-						"enum": ["accepted", "deprecated", "all", "None"]
+						"enum": ["accepted", "deprecated", "all"]
 					  },
 					"example" :"accepted"
 					},
@@ -202,13 +202,15 @@
 					"in": "path",
 					"name": "collection_id",
 					"description": "Insert the collection ID here. For a full list of collection ID's, use the /collection/ endpoint.",
-					"required": true
+					"required": true,
+					"example" : "L22"
 					},
 				    {
 					"in": "path",
 					"name": "concept_id",
 					"description": "Insert the Concept ID here. For a full list of concepts, view a vocabulary and then refer to the ID column. When viewing the concept, the available versions will also be visible.",
-					"required": true
+					"required": true,
+					"example" : "TOOL1422"
 					},
 					{
 					"in": "path",
@@ -245,7 +247,7 @@
 		},
 		"/scheme/": {
 			"get" : {
-				"tags":["Schemas"],
+				"tags":["Schemes"],
 				"summary": "Retrieve all schemes",
 				"description": "This endpoint will return all the schemes showing their ID, Title, Version, Version Date, Description, Governance and an External Link.",
 				"openapi_extra":{
@@ -278,7 +280,7 @@
 		},
 		"/scheme/{scheme_id}/current/": {
 			"get" : {
-				"tags":["Schemas"],
+				"tags":["Schemes"],
 				"summary": "Retrieve based on a scheme ID",
 				"description": "A concept scheme is an aggregation of one or more SKOS concepts. Semantic links between these concepts can also be viewed as part of the concept scheme.",
 				"openapi_extra":{
@@ -287,7 +289,8 @@
 				"in": "path",
 				"name": "scheme_id",
 				"description": "Pass in the scheme ID here. A full list can be viewed at the /scheme/ endpoint.",
-				"required": true
+				"required": true,
+				"example" : "SDNDDEV"
 				},
 				{
 					"in": "query",
@@ -318,7 +321,7 @@
 		},
 		"/scheme/{scheme_id}/current/{acc_dep}/": {
 			"get" : {
-				"tags":["Schemas"],
+				"tags":["Schemes"],
 				"summary": "Retrieve a scheme based on scheme id and its apprecated/deprecated status",
 				"description": "This endpoint is the same as the /scheme{scheme_id}/ endpoint, but gives the option to pass in an additional status. ",
 				"openapi_extra":{
@@ -337,7 +340,7 @@
 					"schema": {
 						"title": "acc_dep",
 						"type": "status of the desired collection.",
-						"enum": ["accepted", "deprecated", "all", "None"]
+						"enum": ["accepted", "deprecated", "all"]
 					  },
 					"example" :"accepted"
 					},
@@ -371,13 +374,13 @@
 				"get" : {
 					"tags":["Mappings"],
 					"summary": "Retrieve a mapping",
-					"description": "Retrieves a mapping for a collection. #AK",
+					"description": "Retrieves a mapping for a concept.\n\n Use the following query at the SPARQL endpoint to discover mapping URLs for a concept.\n\n­­select * where {?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject> <http://vocab.nerc.ac.uk/collection/A05/current/EV_AIRHUM/> .}",
 					"openapi_extra":{
 					"parameters": [
 					  {
 					"in": "path",
 					"name": "int_ext",
-					"description": "#AK",
+					"description": "Select 'I' for Internal, and 'E' for External.",
 					"schema": {
 						"type": "string",
 						"enum": ["I", "E"]
@@ -388,9 +391,9 @@
 					{
 					"in": "path",
 					"name": "mapping_id",
-					"description": "#AK",
+					"description": "Specify the mapping ID for the desired concept.",
 					"required": true,
-					"example" : "24"
+					"example" : "2"
 					},
 					{
 						"in": "query",
@@ -435,82 +438,29 @@
 		"/sparql/" : {
 			"post": {
 				"tags": ["SPARQL"],
-				"summary": "Post a SPARQL query",
-				"description": "Retrieve results based on a SPARQL Query. \n\nAn example query may be: 'SELECT * WHERE { ?sub ?pred ?obj . } LIMIT 10'",
-				"openapi_extra":{
-					"produces": [
-						"text/html",
-						"application/json"
-					  ],
-					  
-					"responses": {
-						"200": {
-							"body": {
-									"application/json":{
-										"schema":{"type": "string"}
-										},
-										"text/html":{
-										"schema":{"type": "string"}
-										}
+				"summary": "Run a SPARQL query",
+				"description": "To run a SPARQL query interactively, do not here enter query here, instead visit: 'https://www.vocab.nerc.ac.uk/sparql'."
 		
-									}
-								}
-					
-						}	
-					}
-
 			},"get" : {
 				"tags":["SPARQL"],
-				"summary": "Get a SPARQL query",
-				"description": "#JC",
-				"openapi_extra":{
-					"parameters": [
-
-					  {
-					"in": "query",
-					"name": "query",
-					"description": "HTML encoded sparql query",
-					"required": "True",
-					"example": "SELECT * WHERE {?sub ?pred ?obj .} LIMIT 10"
-					},
-
-					{
-						"in": "header",
-						"name": "custom_accept",
-						"description": "The format of the header of the query",
-						"required": "True",
-						"schema": {
-
-							"enum": ["text/html", "text/turtle", "application/rdf+xml", "application/ld+json","application/n-triples", "application/sparql-results+json", "text/csv", "text/tab-separated-values"]
-						  },
-
-						"example": "application/rdf+xml"
-					}
-				],
-
-					"responseBody":{
-						"content":{
-							"application/json":{
-								"schema":
-									{"type": "string"}
-							}
-						}
-					}
-					}
+				"summary": "Run a SPARQL query",
+				"description": "To run a SPARQL query interactively, visit: 'https://www.vocab.nerc.ac.uk/sparql'."
 			}
 		},
-			"/standard_name/{acc_dep_or_concept}/": {
+		
+			"/standard_name/{concept_id}/": {
 				"get" : {
 					"tags":["Standard"],
-					"summary": "#AK",
-					"description": "#AK",
+					"summary": "Climate and Forecast standard names",
+					"description": "Descriptions of measured phenomena in the CF conventions (a content standard for data stored in NetCDF).",
 					"openapi_extra":{
 					"parameters": [
 						{
 						"in": "path",
-						"name": "acc_dep_or_concept",
-						"description": "#AK",
-						"required": false
+						"name": "concept_id",
+						"description": "The ID for the desired concept.",
+						"required": false,
+						"example" : "aerodynamic_resistance"
 						}]
 					}
 				}
@@ -519,5 +469,6 @@
 				
 		}
 	}
+
 
 
