@@ -1679,7 +1679,9 @@ class ConceptRenderer(Renderer):
             elif p == str(SKOS.prefLabel):
                 context["prefLabel"] = o
             elif p == str(SKOS.altLabel):
-                context["altLabels"].append(o)
+                if o not in context["altLabels"]:
+                    context["altLabels"].append(o)
+
             elif p == str(SKOS.definition):
                 context["definition"] = o
             elif p == str(DCTERMS.date):
