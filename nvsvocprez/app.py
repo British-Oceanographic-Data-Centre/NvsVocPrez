@@ -1,4 +1,6 @@
 import logging
+import json
+
 from typing import Optional, AnyStr, Literal
 from pathlib import Path
 import fastapi
@@ -37,7 +39,25 @@ from rdflib.namespace import DC, DCTERMS, ORG, OWL, RDF, RDFS, SKOS, VOID
 
 
 api_home_dir = Path(__file__).parent
-api = fastapi.FastAPI()
+with open("api_doc_config.json", "r") as config_file:
+    doc_config = json.load(config_file)
+
+
+api_details = doc_config["api_details"]
+tags = doc_config["tags"]
+paths = doc_config["paths"]
+
+api = fastapi.FastAPI(
+    title=api_details['title'],
+    description=api_details['description'],
+    version=api_details['version'],
+    contact=api_details['contact'],
+    license_info=api_details['license_info'],
+    openapi_tags=tags,
+    docs_url=api_details['docs_url'],
+    swagger_ui_parameters={"defaultModelsExpandDepth": -1}
+    )
+
 templates = Jinja2Templates(str(api_home_dir / "view" / "templates"))
 api.mount(
     "/static",
@@ -53,8 +73,8 @@ acc_dep_map = {
 }
 
 
-@api.get("/")
-@api.head("/")
+@api.get("/", include_in_schema=False)
+@api.head("/", include_in_schema=False)
 def index(request: Request):
     dcat_file = api_home_dir / "dcat.ttl"
     sdo_file = api_home_dir / "sdo.ttl"
@@ -124,8 +144,8 @@ def index(request: Request):
     return DatasetRenderer().render()
 
 
-@api.get("/collection/")
-@api.head("/collection/")
+@api.get("/collection/", **paths["/collection/"]["get"])
+@api.head("/collection/" , include_in_schema=False)
 def collections(request: Request):
     class CollectionsRenderer(ContainerRenderer):
         def __init__(self):
@@ -317,8 +337,8 @@ def collections(request: Request):
     return CollectionsRenderer().render()
 
 
-@api.get("/scheme/")
-@api.head("/scheme/")
+@api.get("/scheme/", **paths["/scheme/"]["get"])
+@api.head("/scheme/", include_in_schema=False)
 def conceptschemes(request: Request):
     class ConceptSchemeRenderer(ContainerRenderer):
         def __init__(self):
@@ -501,18 +521,18 @@ def conceptschemes(request: Request):
     return ConceptSchemeRenderer().render()
 
 
-@api.get("/collection/{collection_id}")
-@api.get("/collection/{collection_id}/")
-@api.head("/collection/{collection_id}")
-@api.head("/collection/{collection_id}/")
+@api.get("/collection/{collection_id}", include_in_schema=False)
+@api.get("/collection/{collection_id}/", include_in_schema=False)
+@api.head("/collection/{collection_id}" , include_in_schema=False)
+@api.head("/collection/{collection_id}/" , include_in_schema=False)
 def collection_no_current(request: Request, collection_id):
     return RedirectResponse(url=f"/collection/{collection_id}/current/")
 
 
-@api.get("/collection/{collection_id}/current/")
-@api.get("/collection/{collection_id}/current/{acc_dep_or_concept}/")
-@api.head("/collection/{collection_id}/current/")
-@api.head("/collection/{collection_id}/current/{acc_dep_or_concept}/")
+@api.get("/collection/{collection_id}/current/", **paths["/collection/{collection_id}/current/"]["get"])
+@api.get("/collection/{collection_id}/current/{acc_dep_or_concept}/",**paths["/collection/{collection_id}/current/{acc_dep_or_concept}/"]["get"])
+@api.head("/collection/{collection_id}/current/" , include_in_schema=False)
+@api.head("/collection/{collection_id}/current/{acc_dep_or_concept}/" , include_in_schema=False)
 def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
 
     if not exists_triple(request.url.path) and acc_dep_or_concept not in ["accepted", "deprecated", "all"]:
@@ -736,32 +756,32 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
     return CollectionRenderer().render()
 
 
-@api.get("/collection/{collection_id}/current/{concept_id}/{vnum}/")
-@api.head("/collection/{collection_id}/current/{concept_id}/{vnum}/")
+@api.get("/collection/{collection_id}/current/{concept_id}/{vnum}/", **paths["/collection/{collection_id}/current/{concept_id}/{vnum}/"]['get'])
+@api.head("/collection/{collection_id}/current/{concept_id}/{vnum}/" , include_in_schema=False)
 def concept_with_version(request: Request, collection_id, concept_id, vnum: int):
     return concept(request)
 
 
-@api.get("/collection/{collection_id}/current/{acc_dep_or_concept}")
-@api.head("/collection/{collection_id}/current/{acc_dep_or_concept}")
+@api.get("/collection/{collection_id}/current/{acc_dep_or_concept}", include_in_schema=False)
+@api.head("/collection/{collection_id}/current/{acc_dep_or_concept}" , include_in_schema=False)
 def collection_concept_noslash(request: Request, collection_id, acc_dep_or_concept):
     return RedirectResponse(
         url=f"/collection/{collection_id}/current/{acc_dep_or_concept}/"
     )
 
 
-@api.get("/scheme/{scheme_id}")
-@api.get("/scheme/{scheme_id}/")
-@api.head("/scheme/{scheme_id}")
-@api.head("/scheme/{scheme_id}/")
+@api.get("/scheme/{scheme_id}" , include_in_schema=False)
+@api.get("/scheme/{scheme_id}/", include_in_schema=False)
+@api.head("/scheme/{scheme_id}" , include_in_schema=False)
+@api.head("/scheme/{scheme_id}/" , include_in_schema=False)
 def scheme_no_current(request: Request, scheme_id):
     return RedirectResponse(url=f"/scheme/{scheme_id}/current/")
 
 
-@api.get("/scheme/{scheme_id}/current/")
-@api.get("/scheme/{scheme_id}/current/{acc_dep}/")
-@api.head("/scheme/{scheme_id}/current/")
-@api.head("/scheme/{scheme_id}/current/{acc_dep}/")
+@api.get("/scheme/{scheme_id}/current/", **paths["/scheme/{scheme_id}/current/"]["get"])
+@api.get("/scheme/{scheme_id}/current/{acc_dep}/", include_in_schema=False)
+@api.head("/scheme/{scheme_id}/current/" , include_in_schema=False)
+@api.head("/scheme/{scheme_id}/current/{acc_dep}/" , include_in_schema=False)
 def scheme(
     request: Request, scheme_id, acc_dep: Literal["accepted", "deprecated", "all", None] = None
 ):
@@ -1181,19 +1201,20 @@ def scheme(
     return SchemeRenderer().render()
 
 
-@api.get("/scheme/{scheme_id}/current/{acc_dep}")
-@api.head("/scheme/{scheme_id}/current/{acc_dep}")
+@api.get("/scheme/{scheme_id}/current/{acc_dep}", include_in_schema=False)
+@api.head("/scheme/{scheme_id}/current/{acc_dep}" , include_in_schema=False)
 def scheme_concept_noslash(request: Request, scheme_id, acc_dep):
     return RedirectResponse(url=f"/scheme/{scheme_id}/current/{acc_dep}/")
 
 
-@api.get("/standard_name/")
-@api.get("/standard_name/{acc_dep_or_concept}")
-@api.get("/standard_name/{acc_dep_or_concept}/")
-@api.head("/standard_name/")
-@api.head("/standard_name/{acc_dep_or_concept}")
-@api.head("/standard_name/{acc_dep_or_concept}/")
-def standard_name(request: Request, acc_dep_or_concept: str = None):
+@api.get("/standard_name/", **paths["/standard_name/{concept_id}/"]["get"])
+@api.get("/standard_name/{concept_id}" , include_in_schema=False)
+@api.get("/standard_name/{concept_id}/", **paths["/standard_name/{concept_id}/"]["get"])
+@api.head("/standard_name/" , include_in_schema=False)
+@api.head("/standard_name/{concept_id}" , include_in_schema=False)
+@api.head("/standard_name/{concept_id}/" , include_in_schema=False)
+def standard_name(request: Request, concept_id: str = None):
+    acc_dep_or_concept = concept_id
 
     if not exists_triple(request.url.path) and request.url.path != "/standard_name/":
       raise HTTPException(status_code=404)
@@ -1766,10 +1787,10 @@ class ConceptRenderer(Renderer):
 
         for item in r1[1]:
            if 'conforms_to' in item and item['systemUri']['value'] in context["uri"]:
-             c = item['conforms_to']['value'].split(",")
-             for c_item in c:
-               match = any(c_item in s for s in p_keys) 
-               if match: context["conforms_to"].append(c_item)  
+               c = item['conforms_to']['value'].split(",")
+               for c_item in c:
+                   match = any(c_item in s for s in p_keys) 
+                   if match: context["conforms_to"].append(c_item)  
 
         # print(context["conforms_to"]) # used to build required butons on concept page for access to HTML alt profile view 
 
@@ -1977,8 +1998,8 @@ def concept(request: Request):
     return ConceptRenderer(request).render()
 
 
-@api.get("/mapping/{int_ext}/{mapping_id}/")
-@api.head("/mapping/{int_ext}/{mapping_id}/")
+@api.get("/mapping/{int_ext}/{mapping_id}/", **paths["/mapping/{int_ext}/{mapping_id}/"]["get"])
+@api.head("/mapping/{int_ext}/{mapping_id}/", include_in_schema=False)
 def mapping(request: Request):
 
     if not exists_triple(request.url.path):
@@ -1990,7 +2011,7 @@ def mapping(request: Request):
                 f"{DATA_URI}/mapping/"
                 + str(request.url).split("/mapping/")[1].split("?")[0]
             )
-
+            
             super().__init__(request, self.instance_uri, {"nvs": nvs}, "nvs")
 
         def render(self):
@@ -2092,20 +2113,20 @@ def mapping(request: Request):
     return MappingRenderer().render()
 
 
-@api.get("/about")
-@api.head("/about")
+@api.get("/about", include_in_schema=False)
+@api.head("/about", include_in_schema=False)
 def about(request: Request):
     return templates.TemplateResponse("about.html", {"request": request})
 
 
-@api.get("/.well_known/")
-@api.head("/.well_known/")
+@api.get("/.well_known/",include_in_schema=False)
+@api.head("/.well_known/", include_in_schema=False)
 def well_known(request: Request):
     return RedirectResponse(url="/.well_known/void")
 
 
-@api.get("/.well_known/void")
-@api.head("/.well_known/void")
+@api.get("/.well_known/void", include_in_schema=False)
+@api.head("/.well_known/void", include_in_schema=False)
 def well_known_void(
     request: Request,
     _profile: Optional[AnyStr] = None,
@@ -2141,18 +2162,20 @@ def well_known_void(
     return WkRenderer().render()
 
 
-@api.get("/contact")
-@api.get("/contact-us")
-@api.head("/contact")
-@api.head("/contact-us")
+@api.get("/contact", include_in_schema=False)
+@api.get("/contact-us" , include_in_schema=False)
+@api.get("/contact/", include_in_schema=False)
+@api.get("/contact-us/" , include_in_schema=False)
+@api.head("/contact", include_in_schema=False)
+@api.head("/contact-us", include_in_schema=False)
 def contact(request: Request):
     return templates.TemplateResponse("contact_us.html", {"request": request})
 
 
-@api.get("/sparql")
-@api.get("/sparql/")
-@api.head("/sparql")
-@api.head("/sparql/")
+@api.get("/sparql" , include_in_schema=False)
+@api.get("/sparql/", **paths["/sparql/"]["get"])
+@api.head("/sparql", include_in_schema=False)
+@api.head("/sparql/", include_in_schema=False)
 def sparql(request: Request):
     # queries to /sparql with an accept header set to a SPARQL return type or an RDF type
     # are forwarded to /endpoint for a response
@@ -2168,6 +2191,7 @@ def sparql(request: Request):
     )
     accepts = get_accepts(request.headers["Accept"])
     accept = [x for x in accepts if x in QUERY_RESPONSE_MEDIA_TYPES][0]
+    
     if accept == "text/html":
         return templates.TemplateResponse("sparql.html", {"request": request})
     else:
@@ -2245,9 +2269,9 @@ def _sparql_query2(q, mimetype="application/json"):
         raise ex
 
 
-@api.post("/sparql/")
-@api.post("/sparql")
-@api.post("/endpoint")
+@api.post("/sparql/", **paths["/sparql/"]["post"])
+@api.post("/sparql" , include_in_schema=False)
+@api.post("/endpoint", include_in_schema=False)
 def endpoint_post(request: Request, query: str = fastapi.Form(...)):
     """
     TESTS
@@ -2333,8 +2357,8 @@ def endpoint_post(request: Request, query: str = fastapi.Form(...)):
         return PlainTextResponse(str(e), status_code=500)
 
 
-@api.get("/endpoint")
-@api.head("/endpoint")
+@api.get("/endpoint", include_in_schema=False)
+@api.head("/endpoint", include_in_schema=False)
 def endpoint_get(request: Request):
     if request.query_params.get("query") is not None:
         # SPARQL GET request
@@ -2395,7 +2419,7 @@ def endpoint_get(request: Request):
             return Response(_get_sparql_service_description(accept), media_type=accept)
 
 
-@api.get("/cache-clear")
+@api.get("/cache-clear", include_in_schema=False)
 def cache_clr(request: Request):
     cache_clear()
     return PlainTextResponse("Cache cleared")
