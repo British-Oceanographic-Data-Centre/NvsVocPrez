@@ -115,7 +115,7 @@
 		  "tags": [
 			"Collections"
 		  ],
-		  "summary": "Retrieve based on a collection id",
+		  "summary": "Retrieve based on a collection ID",
 		  "description": "Retrieve details of a particular collection",
 		  "openapi_extra": {
 			"parameters": [
@@ -399,7 +399,7 @@
 		  "tags": [
 			"Schemes"
 		  ],
-		  "summary": "Retrieve a scheme based on scheme id and its apprecated/deprecated status",
+		  "summary": "Retrieve a scheme based on scheme ID and its apprecated/deprecated status",
 		  "description": "This endpoint is the same as the /scheme{scheme_id}/ endpoint, but gives the option to pass in an additional status. ",
 		  "openapi_extra": {
 			"parameters": [
@@ -571,7 +571,7 @@
 			  {
 				"in": "path",
 				"name": "concept_id",
-				"description": "The ID for the desired concept.",
+				"description": "The ID for the desired concept. To get a full list of ID's, go to the **/collection/{collection_id}/current/**  endpoint and search for P07.",
 				"required": true,
 				"example": "aerodynamic_resistance"
 			  },
