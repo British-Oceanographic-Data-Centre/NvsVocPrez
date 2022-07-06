@@ -5,7 +5,7 @@
 	  "version": "0.0.1",
 	  "contact": {
 		"name": "Vocab Services",
-		"url": "https://www.vocab.nerc.ac.uk",
+		"url": "http://vocab.nerc.ac.uk",
 		"email": "vocab.services@bodc.ac.uk"
 	  },
 	  "license_info": {
@@ -115,7 +115,7 @@
 		  "tags": [
 			"Collections"
 		  ],
-		  "summary": "Retrieve based on a collection id",
+		  "summary": "Retrieve based on a collection ID",
 		  "description": "Retrieve details of a particular collection",
 		  "openapi_extra": {
 			"parameters": [
@@ -183,17 +183,8 @@
 			  {
 				"in": "path",
 				"name": "acc_dep_or_concept",
-				"description": "Status of the desired collection.",
+				"description": "This option can either be the status of the collection, or a concept ID.\n\nThe available options for the status are 'accepted', 'deprecated', or 'all'.",
 				"required": "False",
-				"schema": {
-				  "title": "Collection id Status",
-				  "type": "status of the collection id",
-				  "enum": [
-					"accepted",
-					"deprecated",
-					"all"
-				  ]
-				},
 				"example": "accepted"
 			  },
 			  {
@@ -408,7 +399,7 @@
 		  "tags": [
 			"Schemes"
 		  ],
-		  "summary": "Retrieve a scheme based on scheme id and its apprecated/deprecated status",
+		  "summary": "Retrieve a scheme based on scheme ID and its apprecated/deprecated status",
 		  "description": "This endpoint is the same as the /scheme{scheme_id}/ endpoint, but gives the option to pass in an additional status. ",
 		  "openapi_extra": {
 			"parameters": [
@@ -580,9 +571,43 @@
 			  {
 				"in": "path",
 				"name": "concept_id",
-				"description": "The ID for the desired concept.",
-				"required": false,
+				"description": "The ID for the desired concept. To get a full list of ID's, go to the **/collection/{collection_id}/current/**  endpoint and search for P07.",
+				"required": true,
 				"example": "aerodynamic_resistance"
+			  },
+			  {
+				"in": "query",
+				"name": "_mediatype",
+				"description": "Select the media type for the collection that is being retrieved.",
+				"required": false,
+				"schema": {
+				  "type": "string",
+				  "enum": [
+					"text/turtle",
+					"application/ld+json",
+					"application/rdf+xml"
+				  ]
+				},
+				"example": "text/turtle"
+			  },
+			  {
+				"in": "query",
+				"name": "_profile",
+				"description": "Select the profile to use when making the request.",
+				"schema": {
+				  "type": "string",
+				  "enum": [
+					"void",
+					"nvs",
+					"skos",
+					"dd",
+					"vocpub",
+					"dcat",
+					"sdo"
+				  ]
+				},
+				"required": false,
+				"example": "nvs"
 			  }
 			]
 		  }
