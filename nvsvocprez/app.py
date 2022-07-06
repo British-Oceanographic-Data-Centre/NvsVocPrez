@@ -1207,7 +1207,7 @@ def scheme_concept_noslash(request: Request, scheme_id, acc_dep):
     return RedirectResponse(url=f"/scheme/{scheme_id}/current/{acc_dep}/")
 
 
-@api.get("/standard_name/", **paths["/standard_name/{concept_id}/"]["get"])
+@api.get("/standard_name/", include_in_schema=False)
 @api.get("/standard_name/{concept_id}" , include_in_schema=False)
 @api.get("/standard_name/{concept_id}/", **paths["/standard_name/{concept_id}/"]["get"])
 @api.head("/standard_name/" , include_in_schema=False)

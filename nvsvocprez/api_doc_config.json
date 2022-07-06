@@ -183,17 +183,8 @@
 			  {
 				"in": "path",
 				"name": "acc_dep_or_concept",
-				"description": "Status of the desired collection.",
+				"description": "This option can either be the status of the collection, or a concept ID.\n\nThe available options for the status are 'accepted', 'deprecated', or 'all'.",
 				"required": "False",
-				"schema": {
-				  "title": "Collection id Status",
-				  "type": "status of the collection id",
-				  "enum": [
-					"accepted",
-					"deprecated",
-					"all"
-				  ]
-				},
 				"example": "accepted"
 			  },
 			  {
@@ -581,8 +572,42 @@
 				"in": "path",
 				"name": "concept_id",
 				"description": "The ID for the desired concept.",
-				"required": false,
+				"required": true,
 				"example": "aerodynamic_resistance"
+			  },
+			  {
+				"in": "query",
+				"name": "_mediatype",
+				"description": "Select the media type for the collection that is being retrieved.",
+				"required": false,
+				"schema": {
+				  "type": "string",
+				  "enum": [
+					"text/turtle",
+					"application/ld+json",
+					"application/rdf+xml"
+				  ]
+				},
+				"example": "text/turtle"
+			  },
+			  {
+				"in": "query",
+				"name": "_profile",
+				"description": "Select the profile to use when making the request.",
+				"schema": {
+				  "type": "string",
+				  "enum": [
+					"void",
+					"nvs",
+					"skos",
+					"dd",
+					"vocpub",
+					"dcat",
+					"sdo"
+				  ]
+				},
+				"required": false,
+				"example": "nvs"
 			  }
 			]
 		  }
