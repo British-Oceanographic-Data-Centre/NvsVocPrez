@@ -169,7 +169,7 @@
 		  "tags": [
 			"Collections"
 		  ],
-		  "summary": "Retrieve based on a collection ID and status",
+		  "summary": "Retrieve based on a collection ID and concept ID",
 		  "description": "Retrieve details of a particular collection",
 		  "openapi_extra": {
 			"parameters": [
