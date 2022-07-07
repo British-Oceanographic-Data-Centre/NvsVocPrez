@@ -48,7 +48,7 @@
 		}
 	  },
 	  {
-		"name": "Standard",
+		"name": "Standard Names",
 		"description": "Climate and Forecast Standard Names",
 		"externalDocs": {
 		  "description": "Find out more",
@@ -562,16 +562,16 @@
 	  "/standard_name/{concept_id}/": {
 		"get": {
 		  "tags": [
-			"Standard"
+			"Standard Names"
 		  ],
 		  "summary": "Climate and Forecast standard names",
-		  "description": "Descriptions of measured phenomena in the CF conventions (a content standard for data stored in NetCDF).",
+		  "description": "Descriptions of measured phenomena in the CF conventions (a content standard for data stored in NetCDF).\n\nUse the /standard_name/ endpoint to get the full list of concepts.",
 		  "openapi_extra": {
 			"parameters": [
 			  {
 				"in": "path",
 				"name": "concept_id",
-				"description": "The ID for the desired concept. To get a full list of ID's, go to the **/collection/{collection_id}/current/**  endpoint and search for P07.",
+				"description": "The ID for the desired concept is the prefLabel of the P07 collection listed in the above endpoint **/collection/{collection_id}/current/** where collection_id = P07.",
 				"required": true,
 				"example": "aerodynamic_resistance"
 			  },
