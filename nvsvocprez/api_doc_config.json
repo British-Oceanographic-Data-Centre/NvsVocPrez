@@ -183,9 +183,9 @@
 			  {
 				"in": "path",
 				"name": "acc_dep_or_concept",
-				"description": "This option can either be the status of the collection, or a concept ID.\n\nThe available options for the status are 'accepted', 'deprecated', or 'all'.",
+				"description": "Concept ID",
 				"required": "False",
-				"example": "accepted"
+				"example": "ADMT"
 			  },
 			  {
 				"in": "query",
