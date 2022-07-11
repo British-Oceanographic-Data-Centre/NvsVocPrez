@@ -1,6 +1,8 @@
 fastapi==0.78.0
 uvicorn
 httpx
+python-dotenv
+authlib
 jinja2
 aiofiles
 rdflib==6.0.1

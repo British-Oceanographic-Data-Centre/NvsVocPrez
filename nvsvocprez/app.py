@@ -1,5 +1,6 @@
 import logging
 import json
+import AuthenticationHandler
 
 from typing import Optional, AnyStr, Literal
 from pathlib import Path
@@ -143,6 +144,12 @@ def index(request: Request):
 
     return DatasetRenderer().render()
 
+
+@api.get("/login", include_in_schema=False)
+@api.head("/login" , include_in_schema=False)
+def login():
+    """Login code"""
+    return AuthenticationHandler.RESPONSE
 
 @api.get("/collection/", **paths["/collection/"]["get"])
 @api.head("/collection/" , include_in_schema=False)
