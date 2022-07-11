@@ -748,7 +748,10 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                 )
                 return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile in alt_profile_tokens:
-                query = get_collection_query(current_profile, self.instance_uri, self.ontologies)
+                # Get the term for the collection query WHERE clause to filter or accepted or deprecated.
+                # This will be an empty string if neither condition is true.
+                acc_dep_term = acc_dep_map.get(acc_dep_or_concept).replace("?c", "?m")
+                query = get_collection_query(current_profile, self.instance_uri, self.ontologies, acc_dep_term)
                 logging.info(query)
                 return self._render_sparql_response_rdf(sparql_construct(query, self.mediatype))
 
