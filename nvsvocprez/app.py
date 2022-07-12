@@ -679,12 +679,15 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                     SELECT DISTINCT ?c ?pl
                     WHERE {
                         <xxx> skos:member ?c .
+                        acc_dep
                         ?c skos:prefLabel ?pl .
                     }
                     ORDER BY ?pl                
                     """.replace(
-                    "xxx", self.instance_uri
-                )
+                        "xxx", self.instance_uri
+                    ).replace(
+                        "acc_dep", acc_dep_map.get(acc_dep_or_concept)
+                    )
                 r = sparql_query(q)
                 return JSONResponse(
                     [
@@ -709,12 +712,15 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                             skos:prefLabel ?prefLabel ;
                             <http://purl.org/dc/terms/description> ?description ;
                             skos:member ?c .
+                            acc_dep
                         ?c skos:prefLabel ?c_pl .
                     }
                     ORDER BY ?prefLabel
                     """.replace(
-                    "xxx", self.instance_uri
-                )
+                        "xxx", self.instance_uri
+                    ).replace(
+                        "acc_dep", acc_dep_map.get(acc_dep_or_concept)
+                    )
                 return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile == "vocpub":
                 q = """
@@ -740,12 +746,15 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                             dcterms:creator ?creator ;
                             dcterms:publisher ?publisher ;   
                             skos:member ?c .
+                            acc_dep
   
                         ?c skos:prefLabel ?c_pl .
                     }
                     """.replace(
-                    "xxx", self.instance_uri
-                )
+                        "xxx", self.instance_uri
+                    ).replace(
+                        "acc_dep", acc_dep_map.get(acc_dep_or_concept)
+                    )
                 return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile in alt_profile_tokens:
                 # Get the term for the collection query WHERE clause to filter or accepted or deprecated.
