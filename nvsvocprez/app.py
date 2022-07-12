@@ -76,7 +76,7 @@ acc_dep_map = {
     None: "",
 }
 # begin authentication
-api.add_middleware(SessionMiddleware, secret_key="ad1e7e9ac68927284d135f18212f38cfaecacaff00f9bd4a64a7e5a2606f7e2e")
+api.add_middleware(SessionMiddleware, secret_key="APP_SECRET_KEY")
 
 config = Config('.env')
 oauth = OAuth(config)
