@@ -1544,7 +1544,7 @@ class ConceptRenderer(Renderer):
             if ontology not in self.profiles[self.profile].ontologies:
                 exclude_filters += f'FILTER (!STRSTARTS(STR(?p), "{data["url"]}"))\n'
             else:
-                prefixes += f'PREFIX {data["prefix"]}: <{data["url"]}#>\n'
+                prefixes += f'PREFIX {data["prefix"]}: <{data["url"]}>\n'
 
         q = f"""
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -1936,7 +1936,7 @@ class ConceptRenderer(Renderer):
             if ontology not in self.profiles[self.profile].ontologies:
                 exclude_filters += f'FILTER (!STRSTARTS(STR(?p), "{data["url"]}"))\n'
             else:
-                prefixes += f'PREFIX {data["prefix"]}: <{data["url"]}#>\n'
+                prefixes += f'PREFIX {data["prefix"]}: <{data["url"]}>\n'
 
         q = f"""
             PREFIX dc: <http://purl.org/dc/terms/>
