@@ -1,6 +1,9 @@
 import logging
 import json
 
+from routes import about_page, contact_page, collection_page
+
+
 from typing import Optional, AnyStr, Literal
 from pathlib import Path
 import fastapi
@@ -144,197 +147,7 @@ def index(request: Request):
     return DatasetRenderer().render()
 
 
-@api.get("/collection/", **paths["/collection/"]["get"])
-@api.head("/collection/" , include_in_schema=False)
-def collections(request: Request):
-    class CollectionsRenderer(ContainerRenderer):
-        def __init__(self):
-            self.instance_uri = SYSTEM_URI
-            self.label = "NVS Vocabularies"
-            self.comment = (
-                "SKOS concept collections held in the NERC Vocabulary Server. A concept collection "
-                "is useful where a group of concepts shares something in common, and it is convenient "
-                "to group them under a common label. In the NVS, concept collections are synonymous "
-                "with controlled vocabularies or code lists. Each collection is associated with its "
-                "governance body. An external website link is displayed when applicable."
-            )
-            super().__init__(
-                request,
-                self.instance_uri,
-                {"nvs": nvs},
-                "nvs",
-            )
 
-        def _render_sparql_response_rdf(self, sparql_response):
-            if sparql_response[0]:
-                return Response(
-                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode() + sparql_response[
-                        1] if "xml" in self.mediatype else sparql_response[1],
-                    headers={"Content-Type": self.mediatype}
-                )
-            else:
-                return PlainTextResponse(
-                    "There was an error obtaining the Concept RDF from the Triplestore",
-                    status_code=500,
-                )
-
-        def render(self):
-            if self.profile == "nvs":
-                if self.mediatype == "text/html":
-                    collections = cache_return(
-                        collections_or_conceptschemes="collections"
-                    )
-
-                    if request.query_params.get("filter"):
-
-                        def concat_vocab_fields(vocab):
-                            return (
-                                f"{vocab['id']['value']}"
-                                f"{vocab['prefLabel']['value']}"
-                                f"{vocab['description']['value']}"
-                            )
-
-                        collections = [
-                            x
-                            for x in collections
-                            if request.query_params.get("filter")
-                            in concat_vocab_fields(x)
-                        ]
-
-                    return templates.TemplateResponse(
-                        "collections.html",
-                        {
-                            "request": request,
-                            "uri": self.instance_uri,
-                            "label": self.label,
-                            "comment": self.comment,
-                            "collections": collections,
-                            "profile_token": self.profile,
-                        },
-                    )
-                elif self.mediatype in RDF_MEDIATYPES:
-                    q = """
-                        PREFIX dc: <http://purl.org/dc/terms/>
-                        PREFIX grg: <http://www.isotc211.org/schemas/grg/>
-                        PREFIX owl: <http://www.w3.org/2002/07/owl#>
-                        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-                        CONSTRUCT {
-                            ?cs a skos:Collection ;
-                                dc:alternative ?alternative ;
-                                dc:creator ?creator ;
-                                dc:date ?date ;
-                                dc:description ?description ;
-                                dc:publisher ?publisher ;
-                                dc:title ?title ;
-                                rdfs:comment ?comment ;
-                                owl:versionInfo ?version ;
-                                skos:altLabel ?al ;
-                                skos:narrower ?narrower ;
-                                skos:prefLabel ?pl .
-                            ?cs
-                                grg:RE_RegisterManager ?registermanager ;
-                                grg:RE_RegisterOwner ?registerowner .
-                            ?cs rdfs:seeAlso ?seeAlso .
-                            ?cs dc:conformsTo ?conformsTo .
-                        }
-                        WHERE {
-                            ?cs a skos:Collection ;
-                                dc:alternative ?alternative ;
-                                dc:creator ?creator ;
-                                dc:date ?date ;
-                                dc:description ?description ;
-                                dc:publisher ?publisher ;
-                                dc:title ?title ;
-                                rdfs:comment ?comment ;
-                                owl:versionInfo ?version ;
-                                skos:prefLabel ?pl .
-                            OPTIONAL { ?cs skos:altLabel ?al }
-                            OPTIONAL { ?cs skos:narrower ?narrower }
-                            OPTIONAL {
-                                ?cs skos:prefLabel ?pl .
-                                FILTER(lang(?pl) = "en" || lang(?pl) = "")
-                            }
-                            OPTIONAL {
-                                ?cs grg:RE_RegisterManager ?registermanager .
-                                ?cs grg:RE_RegisterManager ?registerowner .
-                            }
-                            OPTIONAL { ?cs rdfs:seeAlso ?seeAlso }
-                            OPTIONAL { ?cs dc:conformsTo ?conformsTo }
-                        } 
-                        """
-                    return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
-            elif self.profile == "mem":
-                collections = []
-                for c in cache_return(collections_or_conceptschemes="collections"):
-                    collections.append(
-                        {
-                            "uri": c["uri"]["value"],
-                            "systemUri": c["systemUri"]["value"],
-                            "label": c["prefLabel"]["value"],
-                        }
-                    )
-
-                if self.mediatype == "text/html":
-                    return templates.TemplateResponse(
-                        "container_mem.html",
-                        {
-                            "request": request,
-                            "uri": self.instance_uri,
-                            "label": self.label,
-                            "collections": collections,
-                            "profile_token": "nvs",
-                        },
-                    )
-                elif self.mediatype == "application/json":
-                    return [
-                        {"uri": c["uri"], "label": c["prefLabel"]} for c in collections
-                    ]
-                else:  # all other available mediatypes are RDF
-                    g = Graph()
-                    container = URIRef(self.instance_uri)
-                    g.add((container, RDF.type, RDF.Bag))
-                    g.add((container, RDFS.label, RdfLiteral(self.label)))
-                    for c in collections:
-                        g.add((container, RDFS.member, URIRef(c["uri"])))
-                        g.add((URIRef(c["uri"]), RDFS.label, RdfLiteral(c["label"])))
-                    return Response(
-                        g.serialize(format=self.mediatype),
-                        media_type=self.mediatype
-                    )
-            elif self.profile == "contanno":
-                if self.mediatype == "text/html":
-                    return templates.TemplateResponse(
-                        "container_contanno.html",
-                        {
-                            "request": request,
-                            "uri": self.instance_uri,
-                            "label": self.label,
-                            "comment": self.comment,
-                            "profile_token": "nvs",
-                        },
-                    )
-                else:  # all other available mediatypes are RDF
-                    g = Graph()
-                    container = URIRef(self.instance_uri)
-                    g.add((container, RDF.type, RDF.Bag))
-                    g.add((container, RDFS.label, RdfLiteral(self.label)))
-                    c = (
-                        "This object is a container that contains a number of members. See other profiles of this "
-                        "object to see those members."
-                    )
-                    c += self.comment
-                    g.add((container, RDFS.comment, RdfLiteral(c)))
-                    return Response(
-                        g.serialize(format=self.mediatype),
-                        media_type=self.mediatype
-                    )
-
-            alt = super().render()
-            if alt is not None:
-                return alt
-
-    return CollectionsRenderer().render()
 
 
 @api.get("/scheme/", **paths["/scheme/"]["get"])
@@ -2115,11 +1928,10 @@ def mapping(request: Request):
     return MappingRenderer().render()
 
 
-@api.get("/about", include_in_schema=False)
-@api.head("/about", include_in_schema=False)
-def about(request: Request):
-    return templates.TemplateResponse("about.html", {"request": request})
-
+### Add the routes to the API
+api.include_router(about_page.router)
+api.include_router(contact_page.router)
+api.include_router(collection_page.router)
 
 @api.get("/.well_known/",include_in_schema=False)
 @api.head("/.well_known/", include_in_schema=False)
@@ -2164,14 +1976,6 @@ def well_known_void(
     return WkRenderer().render()
 
 
-@api.get("/contact", include_in_schema=False)
-@api.get("/contact-us" , include_in_schema=False)
-@api.get("/contact/", include_in_schema=False)
-@api.get("/contact-us/" , include_in_schema=False)
-@api.head("/contact", include_in_schema=False)
-@api.head("/contact-us", include_in_schema=False)
-def contact(request: Request):
-    return templates.TemplateResponse("contact_us.html", {"request": request})
 
 
 @api.get("/sparql" , include_in_schema=False)
