@@ -11,16 +11,10 @@ jobs:
         id: action_black
         with:
           black_args: "."
-
-      - name: Create Pull Request
+      - name: Push Changes
         if: steps.action_black.outputs.is_formatted == 'true'
         run: |
-          git config --global user.name "BlackBot"
-          git config --global author.name "BlackBot"
-          git config --global user.email "bodcsoft@bodc.ac.uk"
-          git config --global author.email "bodcsoft@bodc.ac.uk"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
-          git checkout $GITHUB_HEAD_REF
-          git pull
+          git config --global user.name 'BlackBot'
+          git config --global user.email 'bodcsoft@bodc.ac.uk'
           git commit -am "Apply Black formatting to Python code."
           git push
