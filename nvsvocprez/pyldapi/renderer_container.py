@@ -11,7 +11,7 @@ class ContainerRenderer(Renderer):
         instance_uri,
         profiles=None,
         default_profile_token="mem",
-        **kwargs
+        **kwargs,
     ):
 
         contanno = Profile(
@@ -47,7 +47,7 @@ class ContainerRenderer(Renderer):
 
         super().__init__(
             request,
-            f"{SYSTEM_URI}{str(request.url.path)}" ,
+            f"{SYSTEM_URI}{str(request.url.path)}",
             new_profiles,
             default_profile_token,
         )
