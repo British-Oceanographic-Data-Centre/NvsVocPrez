@@ -56,11 +56,7 @@ def cache_clear():
         conceptschemes_pickle.unlink()
 
 
-def cache_fill(
-    collections_or_conceptschemes_or_both: Literal[
-        "collections", "conceptschemes", "both"
-    ] = "both"
-):
+def cache_fill(collections_or_conceptschemes_or_both: Literal["collections", "conceptschemes", "both"] = "both"):
     logging.debug(f"filled cache {collections_or_conceptschemes_or_both}")
     if not Path(api_home_dir / "cache").is_dir():
         Path(api_home_dir / "cache").mkdir()
@@ -155,9 +151,7 @@ group by ?uri ?id ?systemUri ?prefLabel ?created ?issued ?modified ?creator ?pub
         pass
 
 
-def cache_return(
-    collections_or_conceptschemes: Literal["collections", "conceptschemes"]
-) -> dict:
+def cache_return(collections_or_conceptschemes: Literal["collections", "conceptschemes"]) -> dict:
     if collections_or_conceptschemes == "collections":
         if not collections_pickle.is_file():
             cache_fill(collections_or_conceptschemes_or_both="collections")
@@ -218,18 +212,13 @@ def render_concept_tree(html_doc):
             ul["class"] = "nested"
             if ul.parent.name == "li":
                 temp = BeautifulSoup(str(ul.parent.a.extract()), "html.parser")
-                ul.parent.insert(
-                    0, BeautifulSoup('<span class="caret">', "html.parser")
-                )
+                ul.parent.insert(0, BeautifulSoup('<span class="caret">', "html.parser"))
                 ul.parent.span.insert(0, temp)
     return soup
 
 
 def get_accepts(accept_header: str):
-    return [
-        accept.split(";")[0].replace("*/*", "text/html")
-        for accept in accept_header.split(",")
-    ]
+    return [accept.split(";")[0].replace("*/*", "text/html") for accept in accept_header.split(",")]
 
 
 def exists_triple(s: str):
@@ -271,9 +260,7 @@ def get_alt_profiles() -> Dict:
         altprof_data_by_url = {alt["url"]: alt for alt in resp_json["items"]}
         return altprof_data_by_url
     except requests.RequestException as exc:
-        logging.error(
-            "Failed to retrieve alternate profile information from %s.\n%s", url, exc
-        )
+        logging.error("Failed to retrieve alternate profile information from %s.\n%s", url, exc)
         return {}  # Return blank dict to avoid internal server error.
 
 
@@ -299,11 +286,7 @@ def get_alt_profile_objects(
     """
     profiles = {}
     for url, alt in alt_profiles.items():
-        ontology_dict = {
-            ont: ontologies[ont]
-            for ont in alt["ontology_prefix"].split(",")
-            if ont in ontologies
-        }
+        ontology_dict = {ont: ontologies[ont] for ont in alt["ontology_prefix"].split(",") if ont in ontologies}
         if "conforms_to" in collection and url in collection["conforms_to"]["value"]:
             p = Profile(
                 uri=url,
@@ -320,9 +303,7 @@ def get_alt_profile_objects(
     return profiles
 
 
-def get_collection_query(
-    profile: Profile, instance_uri: str, ontologies: Dict, acc_dep_term: str
-):
+def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict, acc_dep_term: str):
     """Method to generate a query for the collections page excluding certain profiles.
 
     Args:

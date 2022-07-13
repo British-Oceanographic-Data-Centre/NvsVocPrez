@@ -13,6 +13,4 @@ class Profile(BaseModel):
     default_language: str
     ontologies: Dict[
         str, Dict
-    ] = (
-        {}
-    )  # Dict of ontology objects assosciated with the profile view. Defaults to a blank dict.
+    ] = {}  # Dict of ontology objects assosciated with the profile view. Defaults to a blank dict.

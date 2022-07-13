@@ -101,9 +101,7 @@ def index(request: Request):
         def render(self):
             if self.profile == "dcat":
                 if self.mediatype == "text/html":
-                    return templates.TemplateResponse(
-                        "index.html", {"request": request}
-                    )
+                    return templates.TemplateResponse("index.html", {"request": request})
                 else:  # all other formats are RDF
                     if self.mediatype == "text/turtle":
                         return Response(
@@ -112,9 +110,7 @@ def index(request: Request):
                         )
                     else:
                         g = Graph().parse(
-                            data=open(dcat_file)
-                            .read()
-                            .replace("xxx", self.instance_uri),
+                            data=open(dcat_file).read().replace("xxx", self.instance_uri),
                             format="turtle",
                         )
                         return Response(
@@ -168,8 +164,7 @@ def collections(request: Request):
         def _render_sparql_response_rdf(self, sparql_response):
             if sparql_response[0]:
                 return Response(
-                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode()
-                    + sparql_response[1]
+                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode() + sparql_response[1]
                     if "xml" in self.mediatype
                     else sparql_response[1],
                     headers={"Content-Type": self.mediatype},
@@ -183,9 +178,7 @@ def collections(request: Request):
         def render(self):
             if self.profile == "nvs":
                 if self.mediatype == "text/html":
-                    collections = cache_return(
-                        collections_or_conceptschemes="collections"
-                    )
+                    collections = cache_return(collections_or_conceptschemes="collections")
 
                     if request.query_params.get("filter"):
 
@@ -197,10 +190,7 @@ def collections(request: Request):
                             )
 
                         collections = [
-                            x
-                            for x in collections
-                            if request.query_params.get("filter")
-                            in concat_vocab_fields(x)
+                            x for x in collections if request.query_params.get("filter") in concat_vocab_fields(x)
                         ]
 
                     return templates.TemplateResponse(
@@ -265,9 +255,7 @@ def collections(request: Request):
                             OPTIONAL { ?cs dc:conformsTo ?conformsTo }
                         } 
                         """
-                    return self._render_sparql_response_rdf(
-                        sparql_construct(q, self.mediatype)
-                    )
+                    return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile == "mem":
                 collections = []
                 for c in cache_return(collections_or_conceptschemes="collections"):
@@ -291,9 +279,7 @@ def collections(request: Request):
                         },
                     )
                 elif self.mediatype == "application/json":
-                    return [
-                        {"uri": c["uri"], "label": c["prefLabel"]} for c in collections
-                    ]
+                    return [{"uri": c["uri"], "label": c["prefLabel"]} for c in collections]
                 else:  # all other available mediatypes are RDF
                     g = Graph()
                     container = URIRef(self.instance_uri)
@@ -302,9 +288,7 @@ def collections(request: Request):
                     for c in collections:
                         g.add((container, RDFS.member, URIRef(c["uri"])))
                         g.add((URIRef(c["uri"]), RDFS.label, RdfLiteral(c["label"])))
-                    return Response(
-                        g.serialize(format=self.mediatype), media_type=self.mediatype
-                    )
+                    return Response(g.serialize(format=self.mediatype), media_type=self.mediatype)
             elif self.profile == "contanno":
                 if self.mediatype == "text/html":
                     return templates.TemplateResponse(
@@ -328,9 +312,7 @@ def collections(request: Request):
                     )
                     c += self.comment
                     g.add((container, RDFS.comment, RdfLiteral(c)))
-                    return Response(
-                        g.serialize(format=self.mediatype), media_type=self.mediatype
-                    )
+                    return Response(g.serialize(format=self.mediatype), media_type=self.mediatype)
 
             alt = super().render()
             if alt is not None:
@@ -363,8 +345,7 @@ def conceptschemes(request: Request):
         def _render_sparql_response_rdf(self, sparql_response):
             if sparql_response[0]:
                 return Response(
-                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode()
-                    + sparql_response[1]
+                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode() + sparql_response[1]
                     if "xml" in self.mediatype
                     else sparql_response[1],
                     headers={"Content-Type": self.mediatype},
@@ -378,9 +359,7 @@ def conceptschemes(request: Request):
         def render(self):
             if self.profile == "nvs":
                 if self.mediatype == "text/html":
-                    conceptschemes = cache_return(
-                        collections_or_conceptschemes="conceptschemes"
-                    )
+                    conceptschemes = cache_return(collections_or_conceptschemes="conceptschemes")
 
                     if request.query_params.get("filter"):
 
@@ -392,10 +371,7 @@ def conceptschemes(request: Request):
                             )
 
                         conceptschemes = [
-                            x
-                            for x in conceptschemes
-                            if request.query_params.get("filter")
-                            in concat_vocab_fields(x)
+                            x for x in conceptschemes if request.query_params.get("filter") in concat_vocab_fields(x)
                         ]
 
                     return templates.TemplateResponse(
@@ -452,9 +428,7 @@ def conceptschemes(request: Request):
                             }
                         }
                         """
-                    return self._render_sparql_response_rdf(
-                        sparql_construct(q, self.mediatype)
-                    )
+                    return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile == "mem":
                 collections = []
                 for c in cache_return(collections_or_conceptschemes="conceptschemes"):
@@ -478,9 +452,7 @@ def conceptschemes(request: Request):
                         },
                     )
                 elif self.mediatype == "application/json":
-                    return [
-                        {"uri": c["uri"], "label": c["prefLabel"]} for c in collections
-                    ]
+                    return [{"uri": c["uri"], "label": c["prefLabel"]} for c in collections]
                 else:  # all other available mediatypes are RDF
                     g = Graph()
                     container = URIRef(self.instance_uri)
@@ -489,9 +461,7 @@ def conceptschemes(request: Request):
                     for c in collections:
                         g.add((container, RDFS.member, URIRef(c["uri"])))
                         g.add((URIRef(c["uri"]), RDFS.label, RdfLiteral(c["label"])))
-                    return Response(
-                        g.serialize(format=self.mediatype), media_type=self.mediatype
-                    )
+                    return Response(g.serialize(format=self.mediatype), media_type=self.mediatype)
             elif self.profile == "contanno":
                 if self.mediatype == "text/html":
                     return templates.TemplateResponse(
@@ -515,9 +485,7 @@ def conceptschemes(request: Request):
                     )
                     c += self.comment
                     g.add((container, RDFS.comment, RdfLiteral(c)))
-                    return Response(
-                        g.serialize(format=self.mediatype), media_type=self.mediatype
-                    )
+                    return Response(g.serialize(format=self.mediatype), media_type=self.mediatype)
             alt = super().render()
             if alt is not None:
                 return alt
@@ -542,9 +510,7 @@ def collection_no_current(request: Request, collection_id):
     **paths["/collection/{collection_id}/current/{acc_dep_or_concept}/"]["get"],
 )
 @api.head("/collection/{collection_id}/current/", include_in_schema=False)
-@api.head(
-    "/collection/{collection_id}/current/{acc_dep_or_concept}/", include_in_schema=False
-)
+@api.head("/collection/{collection_id}/current/{acc_dep_or_concept}/", include_in_schema=False)
 def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
 
     if not exists_triple(request.url.path) and acc_dep_or_concept not in [
@@ -586,8 +552,7 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
         def _render_sparql_response_rdf(self, sparql_response):
             if sparql_response[0]:
                 return Response(
-                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode()
-                    + sparql_response[1]
+                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode() + sparql_response[1]
                     if "xml" in self.mediatype
                     else sparql_response[1],
                     headers={"Content-Type": self.mediatype},
@@ -642,9 +607,7 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                         "prefLabel": concept["pl"]["value"].replace("_", " "),
                         "definition": concept["def"]["value"].replace("_", "_ "),
                         "date": concept["date"]["value"][0:10],
-                        "deprecated": True
-                        if concept.get("dep") and concept["dep"]["value"] == "true"
-                        else False,
+                        "deprecated": True if concept.get("dep") and concept["dep"]["value"] == "true" else False,
                     }
                     for concept in sparql_result[1]
                 ]
@@ -686,9 +649,7 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                 elif self.mediatype in RDF_MEDIATYPES:
                     # Get the term for the collection query WHERE clause to filter or accepted or deprecated.
                     # This will be an empty string if neither condition is true.
-                    acc_dep_term = acc_dep_map.get(acc_dep_or_concept).replace(
-                        "?c", "?m"
-                    )
+                    acc_dep_term = acc_dep_map.get(acc_dep_or_concept).replace("?c", "?m")
                     query = get_collection_query(
                         current_profile,
                         self.instance_uri,
@@ -696,9 +657,7 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                         acc_dep_term,
                     )
                     logging.info(query)
-                    return self._render_sparql_response_rdf(
-                        sparql_construct(query, self.mediatype)
-                    )
+                    return self._render_sparql_response_rdf(sparql_construct(query, self.mediatype))
             elif self.profile == "dd":
                 q = """
                     PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -716,12 +675,7 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                     "acc_dep", acc_dep_map.get(acc_dep_or_concept)
                 )
                 r = sparql_query(q)
-                return JSONResponse(
-                    [
-                        {"uri": x["c"]["value"], "prefLabel": x["pl"]["value"]}
-                        for x in r[1]
-                    ]
-                )
+                return JSONResponse([{"uri": x["c"]["value"], "prefLabel": x["pl"]["value"]} for x in r[1]])
             elif self.profile == "skos":
                 q = """
                     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>                    
@@ -748,9 +702,7 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                 ).replace(
                     "acc_dep", acc_dep_map.get(acc_dep_or_concept)
                 )
-                return self._render_sparql_response_rdf(
-                    sparql_construct(q, self.mediatype)
-                )
+                return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile == "vocpub":
                 q = """
                     PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -784,20 +736,14 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                 ).replace(
                     "acc_dep", acc_dep_map.get(acc_dep_or_concept)
                 )
-                return self._render_sparql_response_rdf(
-                    sparql_construct(q, self.mediatype)
-                )
+                return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile in alt_profile_tokens:
                 # Get the term for the collection query WHERE clause to filter or accepted or deprecated.
                 # This will be an empty string if neither condition is true.
                 acc_dep_term = acc_dep_map.get(acc_dep_or_concept).replace("?c", "?m")
-                query = get_collection_query(
-                    current_profile, self.instance_uri, self.ontologies, acc_dep_term
-                )
+                query = get_collection_query(current_profile, self.instance_uri, self.ontologies, acc_dep_term)
                 logging.info(query)
-                return self._render_sparql_response_rdf(
-                    sparql_construct(query, self.mediatype)
-                )
+                return self._render_sparql_response_rdf(sparql_construct(query, self.mediatype))
 
             alt = super().render()
             if alt is not None:
@@ -810,23 +756,15 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
     "/collection/{collection_id}/current/{concept_id}/{vnum}/",
     **paths["/collection/{collection_id}/current/{concept_id}/{vnum}/"]["get"],
 )
-@api.head(
-    "/collection/{collection_id}/current/{concept_id}/{vnum}/", include_in_schema=False
-)
+@api.head("/collection/{collection_id}/current/{concept_id}/{vnum}/", include_in_schema=False)
 def concept_with_version(request: Request, collection_id, concept_id, vnum: int):
     return concept(request)
 
 
-@api.get(
-    "/collection/{collection_id}/current/{acc_dep_or_concept}", include_in_schema=False
-)
-@api.head(
-    "/collection/{collection_id}/current/{acc_dep_or_concept}", include_in_schema=False
-)
+@api.get("/collection/{collection_id}/current/{acc_dep_or_concept}", include_in_schema=False)
+@api.head("/collection/{collection_id}/current/{acc_dep_or_concept}", include_in_schema=False)
 def collection_concept_noslash(request: Request, collection_id, acc_dep_or_concept):
-    return RedirectResponse(
-        url=f"/collection/{collection_id}/current/{acc_dep_or_concept}/"
-    )
+    return RedirectResponse(url=f"/collection/{collection_id}/current/{acc_dep_or_concept}/")
 
 
 @api.get("/scheme/{scheme_id}", include_in_schema=False)
@@ -864,8 +802,7 @@ def scheme(
         def _render_sparql_response_rdf(self, sparql_response):
             if sparql_response[0]:
                 return Response(
-                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode()
-                    + sparql_response[1]
+                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode() + sparql_response[1]
                     if "xml" in self.mediatype
                     else sparql_response[1],
                     headers={"Content-Type": self.mediatype},
@@ -888,9 +825,7 @@ def scheme(
 
                 for d in data:
                     child = d["c"]["value"]
-                    parent = (
-                        d["broader"]["value"] if d.get("broader") is not None else None
-                    )
+                    parent = d["broader"]["value"] if d.get("broader") is not None else None
                     children_parents.append((child, parent))
                     labels[child] = d["pl"]["value"].replace("<", "&lt;")
 
@@ -924,11 +859,7 @@ def scheme(
                         html += make_nested_ul(v, labels)
                         html += "</ul>"
                     else:
-                        html += (
-                            f'<li><a href="{k.replace(DATA_URI, "")}">{labels[k]}</a>'
-                            if k is not None
-                            else "None"
-                        )
+                        html += f'<li><a href="{k.replace(DATA_URI, "")}">{labels[k]}</a>' if k is not None else "None"
                     html += "</li>"
                 return html
 
@@ -972,14 +903,9 @@ def scheme(
                 else:
                     hier = make_hierarchical_dicts(r[1])
                     hier[1][None] = None
-                    return (
-                        '<ul class="concept-hierarchy">'
-                        + make_nested_ul(hier[0], hier[1])[23:-5]
-                    )
+                    return '<ul class="concept-hierarchy">' + make_nested_ul(hier[0], hier[1])[23:-5]
             except RecursionError as e:
-                logging.warning(
-                    "Encountered a recursion limit error for {}".format(self.vocab_uri)
-                )
+                logging.warning("Encountered a recursion limit error for {}".format(self.vocab_uri))
                 # make a flat list of concepts
                 q = """
                     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -994,14 +920,9 @@ def scheme(
                     vocab_uri=self.instance_uri
                 )
 
-                concepts = [
-                    (concept["systemUri"]["value"], concept["pl"]["value"])
-                    for concept in sparql_query(q)
-                ]
+                concepts = [(concept["systemUri"]["value"], concept["pl"]["value"]) for concept in sparql_query(q)]
 
-                concepts_html = "<br />".join(
-                    ['<a href="{}">{}</a>'.format(c[0], c[1]) for c in concepts]
-                )
+                concepts_html = "<br />".join(['<a href="{}">{}</a>'.format(c[0], c[1]) for c in concepts])
                 return """<p><strong><em>This concept hierarchy cannot be displayed</em></strong><p>
                             <p>The flat list of all this Scheme's Concepts is:</p>
                             <p>{}</p>
@@ -1094,9 +1015,7 @@ def scheme(
                     ).replace(
                         "acc_dep", acc_dep_map.get(acc_dep)
                     )
-                    return self._render_sparql_response_rdf(
-                        sparql_construct(q, self.mediatype)
-                    )
+                    return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile == "dd":
                 q = """
                     PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -1188,9 +1107,7 @@ def scheme(
                     """.replace(
                     "xxx", self.instance_uri
                 )
-                return self._render_sparql_response_rdf(
-                    sparql_construct(q, self.mediatype)
-                )
+                return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile == "vocpub":
                 q = """
                     PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -1259,9 +1176,7 @@ def scheme(
                     """.replace(
                     "xxx", self.instance_uri
                 )
-                return self._render_sparql_response_rdf(
-                    sparql_construct(q, self.mediatype)
-                )
+                return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
 
             alt = super().render()
             if alt is not None:
@@ -1307,8 +1222,7 @@ def standard_name(request: Request, concept_id: str = None):
         def _render_sparql_response_rdf(self, sparql_response):
             if sparql_response[0]:
                 return Response(
-                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode()
-                    + sparql_response[1]
+                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode() + sparql_response[1]
                     if "xml" in self.mediatype
                     else sparql_response[1],
                     headers={"Content-Type": self.mediatype},
@@ -1363,9 +1277,7 @@ def standard_name(request: Request, concept_id: str = None):
                         "prefLabel": concept["pl"]["value"].replace("_", " "),
                         "definition": concept["def"]["value"].replace("_", "_ "),
                         "date": concept["date"]["value"][0:10],
-                        "deprecated": True
-                        if concept.get("dep") and concept["dep"]["value"] == "true"
-                        else False,
+                        "deprecated": True if concept.get("dep") and concept["dep"]["value"] == "true" else False,
                     }
                     for concept in sparql_result[1]
                 ]
@@ -1442,9 +1354,7 @@ def standard_name(request: Request, concept_id: str = None):
                         """.replace(
                         "DATA_URI", DATA_URI
                     )
-                    return self._render_sparql_response_rdf(
-                        sparql_construct(q, self.mediatype)
-                    )
+                    return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile == "dd":
                 q = """
                     PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -1464,12 +1374,7 @@ def standard_name(request: Request, concept_id: str = None):
                     "DATA_URI", DATA_URI
                 )
                 r = sparql_query(q)
-                return JSONResponse(
-                    [
-                        {"uri": x["c"]["value"], "prefLabel": x["pl"]["value"]}
-                        for x in r[1]
-                    ]
-                )
+                return JSONResponse([{"uri": x["c"]["value"], "prefLabel": x["pl"]["value"]} for x in r[1]])
             elif self.profile == "skos":
                 q = """
                     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>                    
@@ -1498,9 +1403,7 @@ def standard_name(request: Request, concept_id: str = None):
                 ).replace(
                     "DATA_URI", DATA_URI
                 )
-                return self._render_sparql_response_rdf(
-                    sparql_construct(q, self.mediatype)
-                )
+                return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile == "vocpub":
                 q = """
                     PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -1539,9 +1442,7 @@ def standard_name(request: Request, concept_id: str = None):
                 ).replace(
                     "DATA_URI", DATA_URI
                 )
-                return self._render_sparql_response_rdf(
-                    sparql_construct(q, self.mediatype)
-                )
+                return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
 
             self.instance_uri = f"{DATA_URI}/standard_name/"
             alt = super().render()
@@ -1560,14 +1461,10 @@ class ConceptRenderer(Renderer):
     def __init__(self, request):
         self.request = request
         if "collection" in str(request.url):
-            self.instance_uri = (
-                f"{DATA_URI}/collection/"
-                + str(request.url).split("/collection/")[1].split("?")[0]
-            )
+            self.instance_uri = f"{DATA_URI}/collection/" + str(request.url).split("/collection/")[1].split("?")[0]
         elif "standard_name" in str(request.url):
             self.instance_uri = (
-                f"{DATA_URI}/standard_name/"
-                + str(request.url).split("/standard_name/")[1].split("?")[0]
+                f"{DATA_URI}/standard_name/" + str(request.url).split("/standard_name/")[1].split("?")[0]
             )
 
         concept_profiles = {
@@ -1746,9 +1643,7 @@ class ConceptRenderer(Renderer):
             p = x["p"]["value"]
             o = x["o"]["value"]
             o_label = x["o_label"]["value"] if x.get("o_label") is not None else None
-            o_notation = (
-                x["o_notation"]["value"] if x.get("o_notation") is not None else None
-            )
+            o_notation = x["o_notation"]["value"] if x.get("o_notation") is not None else None
 
             context["collection_systemUri"] = x["collection_systemUri"]["value"]
             context["collection_label"] = x["collection_label"]["value"]
@@ -1767,21 +1662,15 @@ class ConceptRenderer(Renderer):
                 context["date"] = o.replace(" ", "T").rstrip(".0")
             elif p in props.keys():
                 if props[p]["group"] != "ignore":
-                    context[props[p]["group"]].append(
-                        DisplayProperty(p, props[p]["label"], o, o_label, o_notation)
-                    )
+                    context[props[p]["group"]].append(DisplayProperty(p, props[p]["label"], o, o_label, o_notation))
             elif profile_url and p.startswith(profile_url):
                 p_label = p[len(profile_url) :]
                 if p_label[0] == "#":
                     p_label = p_label[1:]
 
-                context["profile_properties"].append(
-                    DisplayProperty(p, p_label, o, o_label, o_notation)
-                )
+                context["profile_properties"].append(DisplayProperty(p, p_label, o, o_label, o_notation))
             else:
-                context["other"].append(
-                    DisplayProperty(p, make_predicate_label_from_uri(p), o, o_label)
-                )
+                context["other"].append(DisplayProperty(p, make_predicate_label_from_uri(p), o, o_label))
 
         def clean_prop_list_labels(prop_list):
             last_pred_html = None
@@ -2049,10 +1938,7 @@ class ConceptRenderer(Renderer):
     def render(self):
         alt_profile_tokens = [alt["token"] for alt in self.alt_profiles.values()]
         if self.profile == "nvs":
-            if (
-                self.mediatype in RDF_MEDIATYPES
-                or self.mediatype in Renderer.RDF_SERIALIZER_TYPES_MAP
-            ):
+            if self.mediatype in RDF_MEDIATYPES or self.mediatype in Renderer.RDF_SERIALIZER_TYPES_MAP:
                 return self._render_nvs_rdf()
             else:
                 return self._render_nvs_or_profile_html()
@@ -2063,10 +1949,7 @@ class ConceptRenderer(Renderer):
         elif self.profile == "sdo":
             return self._render_sdo_rdf()
         elif self.profile in alt_profile_tokens:
-            if (
-                self.mediatype in RDF_MEDIATYPES
-                or self.mediatype in Renderer.RDF_SERIALIZER_TYPES_MAP
-            ):
+            if self.mediatype in RDF_MEDIATYPES or self.mediatype in Renderer.RDF_SERIALIZER_TYPES_MAP:
                 return self._render_profile_rdf()
             else:
                 return self._render_nvs_or_profile_html()
@@ -2092,10 +1975,7 @@ def mapping(request: Request):
 
     class MappingRenderer(Renderer):
         def __init__(self):
-            self.instance_uri = (
-                f"{DATA_URI}/mapping/"
-                + str(request.url).split("/mapping/")[1].split("?")[0]
-            )
+            self.instance_uri = f"{DATA_URI}/mapping/" + str(request.url).split("/mapping/")[1].split("?")[0]
 
             super().__init__(request, self.instance_uri, {"nvs": nvs}, "nvs")
 
@@ -2119,10 +1999,7 @@ def mapping(request: Request):
                         status_code=400,
                     )
 
-                if (
-                    self.mediatype in RDF_MEDIATYPES
-                    or self.mediatype in Renderer.RDF_SERIALIZER_TYPES_MAP
-                ):
+                if self.mediatype in RDF_MEDIATYPES or self.mediatype in Renderer.RDF_SERIALIZER_TYPES_MAP:
                     return self._render_nvs_rdf(g)
                 else:
                     return self._render_nvs_html(g)
@@ -2231,9 +2108,7 @@ def well_known_void(
 
         def render(self):
             if self.mediatype == "text/turtle":
-                return Response(
-                    open(void_file).read(), headers={"Content-Type": "text/turtle"}
-                )
+                return Response(open(void_file).read(), headers={"Content-Type": "text/turtle"})
             else:
                 from rdflib import Graph
 
@@ -2270,9 +2145,7 @@ def sparql(request: Request):
         "text/csv",
         "text/tab-separated-values",
     ]
-    QUERY_RESPONSE_MEDIA_TYPES = (
-        ["text/html"] + SPARQL_RESPONSE_MEDIA_TYPES + RDF_MEDIATYPES
-    )
+    QUERY_RESPONSE_MEDIA_TYPES = ["text/html"] + SPARQL_RESPONSE_MEDIA_TYPES + RDF_MEDIATYPES
     accepts = get_accepts(request.headers["Accept"])
     accept = [x for x in accepts if x in QUERY_RESPONSE_MEDIA_TYPES][0]
 
@@ -2315,9 +2188,7 @@ def _get_sparql_service_description(rdf_fmt="text/turtle"):
     if rdf_fmt in RDF_MEDIATYPES:
         return grf.serialize(format=rdf_fmt)
     else:
-        raise ValueError(
-            "Input parameter rdf_format must be one of: " + ", ".join(RDF_MEDIATYPES)
-        )
+        raise ValueError("Input parameter rdf_format must be one of: " + ", ".join(RDF_MEDIATYPES))
 
 
 def _sparql_query2(q, mimetype="application/json"):
@@ -2339,13 +2210,9 @@ def _sparql_query2(q, mimetype="application/json"):
         auth = None
 
     try:
-        logging.debug(
-            "endpoint={}\ndata={}\nheaders={}".format(SPARQL_ENDPOINT, data, headers)
-        )
+        logging.debug("endpoint={}\ndata={}\nheaders={}".format(SPARQL_ENDPOINT, data, headers))
         if auth is not None:
-            r = httpx.post(
-                SPARQL_ENDPOINT, auth=auth, data=data, headers=headers, timeout=60
-            )
+            r = httpx.post(SPARQL_ENDPOINT, auth=auth, data=data, headers=headers, timeout=60)
         else:
             r = httpx.post(SPARQL_ENDPOINT, data=data, headers=headers, timeout=60)
         return r.content.decode()
@@ -2461,22 +2328,16 @@ def endpoint_get(request: Request):
             accept = [x for x in accepts if x in RDF_MEDIATYPES][0]
             if accept is None:
                 return PlainTextResponse(
-                    "Accept header must include at least on RDF Media Type:"
-                    + ", ".join(RDF_MEDIATYPES)
-                    + ".",
+                    "Accept header must include at least on RDF Media Type:" + ", ".join(RDF_MEDIATYPES) + ".",
                     status_code=400,
                 )
             return Response(
                 _sparql_query2(query, mimetype=request.headers["Accept"]),
                 media_type=accept,
-                headers={
-                    "Content-Disposition": f"attachment; filename=query_result.{RDF_FILE_EXTS[accept]}"
-                },
+                headers={"Content-Disposition": f"attachment; filename=query_result.{RDF_FILE_EXTS[accept]}"},
             )
         else:
-            return Response(
-                _sparql_query2(query), media_type="application/sparql-results+json"
-            )
+            return Response(_sparql_query2(query), media_type="application/sparql-results+json")
     else:
         # SPARQL Service Description
         """
@@ -2495,9 +2356,7 @@ def endpoint_get(request: Request):
             accept = [x for x in accepts if x in RDF_MEDIATYPES][0]
             if accept is None:
                 return PlainTextResponse(
-                    "Accept header must include at least on RDF Media Type:"
-                    + ", ".join(RDF_MEDIATYPES)
-                    + ".",
+                    "Accept header must include at least on RDF Media Type:" + ", ".join(RDF_MEDIATYPES) + ".",
                     status_code=400,
                 )
             return Response(_get_sparql_service_description(accept), media_type=accept)

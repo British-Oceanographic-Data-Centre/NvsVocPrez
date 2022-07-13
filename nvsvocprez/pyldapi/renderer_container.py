@@ -59,6 +59,4 @@ class ContainerRenderer(Renderer):
         elif self.profile == "mem":
             raise NotImplementedError("You must implement handling for the mem profile")
         elif self.profile == "contanno":
-            raise NotImplementedError(
-                "You must implement handling for the contanno profile"
-            )
+            raise NotImplementedError("You must implement handling for the contanno profile")
