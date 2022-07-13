@@ -1,3 +1,4 @@
+"""Utility functions used in rendering pages."""
 import logging
 from typing import Dict, List, Literal
 import httpx
@@ -19,6 +20,10 @@ conceptschemes_pickle = Path(api_home_dir / "cache" / "conceptschemes.pickle")
 
 class TriplestoreError(Exception):
     pass
+
+
+def get_user_status(request):
+    return request.session['user']['nickname'] if 'user' in request.session else 'Not Logged in'
 
 
 def sparql_query(query: str):

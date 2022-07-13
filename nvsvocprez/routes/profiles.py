@@ -1,3 +1,10 @@
+"""Saved profiles for use in any page which renders information
+
+Most of the pages which render collection & schemas render information differently
+depending on the profile. Information about each profile is stored here, and is then
+imported into the python scripts that require them
+"""
+
 from pyldapi.profile import Profile
 from pyldapi.renderer import RDF_MEDIATYPES
 

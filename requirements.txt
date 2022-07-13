@@ -9,3 +9,5 @@ markdown
 python-multipart
 gunicorn
 requests==2.27.1
+starlette
+itsdangerous

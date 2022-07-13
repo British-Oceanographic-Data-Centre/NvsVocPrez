@@ -60,6 +60,10 @@ body {
     margin-left: 10px;
 }
 
+.logged-in-user {
+    text-align: right;
+}
+
 #mainmenu {
     text-align: center;
 

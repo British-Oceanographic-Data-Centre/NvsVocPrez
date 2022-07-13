@@ -2,6 +2,7 @@ import logging
 import json
 
 from routes import about_page, contact_page, collection_page
+from authentication import login
 
 
 from typing import Optional, AnyStr, Literal
@@ -16,7 +17,7 @@ from starlette.responses import (
     PlainTextResponse,
     JSONResponse,
 )
-
+from starlette.middleware.sessions import SessionMiddleware
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 from pyldapi.renderer import RDF_MEDIATYPES
@@ -61,12 +62,19 @@ api = fastapi.FastAPI(
     swagger_ui_parameters={"defaultModelsExpandDepth": -1}
     )
 
+# --max_age needs to be investigated--
+# In this current setting the session cookies will persist inbetween the
+# app being exited and restarted, and only seems to require a full
+# Auth0 login if the browser cookies/cache are cleared.
+api.add_middleware(SessionMiddleware, max_age=None, secret_key="SECRET_KEY")
+
 templates = Jinja2Templates(str(api_home_dir / "view" / "templates"))
 api.mount(
     "/static",
     StaticFiles(directory=str(api_home_dir / "view" / "static")),
     name="static",
 )
+
 logging.basicConfig(level=logging.DEBUG)
 acc_dep_map = {
     "accepted": '?c <http://www.w3.org/2002/07/owl#deprecated> "false" .',
@@ -74,6 +82,12 @@ acc_dep_map = {
     "all": "",
     None: "",
 }
+
+# This function is here temporarily, when all routes are inside the /routes/ folder
+# then this function will need to go inside /routes/utils/
+def get_user_status(request: Request) -> str:
+    """Check the current session to return name of logged in user, if logged in."""
+    return request.session['user']['nickname'] if 'user' in request.session else 'Not Logged in'
 
 
 @api.get("/", include_in_schema=False)
@@ -105,7 +119,9 @@ def index(request: Request):
             if self.profile == "dcat":
                 if self.mediatype == "text/html":
                     return templates.TemplateResponse(
-                        "index.html", {"request": request}
+                        "index.html", {"request": request,
+                        "login_status" : get_user_status(request),
+                        "logged_in_user" : get_user_status(request)}
                     )
                 else:  # all other formats are RDF
                     if self.mediatype == "text/turtle":
@@ -145,8 +161,6 @@ def index(request: Request):
                 return alt
 
     return DatasetRenderer().render()
-
-
 
 
 
@@ -1932,6 +1946,8 @@ def mapping(request: Request):
 api.include_router(about_page.router)
 api.include_router(contact_page.router)
 api.include_router(collection_page.router)
+api.include_router(login.router)
+
 
 @api.get("/.well_known/",include_in_schema=False)
 @api.head("/.well_known/", include_in_schema=False)

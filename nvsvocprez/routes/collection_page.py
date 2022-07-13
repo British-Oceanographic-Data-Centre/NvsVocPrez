@@ -15,7 +15,7 @@ from starlette.templating import Jinja2Templates
 
 from .page_configs import SYSTEM_URI
 from .profiles import nvs
-from .utils import cache_return, sparql_construct
+from .utils import cache_return, sparql_construct, get_user_status
 
 router = APIRouter()
 
@@ -25,6 +25,7 @@ templates = Jinja2Templates(str(api_home_dir / "view" / "templates"))
 config_file_location = Path(__file__).parent.parent / "api_doc_config.json"
 with open(config_file_location, "r") as config_file:
     paths = json.load(config_file)["paths"]
+
 
 
 @router.get("/collection/", **paths["/collection/"]["get"])
@@ -91,6 +92,7 @@ def collections(request: Request):
                             "comment": self.comment,
                             "collections": collections,
                             "profile_token": self.profile,
+                            "logged_in_user" : get_user_status(request)
                         },
                     )
                 elif self.mediatype in RDF_MEDIATYPES:
@@ -165,6 +167,7 @@ def collections(request: Request):
                             "label": self.label,
                             "collections": collections,
                             "profile_token": "nvs",
+                            "logged_in_user" : get_user_status(request)
                         },
                     )
                 elif self.mediatype == "application/json":
@@ -188,6 +191,7 @@ def collections(request: Request):
                             "label": self.label,
                             "comment": self.comment,
                             "profile_token": "nvs",
+                            "logged_in_user" : get_user_status(request)
                         },
                     )
                 graph = Graph()
