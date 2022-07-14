@@ -315,15 +315,17 @@ def get_alt_profile_objects(
     return profiles
 
 
-def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict):
+def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict, acc_dep_term: str):
     """Method to generate a query for the collections page excluding certain profiles.
     
     Args:
         profile_name (Profile): Profile object representing the current profile.
         insance_uri (str): Instance URI.
         ontologies: Dict of all ontologies. {ontology_prefix : {ontology_object}, ...}.
+        acc_dep_term (str): The string to apply to the WHERE clause in the query to filter
+            for accepted or deprecated values. If an empty string, no filtering is applied.
     Returns:
-        str: The construncted sparql query.
+        str: The constructed sparql query.
     """
     
     prefix_text = ""
@@ -331,7 +333,7 @@ def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict):
     if profile.id != "nvs":
         # Build prefix text.
         for ontology, data in profile.ontologies.items():
-            prefix_text += f'PREFIX {data["prefix"]}: <{data["url"]}#>\n'
+            prefix_text += f'PREFIX {data["prefix"]}: <{data["url"]}>\n'
         filter_text += """
             FILTER ( ?p2 != skos:broader )
             FILTER ( ?p2 != skos:narrower )
@@ -366,6 +368,7 @@ def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict):
             UNION
             {{
             <{instance_uri}> skos:member ?m .
+            acc_dep_filter
             ?m a skos:Concept .
             ?m ?p2 ?o2 .
             FILTER ( ?p2 != skos:broaderTransitive )
@@ -374,4 +377,5 @@ def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict):
             }}
         }}
     """
+    query = query.replace("acc_dep_filter", acc_dep_term)
     return query

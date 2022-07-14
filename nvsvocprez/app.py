@@ -493,7 +493,10 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                         },
                     )
                 elif self.mediatype in RDF_MEDIATYPES:
-                    query = get_collection_query(current_profile, self.instance_uri, self.ontologies)
+                    # Get the term for the collection query WHERE clause to filter or accepted or deprecated.
+                    # This will be an empty string if neither condition is true.
+                    acc_dep_term = acc_dep_map.get(acc_dep_or_concept).replace("?c", "?m")
+                    query = get_collection_query(current_profile, self.instance_uri, self.ontologies, acc_dep_term)
                     logging.info(query)
                     return self._render_sparql_response_rdf(sparql_construct(query, self.mediatype))
             elif self.profile == "dd":
@@ -503,12 +506,15 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                     SELECT DISTINCT ?c ?pl
                     WHERE {
                         <xxx> skos:member ?c .
+                        acc_dep
                         ?c skos:prefLabel ?pl .
                     }
                     ORDER BY ?pl                
                     """.replace(
-                    "xxx", self.instance_uri
-                )
+                        "xxx", self.instance_uri
+                    ).replace(
+                        "acc_dep", acc_dep_map.get(acc_dep_or_concept)
+                    )
                 r = sparql_query(q)
                 return JSONResponse(
                     [
@@ -533,12 +539,15 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                             skos:prefLabel ?prefLabel ;
                             <http://purl.org/dc/terms/description> ?description ;
                             skos:member ?c .
+                            acc_dep
                         ?c skos:prefLabel ?c_pl .
                     }
                     ORDER BY ?prefLabel
                     """.replace(
-                    "xxx", self.instance_uri
-                )
+                        "xxx", self.instance_uri
+                    ).replace(
+                        "acc_dep", acc_dep_map.get(acc_dep_or_concept)
+                    )
                 return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile == "vocpub":
                 q = """
@@ -564,15 +573,21 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                             dcterms:creator ?creator ;
                             dcterms:publisher ?publisher ;   
                             skos:member ?c .
+                            acc_dep
   
                         ?c skos:prefLabel ?c_pl .
                     }
                     """.replace(
-                    "xxx", self.instance_uri
-                )
+                        "xxx", self.instance_uri
+                    ).replace(
+                        "acc_dep", acc_dep_map.get(acc_dep_or_concept)
+                    )
                 return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile in alt_profile_tokens:
-                query = get_collection_query(current_profile, self.instance_uri, self.ontologies)
+                # Get the term for the collection query WHERE clause to filter or accepted or deprecated.
+                # This will be an empty string if neither condition is true.
+                acc_dep_term = acc_dep_map.get(acc_dep_or_concept).replace("?c", "?m")
+                query = get_collection_query(current_profile, self.instance_uri, self.ontologies, acc_dep_term)
                 logging.info(query)
                 return self._render_sparql_response_rdf(sparql_construct(query, self.mediatype))
 
@@ -1371,7 +1386,7 @@ class ConceptRenderer(Renderer):
             if ontology not in self.profiles[self.profile].ontologies:
                 exclude_filters += f'FILTER (!STRSTARTS(STR(?p), "{data["url"]}"))\n'
             else:
-                prefixes += f'PREFIX {data["prefix"]}: <{data["url"]}#>\n'
+                prefixes += f'PREFIX {data["prefix"]}: <{data["url"]}>\n'
 
         q = f"""
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -1763,7 +1778,7 @@ class ConceptRenderer(Renderer):
             if ontology not in self.profiles[self.profile].ontologies:
                 exclude_filters += f'FILTER (!STRSTARTS(STR(?p), "{data["url"]}"))\n'
             else:
-                prefixes += f'PREFIX {data["prefix"]}: <{data["url"]}#>\n'
+                prefixes += f'PREFIX {data["prefix"]}: <{data["url"]}>\n'
 
         q = f"""
             PREFIX dc: <http://purl.org/dc/terms/>
