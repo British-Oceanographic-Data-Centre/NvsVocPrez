@@ -1,7 +1,6 @@
 """Authentication functions used in login/logout."""
 from urllib.request import Request
 from starlette.config import Config
-from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter
