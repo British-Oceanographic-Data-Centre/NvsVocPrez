@@ -62,12 +62,8 @@ api = fastapi.FastAPI(
     swagger_ui_parameters={"defaultModelsExpandDepth": -1}
     )
 
-# --max_age needs to be investigated--
-# In this current setting the session cookies will persist inbetween the
-# app being exited and restarted, and only seems to require a full
-# Auth0 login if the browser cookies/cache are cleared.
 config = Config('.env')
-api.add_middleware(SessionMiddleware, max_age=None, secret_key=config('APP_SECRET_KEY'))
+api.add_middleware(SessionMiddleware, max_age=config('MAX_SESSION_LENGTH', cast=int, default=None), secret_key=config('APP_SECRET_KEY'))
 
 templates = Jinja2Templates(str(api_home_dir / "view" / "templates"))
 api.mount(
