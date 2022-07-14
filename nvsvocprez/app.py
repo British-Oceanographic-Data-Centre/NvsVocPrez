@@ -8,7 +8,7 @@ from authentication import login
 from typing import Optional, AnyStr, Literal
 from pathlib import Path
 import fastapi
-from fastapi import HTTPException, APIRouter
+from fastapi import HTTPException
 import uvicorn
 from starlette.config import Config
 from starlette.requests import Request
@@ -41,8 +41,6 @@ from config import SYSTEM_URI, DATA_URI, PORT
 from rdflib import Graph, URIRef
 from rdflib import Literal as RdfLiteral, Namespace
 from rdflib.namespace import DC, DCTERMS, ORG, OWL, RDF, RDFS, SKOS, VOID
-
-router = APIRouter()
 
 api_home_dir = Path(__file__).parent
 with open("api_doc_config.json", "r") as config_file:
