@@ -40,7 +40,6 @@ async def auth(request: Request):
 
 @router.route('/logout')
 async def logout(request: Request):
-    print("router", router)
     request.session.pop('user', None)
     return RedirectResponse(
         "https://"
