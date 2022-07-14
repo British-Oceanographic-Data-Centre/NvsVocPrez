@@ -8,8 +8,9 @@ from authentication import login
 from typing import Optional, AnyStr, Literal
 from pathlib import Path
 import fastapi
-from fastapi import HTTPException
+from fastapi import HTTPException, APIRouter
 import uvicorn
+from starlette.config import Config
 from starlette.requests import Request
 from starlette.responses import (
     RedirectResponse,
@@ -41,6 +42,7 @@ from rdflib import Graph, URIRef
 from rdflib import Literal as RdfLiteral, Namespace
 from rdflib.namespace import DC, DCTERMS, ORG, OWL, RDF, RDFS, SKOS, VOID
 
+router = APIRouter()
 
 api_home_dir = Path(__file__).parent
 with open("api_doc_config.json", "r") as config_file:
@@ -66,7 +68,8 @@ api = fastapi.FastAPI(
 # In this current setting the session cookies will persist inbetween the
 # app being exited and restarted, and only seems to require a full
 # Auth0 login if the browser cookies/cache are cleared.
-api.add_middleware(SessionMiddleware, max_age=None, secret_key="SECRET_KEY")
+config = Config('.env')
+api.add_middleware(SessionMiddleware, max_age=None, secret_key=config('APP_SECRET_KEY'))
 
 templates = Jinja2Templates(str(api_home_dir / "view" / "templates"))
 api.mount(
