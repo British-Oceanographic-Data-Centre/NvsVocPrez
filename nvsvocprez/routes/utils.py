@@ -2,15 +2,14 @@
 import logging
 from typing import Dict, List, Literal
 import httpx
-import config
-from config import DATA_URI, ORDS_ENDPOINT_URL
+from . import page_configs
 import pickle
 from pathlib import Path
 import requests
 from pyldapi.data import RDF_MEDIATYPES
 
 from pyldapi.profile import Profile
-
+from utilities import config
 
 
 api_home_dir = Path(__file__).parent
@@ -22,16 +21,25 @@ class TriplestoreError(Exception):
     pass
 
 
-def get_user_status(request):
-    return request.session['user']['nickname'] if 'user' in request.session else 'Not Logged in'
+config_ = config.verify_env_file()
+
+
+def get_user_status(request, login_status=config_.get("LOGIN_ENABLE")):
+    if login_status == "true":
+        return (
+            request.session["user"]["nickname"]
+            if "user" in request.session
+            else "Not Logged in"
+        )
+    return ""
 
 
 def sparql_query(query: str):
     r = httpx.post(
-        config.SPARQL_ENDPOINT,
+        page_configs.SPARQL_ENDPOINT,
         data=query,
         headers={"Content-Type": "application/sparql-query"},
-        auth=(config.SPARQL_USERNAME, config.SPARQL_PASSWORD),
+        auth=(page_configs.SPARQL_USERNAME, page_configs.SPARQL_PASSWORD),
         timeout=60.0,
     )
     if 200 <= r.status_code < 300:
@@ -42,10 +50,10 @@ def sparql_query(query: str):
 
 def sparql_construct(query: str, rdf_mediatype="text/turtle"):
     r = httpx.post(
-        config.SPARQL_ENDPOINT,
+        page_configs.SPARQL_ENDPOINT,
         data=query,
         headers={"Content-Type": "application/sparql-query", "Accept": rdf_mediatype},
-        auth=(config.SPARQL_USERNAME, config.SPARQL_PASSWORD),
+        auth=(page_configs.SPARQL_USERNAME, page_configs.SPARQL_PASSWORD),
         timeout=90.0,
     )
     if 200 <= r.status_code < 300:
@@ -237,91 +245,98 @@ def get_accepts(accept_header: str):
         for accept in accept_header.split(",")
     ]
 
+
 def exists_triple(s: str):
-  query = f"select count(*) where {{ <{DATA_URI + s}> ?p ?o .}}"
-  rr = sparql_query(query)
-  count = rr[1][0]['.1'].get('value')
-  return True if bool(int(count)) else False
+    query = f"select count(*) where {{ <{page_configs.DATA_URI + s}> ?p ?o .}}"
+    rr = sparql_query(query)
+    count = rr[1][0][".1"].get("value")
+    return True if bool(int(count)) else False
 
 
 def get_ontologies() -> Dict:
     """Get ontologies from livbodcsos ords endpoint.
-    
-        Returns (Dict): Dict of parsed ontology data. {ontology_prefix : {ontology_object}, ...}.
+
+    Returns (Dict): Dict of parsed ontology data. {ontology_prefix : {ontology_object}, ...}.
     """
-    if ORDS_ENDPOINT_URL is None:
+    if page_configs.ORDS_ENDPOINT_URL is None:
         logging.error("Environment variable ORDS_ENDPOINT_URL is not set.")
         return {}
     try:
-        url = f"{ORDS_ENDPOINT_URL}/ontology"
+        url = f"{page_configs.ORDS_ENDPOINT_URL}/ontology"
         resp_json = requests.get(url).json()
-        ont_data_by_prefix = {ont["prefix"]: ont for ont in resp_json['items']}
+        ont_data_by_prefix = {ont["prefix"]: ont for ont in resp_json["items"]}
         return ont_data_by_prefix
-    except requests.RequestException as exc: 
+    except requests.RequestException as exc:
         logging.error("Failed to retrieve ontology information from %s.\n%s", url, exc)
-        return {}   # Return blank dict to avoid internal server error.
+        return {}  # Return blank dict to avoid internal server error.
 
 
 def get_alt_profiles() -> Dict:
     """Get alt profiles from livbodcsos ords endpoint.
-    
-        Returns (Dict): Dict of parsed alt profile data. {alt_profile_url : {alt_profile_object}, ...}.
+
+    Returns (Dict): Dict of parsed alt profile data. {alt_profile_url : {alt_profile_object}, ...}.
     """
-    if ORDS_ENDPOINT_URL is None:
+    if page_configs.ORDS_ENDPOINT_URL is None:
         logging.error("Environment variable ORDS_ENDPOINT_URL is not set.")
         return {}
     try:
-        url = f"{ORDS_ENDPOINT_URL}/altprof"
+        url = f"{page_configs.ORDS_ENDPOINT_URL}/altprof"
         resp_json = requests.get(url).json()
-        altprof_data_by_url = {alt["url"]: alt for alt in resp_json['items']}
+        altprof_data_by_url = {alt["url"]: alt for alt in resp_json["items"]}
         return altprof_data_by_url
-    except requests.RequestException as exc: 
-        logging.error("Failed to retrieve alternate profile information from %s.\n%s", url, exc)
-        return {}   # Return blank dict to avoid internal server error.
-    
-    
+    except requests.RequestException as exc:
+        logging.error(
+            "Failed to retrieve alternate profile information from %s.\n%s", url, exc
+        )
+        return {}  # Return blank dict to avoid internal server error.
+
+
 def get_alt_profile_objects(
-    collection:Dict, 
-    alt_profiles:Dict,
-    ontologies: Dict, 
-    media_types:List=RDF_MEDIATYPES, 
-    default_mediatype:str="text/turtle"
-    ) -> Dict:
+    collection: Dict,
+    alt_profiles: Dict,
+    ontologies: Dict,
+    media_types: List = RDF_MEDIATYPES,
+    default_mediatype: str = "text/turtle",
+) -> Dict:
     """Generate Profile objects for all alt profiles.
-    
+
     Args:
         collection (Dict): Dict representing collection data.
         alt_profiles(Dict): Dict of alt profiles { uri : {profile_data}, ...}.
         ontologies(Dict): Dict of ontologies { prefix : {ontology_data}, ...}.
         media_types (List[str]): List of mediatypes for alt profiles.
         default_mediatype (str): Default media type for alt profiles.
-        
+
     Returns:
         Dict: Dict of Profile objects representing each alternate profile.
             { profile_name: ProfileObject, ... }
     """
     profiles = {}
     for url, alt in alt_profiles.items():
-        ontology_dict = {ont: ontologies[ont] for ont in alt["ontology_prefix"].split(",") if ont in ontologies}
+        ontology_dict = {
+            ont: ontologies[ont]
+            for ont in alt["ontology_prefix"].split(",")
+            if ont in ontologies
+        }
         if "conforms_to" in collection and url in collection["conforms_to"]["value"]:
             p = Profile(
                 uri=url,
-                id=alt['token'],
-                label=alt['name'],
-                comment=alt['vocprezdesc'],
+                id=alt["token"],
+                label=alt["name"],
+                comment=alt["vocprezdesc"],
                 mediatypes=media_types,
                 default_mediatype=default_mediatype,
                 languages=["en"],
                 default_language="en",
-                ontologies = ontology_dict
+                ontologies=ontology_dict,
             )
-            profiles[alt['token']] = p
+            profiles[alt["token"]] = p
     return profiles
 
 
 def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict):
     """Method to generate a query for the collections page excluding certain profiles.
-    
+
     Args:
         profile_name (Profile): Profile object representing the current profile.
         insance_uri (str): Instance URI.
@@ -329,7 +344,7 @@ def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict):
     Returns:
         str: The construncted sparql query.
     """
-    
+
     prefix_text = ""
     filter_text = ""
     if profile.id != "nvs":
@@ -342,12 +357,12 @@ def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict):
             FILTER ( ?p2 != skos:related )
             FILTER ( ?p2 != owl:sameAs )
         """
-    
+
     for ontology, data in ontologies.items():
         if ontology not in profile.ontologies:
             # Build filter text.
             filter_text += f'FILTER (!STRSTARTS(STR(?p2), "{data["url"]}"))\n'
-    
+
     query = f"""
         PREFIX dc: <http://purl.org/dc/terms/>
         PREFIX dce: <http://purl.org/dc/elements/1.1/>

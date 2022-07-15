@@ -1,15 +1,14 @@
 """Authentication functions used in login/logout."""
 from urllib.request import Request
-from starlette.config import Config
 from starlette.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter
 from urllib.parse import quote_plus, urlencode
+from utilities import config
+
 
 router = APIRouter()
-
-# Read in data from the .env file
-config = Config('.env')
+config = config.verify_env_file()
 oauth = OAuth(config)
 
 

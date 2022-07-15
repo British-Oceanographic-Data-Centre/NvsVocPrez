@@ -12,11 +12,13 @@ templates = Jinja2Templates(str(api_home_dir / "view" / "templates"))
 
 
 @router.get("/contact", include_in_schema=False)
-@router.get("/contact-us" , include_in_schema=False)
+@router.get("/contact-us", include_in_schema=False)
 @router.get("/contact/", include_in_schema=False)
-@router.get("/contact-us/" , include_in_schema=False)
+@router.get("/contact-us/", include_in_schema=False)
 @router.head("/contact", include_in_schema=False)
 @router.head("/contact-us", include_in_schema=False)
 def contact(request: Request):
-    return templates.TemplateResponse("contact_us.html", {"request": request,
-                                                          "logged_in_user" : get_user_status(request)})
+    return templates.TemplateResponse(
+        "contact_us.html",
+        {"request": request, "logged_in_user": get_user_status(request)},
+    )
