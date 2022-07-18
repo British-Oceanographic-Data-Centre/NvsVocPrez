@@ -25,7 +25,7 @@ with open(config_file_location, "r") as config_file:
 logging.basicConfig(level=logging.DEBUG)
 
 
-@router.get("/sparql" , include_in_schema=False)
+@router.get("/sparql", include_in_schema=False)
 @router.get("/sparql/", **paths["/sparql/"]["get"])
 @router.head("/sparql", include_in_schema=False)
 @router.head("/sparql/", include_in_schema=False)
@@ -39,15 +39,14 @@ def sparql(request: Request):
         "text/csv",
         "text/tab-separated-values",
     ]
-    QUERY_RESPONSE_MEDIA_TYPES = (
-        ["text/html"] + SPARQL_RESPONSE_MEDIA_TYPES + RDF_MEDIATYPES
-    )
+    QUERY_RESPONSE_MEDIA_TYPES = ["text/html"] + SPARQL_RESPONSE_MEDIA_TYPES + RDF_MEDIATYPES
     accepts = get_accepts(request.headers["Accept"])
     accept = [x for x in accepts if x in QUERY_RESPONSE_MEDIA_TYPES][0]
 
     if accept == "text/html":
-        return templates.TemplateResponse("sparql.html", {"request": request,
-                                                          "logged_in_user": get_user_status(request)})
+        return templates.TemplateResponse(
+            "sparql.html", {"request": request, "logged_in_user": get_user_status(request)}
+        )
     else:
         return endpoint_get(request)
 
@@ -85,15 +84,14 @@ def _get_sparql_service_description(rdf_fmt="text/turtle"):
     if rdf_fmt in RDF_MEDIATYPES:
         return grf.serialize(format=rdf_fmt)
     else:
-        raise ValueError(
-            "Input parameter rdf_format must be one of: " + ", ".join(RDF_MEDIATYPES)
-        )
+        raise ValueError("Input parameter rdf_format must be one of: " + ", ".join(RDF_MEDIATYPES))
 
 
 def _sparql_query2(q, mimetype="application/json"):
     """Make a SPARQL query"""
     import httpx
     from config import SPARQL_ENDPOINT, SPARQL_PASSWORD, SPARQL_USERNAME
+
     data = q
     headers = {
         "Content-Type": "application/sparql-query",
@@ -106,13 +104,9 @@ def _sparql_query2(q, mimetype="application/json"):
         auth = None
 
     try:
-        logging.debug(
-            "endpoint={}\ndata={}\nheaders={}".format(SPARQL_ENDPOINT, data, headers)
-        )
+        logging.debug("endpoint={}\ndata={}\nheaders={}".format(SPARQL_ENDPOINT, data, headers))
         if auth is not None:
-            r = httpx.post(
-                SPARQL_ENDPOINT, auth=auth, data=data, headers=headers, timeout=60
-            )
+            r = httpx.post(SPARQL_ENDPOINT, auth=auth, data=data, headers=headers, timeout=60)
         else:
             r = httpx.post(SPARQL_ENDPOINT, data=data, headers=headers, timeout=60)
         return r.content.decode()
@@ -121,7 +115,7 @@ def _sparql_query2(q, mimetype="application/json"):
 
 
 @router.post("/sparql/", **paths["/sparql/"]["post"])
-@router.post("/sparql" , include_in_schema=False)
+@router.post("/sparql", include_in_schema=False)
 @router.post("/endpoint", include_in_schema=False)
 def endpoint_post(request: Request, query: str = fastapi.Form(...)):
     """
@@ -228,22 +222,16 @@ def endpoint_get(request: Request):
             accept = [x for x in accepts if x in RDF_MEDIATYPES][0]
             if accept is None:
                 return PlainTextResponse(
-                    "Accept header must include at least on RDF Media Type:"
-                    + ", ".join(RDF_MEDIATYPES)
-                    + ".",
+                    "Accept header must include at least on RDF Media Type:" + ", ".join(RDF_MEDIATYPES) + ".",
                     status_code=400,
                 )
             return Response(
                 _sparql_query2(query, mimetype=request.headers["Accept"]),
                 media_type=accept,
-                headers={
-                    "Content-Disposition": f"attachment; filename=query_result.{RDF_FILE_EXTS[accept]}"
-                },
+                headers={"Content-Disposition": f"attachment; filename=query_result.{RDF_FILE_EXTS[accept]}"},
             )
         else:
-            return Response(
-                _sparql_query2(query), media_type="application/sparql-results+json"
-            )
+            return Response(_sparql_query2(query), media_type="application/sparql-results+json")
     else:
         # SPARQL Service Description
         """
@@ -262,9 +250,7 @@ def endpoint_get(request: Request):
             accept = [x for x in accepts if x in RDF_MEDIATYPES][0]
             if accept is None:
                 return PlainTextResponse(
-                    "Accept header must include at least on RDF Media Type:"
-                    + ", ".join(RDF_MEDIATYPES)
-                    + ".",
+                    "Accept header must include at least on RDF Media Type:" + ", ".join(RDF_MEDIATYPES) + ".",
                     status_code=400,
                 )
             return Response(_get_sparql_service_description(accept), media_type=accept)

@@ -62,8 +62,7 @@ def collections(request: Request):
         def _render_sparql_response_rdf(self, sparql_response):
             if sparql_response[0]:
                 return Response(
-                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode()
-                    + sparql_response[1]
+                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode() + sparql_response[1]
                     if "xml" in self.mediatype
                     else sparql_response[1],
                     headers={"Content-Type": self.mediatype},
@@ -77,9 +76,7 @@ def collections(request: Request):
         def render(self):
             if self.profile == "nvs":
                 if self.mediatype == "text/html":
-                    collections = cache_return(
-                        collections_or_conceptschemes="collections"
-                    )
+                    collections = cache_return(collections_or_conceptschemes="collections")
 
                     if request.query_params.get("filter"):
 
@@ -93,8 +90,7 @@ def collections(request: Request):
                         collections = [
                             coll
                             for coll in collections
-                            if request.query_params.get("filter")
-                            in concat_vocab_fields(coll)
+                            if request.query_params.get("filter") in concat_vocab_fields(coll)
                         ]
 
                     return templates.TemplateResponse(
@@ -106,7 +102,7 @@ def collections(request: Request):
                             "comment": self.comment,
                             "collections": collections,
                             "profile_token": self.profile,
-                            "logged_in_user": get_user_status(request)
+                            "logged_in_user": get_user_status(request),
                         },
                     )
                 elif self.mediatype in RDF_MEDIATYPES:
@@ -160,9 +156,7 @@ def collections(request: Request):
                             OPTIONAL { ?cs dc:conformsTo ?conformsTo }
                         } 
                         """
-                    return self._render_sparql_response_rdf(
-                        sparql_construct(query, self.mediatype)
-                    )
+                    return self._render_sparql_response_rdf(sparql_construct(query, self.mediatype))
             elif self.profile == "mem":
                 collections = []
                 for coll in cache_return(collections_or_conceptschemes="collections"):
@@ -187,10 +181,7 @@ def collections(request: Request):
                         },
                     )
                 elif self.mediatype == "application/json":
-                    return [
-                        {"uri": coll["uri"], "label": coll["prefLabel"]}
-                        for coll in collections
-                    ]
+                    return [{"uri": coll["uri"], "label": coll["prefLabel"]} for coll in collections]
                 else:  # all other available mediatypes are RDF
                     graph = Graph()
                     container = URIRef(self.instance_uri)
@@ -232,9 +223,7 @@ def collections(request: Request):
                 )
                 container_message += self.comment
                 graph.add((container, RDFS.comment, RdfLiteral(container_message)))
-                return Response(
-                    graph.serialize(format=self.mediatype), media_type=self.mediatype
-                )
+                return Response(graph.serialize(format=self.mediatype), media_type=self.mediatype)
 
             alt = super().render()
             if alt is not None:
@@ -260,9 +249,7 @@ def collection_no_current(request: Request, collection_id):
     **paths["/collection/{collection_id}/current/{acc_dep_or_concept}/"]["get"],
 )
 @router.head("/collection/{collection_id}/current/", include_in_schema=False)
-@router.head(
-    "/collection/{collection_id}/current/{acc_dep_or_concept}/", include_in_schema=False
-)
+@router.head("/collection/{collection_id}/current/{acc_dep_or_concept}/", include_in_schema=False)
 def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
 
     if not exists_triple(request.url.path) and acc_dep_or_concept not in [
@@ -304,8 +291,7 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
         def _render_sparql_response_rdf(self, sparql_response):
             if sparql_response[0]:
                 return Response(
-                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode()
-                    + sparql_response[1]
+                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode() + sparql_response[1]
                     if "xml" in self.mediatype
                     else sparql_response[1],
                     headers={"Content-Type": self.mediatype},
@@ -360,9 +346,7 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                         "prefLabel": concept["pl"]["value"].replace("_", " "),
                         "definition": concept["def"]["value"].replace("_", "_ "),
                         "date": concept["date"]["value"][0:10],
-                        "deprecated": True
-                        if concept.get("dep") and concept["dep"]["value"] == "true"
-                        else False,
+                        "deprecated": True if concept.get("dep") and concept["dep"]["value"] == "true" else False,
                     }
                     for concept in sparql_result[1]
                 ]
@@ -403,18 +387,14 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                 elif self.mediatype in RDF_MEDIATYPES:
                     # Get the term for the collection query WHERE clause to filter or accepted or deprecated.
                     # This will be an empty string if neither condition is true.
-                    acc_dep_term = acc_dep_map.get(acc_dep_or_concept).replace(
-                        "?c", "?m"
-                    )
+                    acc_dep_term = acc_dep_map.get(acc_dep_or_concept).replace("?c", "?m")
                     query = get_collection_query(
                         current_profile,
                         self.instance_uri,
                         self.ontologies,
                         acc_dep_term,
                     )
-                    return self._render_sparql_response_rdf(
-                        sparql_construct(query, self.mediatype)
-                    )
+                    return self._render_sparql_response_rdf(sparql_construct(query, self.mediatype))
             elif self.profile == "dd":
                 q = """
                     PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -432,12 +412,7 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                     "acc_dep", acc_dep_map.get(acc_dep_or_concept)
                 )
                 r = sparql_query(q)
-                return JSONResponse(
-                    [
-                        {"uri": x["c"]["value"], "prefLabel": x["pl"]["value"]}
-                        for x in r[1]
-                    ]
-                )
+                return JSONResponse([{"uri": x["c"]["value"], "prefLabel": x["pl"]["value"]} for x in r[1]])
             elif self.profile == "skos":
                 q = """
                     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>                    
@@ -464,9 +439,7 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                 ).replace(
                     "acc_dep", acc_dep_map.get(acc_dep_or_concept)
                 )
-                return self._render_sparql_response_rdf(
-                    sparql_construct(q, self.mediatype)
-                )
+                return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile == "vocpub":
                 q = """
                     PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -500,19 +473,13 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                 ).replace(
                     "acc_dep", acc_dep_map.get(acc_dep_or_concept)
                 )
-                return self._render_sparql_response_rdf(
-                    sparql_construct(q, self.mediatype)
-                )
+                return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile in alt_profile_tokens:
                 # Get the term for the collection query WHERE clause to filter or accepted or deprecated.
                 # This will be an empty string if neither condition is true.
                 acc_dep_term = acc_dep_map.get(acc_dep_or_concept).replace("?c", "?m")
-                query = get_collection_query(
-                    current_profile, self.instance_uri, self.ontologies, acc_dep_term
-                )
-                return self._render_sparql_response_rdf(
-                    sparql_construct(query, self.mediatype)
-                )
+                query = get_collection_query(current_profile, self.instance_uri, self.ontologies, acc_dep_term)
+                return self._render_sparql_response_rdf(sparql_construct(query, self.mediatype))
 
             alt = super().render()
             if alt is not None:
@@ -525,20 +492,12 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
     "/collection/{collection_id}/current/{concept_id}/{vnum}/",
     **paths["/collection/{collection_id}/current/{concept_id}/{vnum}/"]["get"],
 )
-@router.head(
-    "/collection/{collection_id}/current/{concept_id}/{vnum}/", include_in_schema=False
-)
+@router.head("/collection/{collection_id}/current/{concept_id}/{vnum}/", include_in_schema=False)
 def concept_with_version(request: Request, collection_id, concept_id, vnum: int):
     return concept(request)
 
 
-@router.get(
-    "/collection/{collection_id}/current/{acc_dep_or_concept}", include_in_schema=False
-)
-@router.head(
-    "/collection/{collection_id}/current/{acc_dep_or_concept}", include_in_schema=False
-)
+@router.get("/collection/{collection_id}/current/{acc_dep_or_concept}", include_in_schema=False)
+@router.head("/collection/{collection_id}/current/{acc_dep_or_concept}", include_in_schema=False)
 def collection_concept_noslash(request: Request, collection_id, acc_dep_or_concept):
-    return RedirectResponse(
-        url=f"/collection/{collection_id}/current/{acc_dep_or_concept}/"
-    )
+    return RedirectResponse(url=f"/collection/{collection_id}/current/{acc_dep_or_concept}/")
