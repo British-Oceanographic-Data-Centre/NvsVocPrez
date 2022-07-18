@@ -13,14 +13,11 @@ oauth = OAuth(config)
 
 
 oauth.register(
-    name='auth0',
-    server_metadata_url=config('AUTH0_CONF_URL'),
-    client_kwargs={
-        'scope': 'openid email profile'
-    }
+    name="auth0", server_metadata_url=config("AUTH0_CONF_URL"), client_kwargs={"scope": "openid email profile"}
 )
 
-@router.route('/login')
+
+@router.route("/login")
 async def login(request: Request):
     redirect_uri = request.url_for("auth")
     return await oauth.auth0.authorize_redirect(request, redirect_uri)
