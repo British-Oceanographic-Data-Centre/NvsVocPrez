@@ -106,7 +106,7 @@ def collections(request: Request):
                             "comment": self.comment,
                             "collections": collections,
                             "profile_token": self.profile,
-                            "logged_in_user": get_user_status(request),
+                            "logged_in_user": get_user_status(request)
                         },
                     )
                 elif self.mediatype in RDF_MEDIATYPES:

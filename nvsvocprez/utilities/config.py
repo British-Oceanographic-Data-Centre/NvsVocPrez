@@ -1,4 +1,5 @@
 """Reads .env file and sends the config to authentication processes."""
+
 from starlette.config import Config
 
 
@@ -23,8 +24,11 @@ def verify_env_file() -> Config:
     they are returned if all present, or a MissingKeyError is raised.
     """
     configuration = Config(".env")
+
     actual_config_keys = set(configuration.file_values.keys())
 
     if expected_config_keys == actual_config_keys:
         return configuration
     raise MissingKeyError(", ".join(expected_config_keys - actual_config_keys))
+
+
