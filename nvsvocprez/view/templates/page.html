@@ -18,10 +18,22 @@
       <a href="https://www.bodc.ac.uk/"><img src="/static/bodc-bw.png" alt="BODC logo" style="height:70%; float:right ;" /></a>
     </div>
     <div id="header-title" style="grid-row:2;">
-      <a href="/login">Log-in</a>
+    {% if logged_in_user != '' %}
+      {% if logged_in_user == 'Not Logged in' %}
+        <a href="/login">Log-in</a>
+      {% else %}
+        <a href="/logout">Log-out</a>
+      {% endif %}
+    {% endif %}
       <span>The NERC Vocabulary Server (NVS)</span>
       <a href="https://sdc.ui.argo.grnet.gr/sdc/dashboard/Critical/VOCABULARY">Service Status</a>
     </div>
+    <div>
+    {% if logged_in_user != '' %}
+      <p class="logged-in-user">{{ logged_in_user }}</p>
+    {% endif %}
+    </div>
+
   </div><!-- #header -->
   <div id="mainmenu" style="grid-column:2;">
     {% include 'nav.html' %}
