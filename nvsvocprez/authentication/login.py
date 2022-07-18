@@ -15,13 +15,14 @@ oauth = OAuth(config)
 CONF_URL = "https://bodc-localhost.eu.auth0.com/.well-known/openid-configuration"
 oauth.register(name="auth0", server_metadata_url=CONF_URL, client_kwargs={"scope": "openid email profile"})
 
-@router.get('/login')
+
+@router.get("/login")
 async def login(request: Request):
     redirect_uri = request.url_for("auth")
     return await oauth.auth0.authorize_redirect(request, redirect_uri)
 
 
-@router.get('/auth')
+@router.get("/auth")
 async def auth(request: Request):
     token = await oauth.auth0.authorize_access_token(request)
     user = token.get("userinfo")
@@ -30,7 +31,7 @@ async def auth(request: Request):
     return RedirectResponse(url="/")
 
 
-@router.get('/logout')
+@router.get("/logout")
 async def logout(request: Request):
     request.session.pop("user", None)
     return RedirectResponse(
