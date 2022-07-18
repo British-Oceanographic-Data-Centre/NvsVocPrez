@@ -11,7 +11,6 @@ from pyldapi.data import RDF_MEDIATYPES
 from pyldapi.profile import Profile
 
 
-
 api_home_dir = Path(__file__).parent
 collections_pickle = Path(api_home_dir / "cache" / "collections.pickle")
 conceptschemes_pickle = Path(api_home_dir / "cache" / "conceptschemes.pickle")
@@ -57,11 +56,7 @@ def cache_clear():
         conceptschemes_pickle.unlink()
 
 
-def cache_fill(
-    collections_or_conceptschemes_or_both: Literal[
-        "collections", "conceptschemes", "both"
-    ] = "both"
-):
+def cache_fill(collections_or_conceptschemes_or_both: Literal["collections", "conceptschemes", "both"] = "both"):
     logging.debug(f"filled cache {collections_or_conceptschemes_or_both}")
     if not Path(api_home_dir / "cache").is_dir():
         Path(api_home_dir / "cache").mkdir()
@@ -156,9 +151,7 @@ group by ?uri ?id ?systemUri ?prefLabel ?created ?issued ?modified ?creator ?pub
         pass
 
 
-def cache_return(
-    collections_or_conceptschemes: Literal["collections", "conceptschemes"]
-) -> dict:
+def cache_return(collections_or_conceptschemes: Literal["collections", "conceptschemes"]) -> dict:
     if collections_or_conceptschemes == "collections":
         if not collections_pickle.is_file():
             cache_fill(collections_or_conceptschemes_or_both="collections")
@@ -206,7 +199,6 @@ def cache_return(
         return markdown.markdown(text)
 
 
-
 def render_concept_tree(html_doc):
     soup = BeautifulSoup(html_doc, "html.parser")
 
@@ -220,30 +212,26 @@ def render_concept_tree(html_doc):
             ul["class"] = "nested"
             if ul.parent.name == "li":
                 temp = BeautifulSoup(str(ul.parent.a.extract()), "html.parser")
-                ul.parent.insert(
-                    0, BeautifulSoup('<span class="caret">', "html.parser")
-                )
+                ul.parent.insert(0, BeautifulSoup('<span class="caret">', "html.parser"))
                 ul.parent.span.insert(0, temp)
     return soup
 
 
 def get_accepts(accept_header: str):
-    return [
-        accept.split(";")[0].replace("*/*", "text/html")
-        for accept in accept_header.split(",")
-    ]
+    return [accept.split(";")[0].replace("*/*", "text/html") for accept in accept_header.split(",")]
+
 
 def exists_triple(s: str):
-  query = f"select count(*) where {{ <{DATA_URI + s}> ?p ?o .}}"
-  rr = sparql_query(query)
-  count = rr[1][0]['.1'].get('value')
-  return True if bool(int(count)) else False
+    query = f"select count(*) where {{ <{DATA_URI + s}> ?p ?o .}}"
+    rr = sparql_query(query)
+    count = rr[1][0][".1"].get("value")
+    return True if bool(int(count)) else False
 
 
 def get_ontologies() -> Dict:
     """Get ontologies from livbodcsos ords endpoint.
-    
-        Returns (Dict): Dict of parsed ontology data. {ontology_prefix : {ontology_object}, ...}.
+
+    Returns (Dict): Dict of parsed ontology data. {ontology_prefix : {ontology_object}, ...}.
     """
     if ORDS_ENDPOINT_URL is None:
         logging.error("Environment variable ORDS_ENDPOINT_URL is not set.")
@@ -251,17 +239,17 @@ def get_ontologies() -> Dict:
     try:
         url = f"{ORDS_ENDPOINT_URL}/ontology"
         resp_json = requests.get(url).json()
-        ont_data_by_prefix = {ont["prefix"]: ont for ont in resp_json['items']}
+        ont_data_by_prefix = {ont["prefix"]: ont for ont in resp_json["items"]}
         return ont_data_by_prefix
-    except requests.RequestException as exc: 
+    except requests.RequestException as exc:
         logging.error("Failed to retrieve ontology information from %s.\n%s", url, exc)
-        return {}   # Return blank dict to avoid internal server error.
+        return {}  # Return blank dict to avoid internal server error.
 
 
 def get_alt_profiles() -> Dict:
     """Get alt profiles from livbodcsos ords endpoint.
-    
-        Returns (Dict): Dict of parsed alt profile data. {alt_profile_url : {alt_profile_object}, ...}.
+
+    Returns (Dict): Dict of parsed alt profile data. {alt_profile_url : {alt_profile_object}, ...}.
     """
     if ORDS_ENDPOINT_URL is None:
         logging.error("Environment variable ORDS_ENDPOINT_URL is not set.")
@@ -269,29 +257,29 @@ def get_alt_profiles() -> Dict:
     try:
         url = f"{ORDS_ENDPOINT_URL}/altprof"
         resp_json = requests.get(url).json()
-        altprof_data_by_url = {alt["url"]: alt for alt in resp_json['items']}
+        altprof_data_by_url = {alt["url"]: alt for alt in resp_json["items"]}
         return altprof_data_by_url
-    except requests.RequestException as exc: 
+    except requests.RequestException as exc:
         logging.error("Failed to retrieve alternate profile information from %s.\n%s", url, exc)
-        return {}   # Return blank dict to avoid internal server error.
-    
-    
+        return {}  # Return blank dict to avoid internal server error.
+
+
 def get_alt_profile_objects(
-    collection:Dict, 
-    alt_profiles:Dict,
-    ontologies: Dict, 
-    media_types:List=RDF_MEDIATYPES, 
-    default_mediatype:str="text/turtle"
-    ) -> Dict:
+    collection: Dict,
+    alt_profiles: Dict,
+    ontologies: Dict,
+    media_types: List = RDF_MEDIATYPES,
+    default_mediatype: str = "text/turtle",
+) -> Dict:
     """Generate Profile objects for all alt profiles.
-    
+
     Args:
         collection (Dict): Dict representing collection data.
         alt_profiles(Dict): Dict of alt profiles { uri : {profile_data}, ...}.
         ontologies(Dict): Dict of ontologies { prefix : {ontology_data}, ...}.
         media_types (List[str]): List of mediatypes for alt profiles.
         default_mediatype (str): Default media type for alt profiles.
-        
+
     Returns:
         Dict: Dict of Profile objects representing each alternate profile.
             { profile_name: ProfileObject, ... }
@@ -302,22 +290,22 @@ def get_alt_profile_objects(
         if "conforms_to" in collection and url in collection["conforms_to"]["value"]:
             p = Profile(
                 uri=url,
-                id=alt['token'],
-                label=alt['name'],
-                comment=alt['vocprezdesc'],
+                id=alt["token"],
+                label=alt["name"],
+                comment=alt["vocprezdesc"],
                 mediatypes=media_types,
                 default_mediatype=default_mediatype,
                 languages=["en"],
                 default_language="en",
-                ontologies = ontology_dict
+                ontologies=ontology_dict,
             )
-            profiles[alt['token']] = p
+            profiles[alt["token"]] = p
     return profiles
 
 
 def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict, acc_dep_term: str):
     """Method to generate a query for the collections page excluding certain profiles.
-    
+
     Args:
         profile_name (Profile): Profile object representing the current profile.
         insance_uri (str): Instance URI.
@@ -327,7 +315,7 @@ def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict, 
     Returns:
         str: The constructed sparql query.
     """
-    
+
     prefix_text = ""
     filter_text = ""
     if profile.id != "nvs":
@@ -340,12 +328,12 @@ def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict, 
             FILTER ( ?p2 != skos:related )
             FILTER ( ?p2 != owl:sameAs )
         """
-    
+
     for ontology, data in ontologies.items():
         if ontology not in profile.ontologies:
             # Build filter text.
             filter_text += f'FILTER (!STRSTARTS(STR(?p2), "{data["url"]}"))\n'
-    
+
     query = f"""
         PREFIX dc: <http://purl.org/dc/terms/>
         PREFIX dce: <http://purl.org/dc/elements/1.1/>

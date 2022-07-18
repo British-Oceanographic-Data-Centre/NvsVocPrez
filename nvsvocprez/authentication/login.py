@@ -22,31 +22,28 @@ oauth.register(
 
 @router.route('/login')
 async def login(request: Request):
-    redirect_uri = request.url_for('auth')
+    redirect_uri = request.url_for("auth")
     return await oauth.auth0.authorize_redirect(request, redirect_uri)
 
 
-@router.route('/auth')
+@router.route("/auth")
 async def auth(request: Request):
     token = await oauth.auth0.authorize_access_token(request)
-    user = token.get('userinfo')
+    user = token.get("userinfo")
     if user:
-        request.session['user'] = user
-    return RedirectResponse(url='/')
+        request.session["user"] = user
+    return RedirectResponse(url="/")
 
 
-@router.route('/logout')
+@router.route("/logout")
 async def logout(request: Request):
-    request.session.pop('user', None)
+    request.session.pop("user", None)
     return RedirectResponse(
         "https://"
-        + config('AUTH0_DOMAIN')
+        + config("AUTH0_DOMAIN")
         + "/v2/logout?"
         + urlencode(
-            {
-                "returnTo": request.url_for('index'),
-                "client_id": config('AUTH0_CLIENT_ID')
-            },
+            {"returnTo": request.url_for("index"), "client_id": config("AUTH0_CLIENT_ID")},
             quote_via=quote_plus,
         )
     )

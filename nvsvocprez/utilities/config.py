@@ -31,5 +31,3 @@ def verify_env_file() -> Config:
     if expected_config_keys == actual_config_keys:
         return configuration
     raise MissingKeyError(", ".join(expected_config_keys - actual_config_keys))
-
-

@@ -5,14 +5,7 @@ from config import SYSTEM_URI
 
 
 class ContainerRenderer(Renderer):
-    def __init__(
-        self,
-        request,
-        instance_uri,
-        profiles=None,
-        default_profile_token="mem",
-        **kwargs
-    ):
+    def __init__(self, request, instance_uri, profiles=None, default_profile_token="mem", **kwargs):
 
         contanno = Profile(
             uri="https://w3id.org/profile/contanno",
@@ -47,7 +40,7 @@ class ContainerRenderer(Renderer):
 
         super().__init__(
             request,
-            f"{SYSTEM_URI}{str(request.url.path)}" ,
+            f"{SYSTEM_URI}{str(request.url.path)}",
             new_profiles,
             default_profile_token,
         )
@@ -59,6 +52,4 @@ class ContainerRenderer(Renderer):
         elif self.profile == "mem":
             raise NotImplementedError("You must implement handling for the mem profile")
         elif self.profile == "contanno":
-            raise NotImplementedError(
-                "You must implement handling for the contanno profile"
-            )
+            raise NotImplementedError("You must implement handling for the contanno profile")

@@ -63,8 +63,7 @@ def conceptschemes(request: Request):
         def _render_sparql_response_rdf(self, sparql_response):
             if sparql_response[0]:
                 return Response(
-                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode()
-                    + sparql_response[1]
+                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode() + sparql_response[1]
                     if "xml" in self.mediatype
                     else sparql_response[1],
                     headers={"Content-Type": self.mediatype},
@@ -78,9 +77,7 @@ def conceptschemes(request: Request):
         def render(self):
             if self.profile == "nvs":
                 if self.mediatype == "text/html":
-                    conceptschemes = cache_return(
-                        collections_or_conceptschemes="conceptschemes"
-                    )
+                    conceptschemes = cache_return(collections_or_conceptschemes="conceptschemes")
 
                     if request.query_params.get("filter"):
 
@@ -92,10 +89,7 @@ def conceptschemes(request: Request):
                             )
 
                         conceptschemes = [
-                            x
-                            for x in conceptschemes
-                            if request.query_params.get("filter")
-                            in concat_vocab_fields(x)
+                            x for x in conceptschemes if request.query_params.get("filter") in concat_vocab_fields(x)
                         ]
 
                     return templates.TemplateResponse(
@@ -153,9 +147,7 @@ def conceptschemes(request: Request):
                             }
                         }
                         """
-                    return self._render_sparql_response_rdf(
-                        sparql_construct(q, self.mediatype)
-                    )
+                    return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile == "mem":
                 collections = []
                 for c in cache_return(collections_or_conceptschemes="conceptschemes"):
@@ -180,9 +172,7 @@ def conceptschemes(request: Request):
                         },
                     )
                 elif self.mediatype == "application/json":
-                    return [
-                        {"uri": c["uri"], "label": c["prefLabel"]} for c in collections
-                    ]
+                    return [{"uri": c["uri"], "label": c["prefLabel"]} for c in collections]
                 else:  # all other available mediatypes are RDF
                     g = Graph()
                     container = URIRef(self.instance_uri)
@@ -191,9 +181,7 @@ def conceptschemes(request: Request):
                     for c in collections:
                         g.add((container, RDFS.member, URIRef(c["uri"])))
                         g.add((URIRef(c["uri"]), RDFS.label, RdfLiteral(c["label"])))
-                    return Response(
-                        g.serialize(format=self.mediatype), media_type=self.mediatype
-                    )
+                    return Response(g.serialize(format=self.mediatype), media_type=self.mediatype)
             elif self.profile == "contanno":
                 if self.mediatype == "text/html":
                     return templates.TemplateResponse(
@@ -218,9 +206,7 @@ def conceptschemes(request: Request):
                     )
                     c += self.comment
                     g.add((container, RDFS.comment, RdfLiteral(c)))
-                    return Response(
-                        g.serialize(format=self.mediatype), media_type=self.mediatype
-                    )
+                    return Response(g.serialize(format=self.mediatype), media_type=self.mediatype)
             alt = super().render()
             if alt is not None:
                 return alt
@@ -244,9 +230,7 @@ def scheme_no_current(request: Request, scheme_id):
     return RedirectResponse(url=f"/scheme/{scheme_id}/current/")
 
 
-@router.get(
-    "/scheme/{scheme_id}/current/", **paths["/scheme/{scheme_id}/current/"]["get"]
-)
+@router.get("/scheme/{scheme_id}/current/", **paths["/scheme/{scheme_id}/current/"]["get"])
 @router.get("/scheme/{scheme_id}/current/{acc_dep}/", include_in_schema=False)
 @router.head("/scheme/{scheme_id}/current/", include_in_schema=False)
 @router.head("/scheme/{scheme_id}/current/{acc_dep}/", include_in_schema=False)
@@ -273,8 +257,7 @@ def scheme(
         def _render_sparql_response_rdf(self, sparql_response):
             if sparql_response[0]:
                 return Response(
-                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode()
-                    + sparql_response[1]
+                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode() + sparql_response[1]
                     if "xml" in self.mediatype
                     else sparql_response[1],
                     headers={"Content-Type": self.mediatype},
@@ -297,9 +280,7 @@ def scheme(
 
                 for d in data:
                     child = d["c"]["value"]
-                    parent = (
-                        d["broader"]["value"] if d.get("broader") is not None else None
-                    )
+                    parent = d["broader"]["value"] if d.get("broader") is not None else None
                     children_parents.append((child, parent))
                     labels[child] = d["pl"]["value"].replace("<", "&lt;")
 
@@ -333,11 +314,7 @@ def scheme(
                         html += make_nested_ul(v, labels)
                         html += "</ul>"
                     else:
-                        html += (
-                            f'<li><a href="{k.replace(DATA_URI, "")}">{labels[k]}</a>'
-                            if k is not None
-                            else "None"
-                        )
+                        html += f'<li><a href="{k.replace(DATA_URI, "")}">{labels[k]}</a>' if k is not None else "None"
                     html += "</li>"
                 return html
 
@@ -381,14 +358,9 @@ def scheme(
                 else:
                     hier = make_hierarchical_dicts(r[1])
                     hier[1][None] = None
-                    return (
-                        '<ul class="concept-hierarchy">'
-                        + make_nested_ul(hier[0], hier[1])[23:-5]
-                    )
+                    return '<ul class="concept-hierarchy">' + make_nested_ul(hier[0], hier[1])[23:-5]
             except RecursionError as e:
-                logging.warning(
-                    "Encountered a recursion limit error for {}".format(self.vocab_uri)
-                )
+                logging.warning("Encountered a recursion limit error for {}".format(self.vocab_uri))
                 # make a flat list of concepts
                 q = """
                     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -403,14 +375,9 @@ def scheme(
                     vocab_uri=self.instance_uri
                 )
 
-                concepts = [
-                    (concept["systemUri"]["value"], concept["pl"]["value"])
-                    for concept in sparql_query(q)
-                ]
+                concepts = [(concept["systemUri"]["value"], concept["pl"]["value"]) for concept in sparql_query(q)]
 
-                concepts_html = "<br />".join(
-                    ['<a href="{}">{}</a>'.format(c[0], c[1]) for c in concepts]
-                )
+                concepts_html = "<br />".join(['<a href="{}">{}</a>'.format(c[0], c[1]) for c in concepts])
                 return """<p><strong><em>This concept hierarchy cannot be displayed</em></strong><p>
                             <p>The flat list of all this Scheme's Concepts is:</p>
                             <p>{}</p>
@@ -504,9 +471,7 @@ def scheme(
                     ).replace(
                         "acc_dep", acc_dep_map.get(acc_dep)
                     )
-                    return self._render_sparql_response_rdf(
-                        sparql_construct(q, self.mediatype)
-                    )
+                    return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile == "dd":
                 q = """
                     PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -598,9 +563,7 @@ def scheme(
                     """.replace(
                     "xxx", self.instance_uri
                 )
-                return self._render_sparql_response_rdf(
-                    sparql_construct(q, self.mediatype)
-                )
+                return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile == "vocpub":
                 q = """
                     PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -669,9 +632,7 @@ def scheme(
                     """.replace(
                     "xxx", self.instance_uri
                 )
-                return self._render_sparql_response_rdf(
-                    sparql_construct(q, self.mediatype)
-                )
+                return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
 
             alt = super().render()
             if alt is not None:

@@ -61,9 +61,7 @@ def index(request: Request):
                         )
                     else:
                         g = Graph().parse(
-                            data=open(dcat_file)
-                            .read()
-                            .replace("xxx", self.instance_uri),
+                            data=open(dcat_file).read().replace("xxx", self.instance_uri),
                             format="turtle",
                         )
                         return Response(
