@@ -14,7 +14,7 @@ expected_config_keys = {
     "AUTH0_DOMAIN",
     "APP_SECRET_KEY",
     "OAUTH_BASE_URL",
-    "AUTH0_CONF_URL"
+    "AUTH0_CONF_URL",
 }
 
 
