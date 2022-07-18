@@ -11,11 +11,7 @@ oauth = OAuth(config)
 
 
 oauth.register(
-    name='auth0',
-    server_metadata_url=config('AUTH0_CONF_URL'),
-    client_kwargs={
-        'scope': 'openid email profile'
-    }
+    name="auth0", server_metadata_url=config("AUTH0_CONF_URL"), client_kwargs={"scope": "openid email profile"}
 )
 
 @router.get('/login')
