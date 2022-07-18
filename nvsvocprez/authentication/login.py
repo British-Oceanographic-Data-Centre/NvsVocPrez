@@ -12,10 +12,9 @@ config = config.verify_env_file()
 oauth = OAuth(config)
 
 
-CONF_URL = 'https://bodc-localhost.eu.auth0.com/.well-known/openid-configuration'
 oauth.register(
     name='auth0',
-    server_metadata_url=CONF_URL,
+    server_metadata_url=config('AUTH0_CONF_URL'),
     client_kwargs={
         'scope': 'openid email profile'
     }
