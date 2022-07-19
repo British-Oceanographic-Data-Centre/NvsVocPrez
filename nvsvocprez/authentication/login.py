@@ -60,19 +60,17 @@ async def process_auth(request: Request):
 @router.get("/auth")
 @router.get("/auth/")
 async def auth(request: Request):
+    error = False
     try:
         request = await process_auth(request= Request)
     except NotVerifiedException:
-        error_url = "/login-error?error=not_verified"
+        error = True
     except MissingRoleException:
-        error_url = "/login-error?error=missing_role"
+        error = True
     except Exception as exc:
-        print("Authentication error:")
-        print(exc)
-        error_url = "/login-error"
-    if error_url:
-        # this logout step is necessary to clear the session from both app + auth0 sides
-        return logout(request)
+        error = True
+    if error:
+        return await logout(request)
     return RedirectResponse("/")
 
 
