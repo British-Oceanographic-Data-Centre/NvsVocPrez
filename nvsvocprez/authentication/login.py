@@ -25,6 +25,7 @@ class MissingRoleException(Exception):
 class NotVerifiedException(Exception):
     """Exception raised when user hasn't verified their email address."""
 
+
 @router.get("/login")
 @router.get("/login/")
 async def login(request: Request):
@@ -58,7 +59,7 @@ async def auth(request: Request):
     except MissingRoleException:
         error = True
     except Exception as exc:
-        print ("exc:", exc)
+        print("exc:", exc)
         error = True
     if error:
         return await logout(request)
