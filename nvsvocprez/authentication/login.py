@@ -18,6 +18,7 @@ oauth.register(
     client_kwargs={"scope": "openid email profile"},
 )
 
+
 @router.get("/login")
 @router.get("/login/")
 async def login(request: Request):
@@ -34,7 +35,7 @@ async def auth(request: Request):
         request.session["user"] = user
     return RedirectResponse(url="/")
 
-    
+
 @router.get("/logout")
 @router.get("/logout/")
 async def logout(request: Request):
