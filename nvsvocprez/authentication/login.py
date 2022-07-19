@@ -7,6 +7,9 @@ from utilities import config
 from fastapi import Request
 
 
+USER_ROLE = "nvs_user"
+OAUTH_ROLES_NAMESPACE = "http://data.submissions.app"
+
 router = APIRouter()
 config = config.verify_env_file()
 oauth = OAuth(config)
@@ -32,6 +35,12 @@ async def auth(request: Request):
     user = token.get("userinfo")
     if user:
         request.session["user"] = user
+    # Check that user is valid before proceeding
+    if not user.get("email_verified", False):
+        return RedirectResponse(url="/")
+    roles = user.get(OAUTH_ROLES_NAMESPACE + "/roles", [])
+    if USER_ROLE not in roles:
+        return RedirectResponse(url="/")
     return RedirectResponse(url="/")
 
     
