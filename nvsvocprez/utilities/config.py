@@ -9,6 +9,8 @@ class MissingKeyError(Exception):
 
 expected_config_keys = {
     "LOGIN_ENABLE",
+    "USER_ROLE",
+    "OAUTH_ROLES_NAMESPACE",
     "AUTH0_CLIENT_ID",
     "AUTH0_CLIENT_SECRET",
     "AUTH0_DOMAIN",
