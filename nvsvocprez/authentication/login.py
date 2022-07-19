@@ -73,7 +73,7 @@ async def auth(request: Request):
     if error_url:
         # this logout step is necessary to clear the session from both app + auth0 sides
         return logout(request)
-    return RedirectResponse("/dashboard")
+    return RedirectResponse("/")
 
 
 @router.get("/logout")
