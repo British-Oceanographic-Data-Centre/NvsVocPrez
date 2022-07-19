@@ -6,10 +6,6 @@ from urllib.parse import quote_plus, urlencode
 from utilities import config
 from fastapi import Request
 
-
-USER_ROLE = "nvs_user"
-OAUTH_ROLES_NAMESPACE = "http://data.submissions.app"
-
 router = APIRouter()
 config = config.verify_env_file()
 oauth = OAuth(config)
@@ -22,14 +18,6 @@ oauth.register(
 )
 
 
-@router.get("/login")
-@router.get("/login/")
-async def login(request: Request):
-    redirect_uri = request.url_for("auth")
-    return await oauth.auth0.authorize_redirect(request, redirect_uri)
-
-
-# Authentication exceptions
 class MissingRoleException(Exception):
     """Exception raised when user lacks the correct role in Auth0."""
 
@@ -37,20 +25,24 @@ class MissingRoleException(Exception):
 class NotVerifiedException(Exception):
     """Exception raised when user hasn't verified their email address."""
 
+@router.get("/login")
+@router.get("/login/")
+async def login(request: Request):
+    redirect_uri = request.url_for("auth")
+    return await oauth.auth0.authorize_redirect(request, redirect_uri)
+
 
 async def process_auth(request: Request):
     """Process callback coming from Auth0."""
     # handles response from token endpoint
     token = await oauth.auth0.authorize_access_token(request)
     user = token.get("userinfo")
-    print ("_______user:", user)
     # Check that user is valid before proceeding
     if not user.get("email_verified", False):
         raise NotVerifiedException
-    roles = user.get(OAUTH_ROLES_NAMESPACE + "/roles", [])
-    if USER_ROLE not in roles:
+    roles = user.get(config("OAUTH_ROLES_NAMESPACE") + "/roles", [])
+    if config("USER_ROLE") not in roles:
         raise MissingRoleException
-
     request.session["user"] = user
     return request
 
@@ -60,14 +52,13 @@ async def process_auth(request: Request):
 async def auth(request: Request):
     error = False
     try:
-        print ("_______try:")
-        request = await process_auth(request=Request)
+        request = await process_auth(request)
     except NotVerifiedException:
         error = True
     except MissingRoleException:
         error = True
     except Exception as exc:
-        print ("_______exc:", exc)
+        print ("exc:", exc)
         error = True
     if error:
         return await logout(request)
