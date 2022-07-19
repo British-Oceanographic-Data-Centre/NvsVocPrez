@@ -42,10 +42,8 @@ async def process_auth(request: Request):
     """Process callback coming from Auth0."""
     # handles response from token endpoint
     token = await oauth.auth0.authorize_access_token(request)
-    access_token = token["access_token"]
-    id_token = token["id_token"]
-    user = token.get("userinfo").json()
-
+    user = token.get("userinfo")
+    print ("_______user:", user)
     # Check that user is valid before proceeding
     if not user.get("email_verified", False):
         raise NotVerifiedException
@@ -53,10 +51,8 @@ async def process_auth(request: Request):
     if USER_ROLE not in roles:
         raise MissingRoleException
 
-    request.session["access_token"] = access_token
-    request.session["id_token"] = id_token
-    request.session["jwt_payload"] = user
-    request.session["profile"] = {"user_id": user["sub"], "name": user["name"], "picture": user["picture"]}
+    request.session["user"] = user
+    return request
 
 
 @router.get("/auth")
@@ -64,12 +60,14 @@ async def process_auth(request: Request):
 async def auth(request: Request):
     error = False
     try:
+        print ("_______try:")
         request = await process_auth(request=Request)
     except NotVerifiedException:
         error = True
     except MissingRoleException:
         error = True
     except Exception as exc:
+        print ("_______exc:", exc)
         error = True
     if error:
         return await logout(request)
