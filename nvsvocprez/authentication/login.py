@@ -43,7 +43,7 @@ async def process_auth(request: Request):
     # handles response from token endpoint
     token = await oauth.auth0.authorize_access_token(request)
     user = token.get("userinfo")
-    print ("_______user:", user)
+    print("_______user:", user)
     # Check that user is valid before proceeding
     if not user.get("email_verified", False):
         raise NotVerifiedException
@@ -60,14 +60,14 @@ async def process_auth(request: Request):
 async def auth(request: Request):
     error = False
     try:
-        print ("_______try:")
+        print("_______try:")
         request = await process_auth(request=Request)
     except NotVerifiedException:
         error = True
     except MissingRoleException:
         error = True
     except Exception as exc:
-        print ("_______exc:", exc)
+        print("_______exc:", exc)
         error = True
     if error:
         return await logout(request)
