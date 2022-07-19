@@ -37,6 +37,7 @@ class MissingRoleException(Exception):
 class NotVerifiedException(Exception):
     """Exception raised when user hasn't verified their email address."""
 
+
 async def process_auth(request: Request):
     """Process callback coming from Auth0."""
     # handles response from token endpoint
@@ -57,11 +58,12 @@ async def process_auth(request: Request):
     request.session["jwt_payload"] = user
     request.session["profile"] = {"user_id": user["sub"], "name": user["name"], "picture": user["picture"]}
 
+
 @router.get("/auth")
 @router.get("/auth/")
 async def auth(request: Request):
     try:
-        request = await process_auth(request= Request)
+        request = await process_auth(request=Request)
     except NotVerifiedException:
         error_url = "/login-error?error=not_verified"
     except MissingRoleException:
