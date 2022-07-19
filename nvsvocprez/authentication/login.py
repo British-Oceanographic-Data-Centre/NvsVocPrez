@@ -19,6 +19,7 @@ oauth.register(
 )
 
 
+
 @router.get("/login/")
 async def login(request: Request):
     redirect_uri = request.url_for("auth")
