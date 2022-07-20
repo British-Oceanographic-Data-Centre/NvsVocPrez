@@ -393,8 +393,7 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                     query = get_collection_query(
                         current_profile,
                         self.instance_uri,
-                        self.ontologies,
-                        acc_dep_term,
+                        self.ontologies
                     )
                     return self._render_sparql_response_rdf(sparql_construct(query, self.mediatype))
             elif self.profile == "dd":
