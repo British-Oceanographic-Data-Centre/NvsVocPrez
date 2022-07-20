@@ -490,7 +490,6 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
     return CollectionRenderer().render()
 
 
-
 class ConceptRenderer(Renderer):
     def __init__(self, request):
         self.request = request
@@ -990,10 +989,11 @@ class ConceptRenderer(Renderer):
         if alt is not None:
             return alt
 
+
 def concept(request: Request):
     return ConceptRenderer(request).render()
 
-    
+
 @router.get(
     "/collection/{collection_id}/current/{concept_id}/{vnum}/",
     **paths["/collection/{collection_id}/current/{concept_id}/{vnum}/"]["get"],
