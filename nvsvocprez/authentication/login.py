@@ -26,8 +26,8 @@ class NotVerifiedException(Exception):
     """Exception raised when user hasn't verified their email address."""
 
 
-@router.get("/login")
-@router.get("/login/")
+@router.get("/login", include_in_schema=False)
+@router.get("/login/", include_in_schema=False)
 async def login(request: Request):
     redirect_uri = request.url_for("auth")
     return await oauth.auth0.authorize_redirect(request, redirect_uri)
@@ -48,8 +48,8 @@ async def process_auth(request: Request):
     return request
 
 
-@router.get("/auth")
-@router.get("/auth/")
+@router.get("/auth", include_in_schema=False)
+@router.get("/auth/", include_in_schema=False)
 async def auth(request: Request):
     error = False
     try:
@@ -66,8 +66,8 @@ async def auth(request: Request):
     return RedirectResponse("/")
 
 
-@router.get("/logout")
-@router.get("/logout/")
+@router.get("/logout", include_in_schema=False)
+@router.get("/logout/", include_in_schema=False)
 async def logout(request: Request):
     request.session.pop("user", None)
     return RedirectResponse(

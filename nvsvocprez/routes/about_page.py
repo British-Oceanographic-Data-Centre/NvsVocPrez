@@ -11,6 +11,7 @@ api_home_dir = Path(__file__).parent.parent
 templates = Jinja2Templates(str(api_home_dir / "view" / "templates"))
 
 
+@router.get("/about", include_in_schema=False)
 @router.get("/about/", include_in_schema=False)
 def about(request: Request):
     return templates.TemplateResponse("about.html", {"request": request, "logged_in_user": get_user_status(request)})
