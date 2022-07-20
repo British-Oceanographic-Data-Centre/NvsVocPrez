@@ -390,11 +390,7 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                     # Get the term for the collection query WHERE clause to filter or accepted or deprecated.
                     # This will be an empty string if neither condition is true.
                     acc_dep_term = acc_dep_map.get(acc_dep_or_concept).replace("?c", "?m")
-                    query = get_collection_query(
-                        current_profile,
-                        self.instance_uri,
-                        self.ontologies
-                    )
+                    query = get_collection_query(current_profile, self.instance_uri, self.ontologies)
                     return self._render_sparql_response_rdf(sparql_construct(query, self.mediatype))
             elif self.profile == "dd":
                 q = """
@@ -487,7 +483,6 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                 return alt
 
     return CollectionRenderer().render()
-
 
 
 class ConceptRenderer(Renderer):
@@ -989,10 +984,11 @@ class ConceptRenderer(Renderer):
         if alt is not None:
             return alt
 
+
 def concept(request: Request):
     return ConceptRenderer(request).render()
 
-    
+
 @router.get(
     "/collection/{collection_id}/current/{concept_id}/{vnum}/",
     **paths["/collection/{collection_id}/current/{concept_id}/{vnum}/"]["get"],
