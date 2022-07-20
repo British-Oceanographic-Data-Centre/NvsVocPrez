@@ -11,7 +11,7 @@ from rdflib import Literal as RdfLiteral
 from rdflib import URIRef
 from rdflib.namespace import RDF, RDFS
 from starlette.requests import Request
-from starlette.responses import PlainTextResponse, Response
+from starlette.responses import PlainTextResponse, Response, RedirectResponse
 from starlette.templating import Jinja2Templates
 
 from .page_configs import DATA_URI, ORDS_ENDPOINT_URL, SYSTEM_URI, acc_dep_map
@@ -487,7 +487,10 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
 
     return CollectionRenderer().render()
 
+def concept(request: Request):
+    return ConceptRenderer(request).render()
 
+    
 @router.get(
     "/collection/{collection_id}/current/{concept_id}/{vnum}/",
     **paths["/collection/{collection_id}/current/{concept_id}/{vnum}/"]["get"],
