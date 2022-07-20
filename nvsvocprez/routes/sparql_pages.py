@@ -12,8 +12,8 @@ from starlette.requests import Request
 from starlette.responses import PlainTextResponse, RedirectResponse, Response
 from starlette.templating import Jinja2Templates
 
-from .page_configs import SYSTEM_URI
-from .utils import get_accepts, get_user_status
+from utilities.system_configs import SYSTEM_URI
+from utilities.utility_functions import get_accepts, get_user_status
 
 router = fastapi.APIRouter()
 api_home_dir = Path(__file__).parent.parent

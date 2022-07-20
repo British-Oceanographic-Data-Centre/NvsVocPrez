@@ -12,9 +12,9 @@ from starlette.requests import Request
 from starlette.responses import PlainTextResponse
 from starlette.templating import Jinja2Templates
 
-from .page_configs import DATA_URI
-from .profiles import nvs
-from .utils import exists_triple, sparql_construct
+from utilities.system_configs import DATA_URI
+from utilities.profiles import nvs
+from utilities.utility_functions import exists_triple, sparql_construct
 
 router = APIRouter()
 

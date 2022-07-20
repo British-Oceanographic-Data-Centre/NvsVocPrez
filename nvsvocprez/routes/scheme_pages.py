@@ -14,9 +14,9 @@ from starlette.requests import Request
 from starlette.responses import PlainTextResponse, Response
 from starlette.templating import Jinja2Templates
 
-from .page_configs import DATA_URI, SYSTEM_URI, acc_dep_map
-from .profiles import dd, nvs, skos, vocpub
-from .utils import (
+from utilities.system_configs import DATA_URI, SYSTEM_URI, acc_dep_map
+from utilities.profiles import dd, nvs, skos, vocpub
+from utilities.utility_functions import (
     cache_return,
     exists_triple,
     get_user_status,

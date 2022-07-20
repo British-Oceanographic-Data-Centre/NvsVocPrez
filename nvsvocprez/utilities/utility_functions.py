@@ -1,27 +1,31 @@
-"""Utility functions used in rendering pages."""
+"""Utility functions used throughout NVS Vocprez"""
 import logging
+import json
 from typing import Dict, List, Literal
 import httpx
-from . import page_configs
+from . import system_configs
 import pickle
 from pathlib import Path
 import requests
 from pyldapi.data import RDF_MEDIATYPES
 
 from pyldapi.profile import Profile
-from utilities import config
+from utilities import env_file_config
 
 
 api_home_dir = Path(__file__).parent
 collections_pickle = Path(api_home_dir / "cache" / "collections.pickle")
 conceptschemes_pickle = Path(api_home_dir / "cache" / "conceptschemes.pickle")
+config_ = env_file_config.verify_env_file()
 
 
+config_file_location = Path(__file__).parent.parent / "api_doc_config.json"
+with open(config_file_location, "r") as config_file:
+    doc_config = json.load(config_file)
+
+api_details = doc_config["api_details"]
 class TriplestoreError(Exception):
     pass
-
-
-config_ = config.verify_env_file()
 
 
 def get_user_status(request, login_status=config_.get("LOGIN_ENABLE")):
@@ -32,10 +36,10 @@ def get_user_status(request, login_status=config_.get("LOGIN_ENABLE")):
 
 def sparql_query(query: str):
     r = httpx.post(
-        page_configs.SPARQL_ENDPOINT,
+        system_configs.SPARQL_ENDPOINT,
         data=query,
         headers={"Content-Type": "application/sparql-query"},
-        auth=(page_configs.SPARQL_USERNAME, page_configs.SPARQL_PASSWORD),
+        auth=(system_configs.SPARQL_USERNAME, system_configs.SPARQL_PASSWORD),
         timeout=60.0,
     )
     if 200 <= r.status_code < 300:
@@ -46,10 +50,10 @@ def sparql_query(query: str):
 
 def sparql_construct(query: str, rdf_mediatype="text/turtle"):
     r = httpx.post(
-        page_configs.SPARQL_ENDPOINT,
+        system_configs.SPARQL_ENDPOINT,
         data=query,
         headers={"Content-Type": "application/sparql-query", "Accept": rdf_mediatype},
-        auth=(page_configs.SPARQL_USERNAME, page_configs.SPARQL_PASSWORD),
+        auth=(system_configs.SPARQL_USERNAME, system_configs.SPARQL_PASSWORD),
         timeout=90.0,
     )
     if 200 <= r.status_code < 300:
@@ -59,7 +63,6 @@ def sparql_construct(query: str, rdf_mediatype="text/turtle"):
 
 
 def cache_clear():
-    logging.debug("cleared cache")
     if collections_pickle.is_file():
         collections_pickle.unlink()
     if conceptschemes_pickle.is_file():
@@ -232,7 +235,7 @@ def get_accepts(accept_header: str):
 
 
 def exists_triple(s: str):
-    query = f"select count(*) where {{ <{page_configs.DATA_URI + s}> ?p ?o .}}"
+    query = f"select count(*) where {{ <{system_configs.DATA_URI + s}> ?p ?o .}}"
     rr = sparql_query(query)
     count = rr[1][0][".1"].get("value")
     return True if bool(int(count)) else False
@@ -243,11 +246,11 @@ def get_ontologies() -> Dict:
 
     Returns (Dict): Dict of parsed ontology data. {ontology_prefix : {ontology_object}, ...}.
     """
-    if page_configs.ORDS_ENDPOINT_URL is None:
+    if system_configs.ORDS_ENDPOINT_URL is None:
         logging.error("Environment variable ORDS_ENDPOINT_URL is not set.")
         return {}
     try:
-        url = f"{page_configs.ORDS_ENDPOINT_URL}/ontology"
+        url = f"{system_configs.ORDS_ENDPOINT_URL}/ontology"
         resp_json = requests.get(url).json()
         ont_data_by_prefix = {ont["prefix"]: ont for ont in resp_json["items"]}
         return ont_data_by_prefix
@@ -261,11 +264,11 @@ def get_alt_profiles() -> Dict:
 
     Returns (Dict): Dict of parsed alt profile data. {alt_profile_url : {alt_profile_object}, ...}.
     """
-    if page_configs.ORDS_ENDPOINT_URL is None:
+    if system_configs.ORDS_ENDPOINT_URL is None:
         logging.error("Environment variable ORDS_ENDPOINT_URL is not set.")
         return {}
     try:
-        url = f"{page_configs.ORDS_ENDPOINT_URL}/altprof"
+        url = f"{system_configs.ORDS_ENDPOINT_URL}/altprof"
         resp_json = requests.get(url).json()
         altprof_data_by_url = {alt["url"]: alt for alt in resp_json["items"]}
         return altprof_data_by_url

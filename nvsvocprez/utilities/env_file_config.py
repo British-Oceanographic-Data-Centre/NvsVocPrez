@@ -3,8 +3,8 @@
 from starlette.config import Config
 
 
-class MissingKeyError(Exception):
-    """Raised when the env file is missing one or more keys."""
+class EnvKeyError(Exception):
+    """Raised when the env does not have the expected keys"""
 
 
 expected_config_keys = {
@@ -15,6 +15,9 @@ expected_config_keys = {
     "APP_SECRET_KEY",
     "OAUTH_BASE_URL",
     "AUTH0_CONF_URL",
+    "LOGIN_ENABLE",
+    "AUTH0_CONF_URL",
+    "MAX_SESSION_LENGTH",
 }
 
 
@@ -25,9 +28,12 @@ def verify_env_file() -> Config:
     they are returned if all present, or a MissingKeyError is raised.
     """
     configuration = Config(".env")
-
     actual_config_keys = set(configuration.file_values.keys())
 
     if expected_config_keys == actual_config_keys:
         return configuration
-    raise MissingKeyError(", ".join(expected_config_keys - actual_config_keys))
+    elif len(actual_config_keys) < len(expected_config_keys):
+        error_str = ' '.join(expected_config_keys - actual_config_keys) + ' are missing.'
+    elif len(actual_config_keys) > len(expected_config_keys):
+        error_str = ' '.join(actual_config_keys - expected_config_keys) + ' are unexpected extra keys.'
+    raise EnvKeyError(error_str)

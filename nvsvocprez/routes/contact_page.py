@@ -3,7 +3,7 @@ from starlette.requests import Request
 from starlette.templating import Jinja2Templates
 from pathlib import Path
 from fastapi import APIRouter
-from .utils import get_user_status
+from utilities.utility_functions import get_user_status
 
 router = APIRouter()
 

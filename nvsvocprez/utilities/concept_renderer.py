@@ -5,12 +5,12 @@ from pyldapi import DisplayProperty, Renderer
 
 from rdflib import Literal as RdfLiteral
 from rdflib import Namespace
-from rdflib.namespace import DC, DCTERMS, OWL, RDF, SKOS
+from rdflib.namespace import DC, DCTERMS, ORG, OWL, RDF, RDFS, SKOS, VOID
 from starlette.responses import PlainTextResponse, Response
 
-from routes.page_configs import DATA_URI
-from routes.profiles import nvs, sdo, skos, vocpub, void
-from routes.utils import (cache_return, exists_triple,
+from utilities.system_configs import DATA_URI
+from utilities.profiles import nvs, sdo, skos, vocpub, void
+from utilities.utility_functions import (cache_return, exists_triple,
                    get_alt_profile_objects, get_alt_profiles,
                    get_ontologies, sparql_construct,
                    sparql_query)

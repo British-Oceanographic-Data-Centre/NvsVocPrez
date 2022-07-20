@@ -1,7 +1,7 @@
 from .renderer import Renderer
 from .profile import Profile
 from .data import RDF_MEDIATYPES
-from config import SYSTEM_URI
+from utilities.system_configs import SYSTEM_URI
 
 
 class ContainerRenderer(Renderer):
