@@ -1,13 +1,21 @@
 """Entry point for NVS-VocPrez Web Application."""
 import fastapi
 import uvicorn
-from starlette.config import Config
 from starlette.middleware.sessions import SessionMiddleware
 
 from authentication import login
-from routes import (about_page, cache_clear_page, collection_pages,
-                    contact_page, index_page, mapping_page, scheme_pages,
-                    sparql_pages, standard_name_page, well_known_page)
+from routes import (
+    about_page,
+    cache_clear_page,
+    collection_pages,
+    contact_page,
+    index_page,
+    mapping_page,
+    scheme_pages,
+    sparql_pages,
+    standard_name_page,
+    well_known_page,
+)
 from utilities.env_file_config import verify_env_file
 from utilities.system_configs import PORT, SYSTEM_URI
 from utilities.templates import static_files_location
@@ -74,7 +82,6 @@ class NvsVocPrez:
 
 nvs_instance = NvsVocPrez()
 api = nvs_instance.run_web_app()
-print(type(api))
 
 
 if __name__ == "__main__":

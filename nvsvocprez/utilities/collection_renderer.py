@@ -1,4 +1,4 @@
-"""."""
+"""Classes to renderer either a single collection or all collections."""
 from pyldapi.renderer import RDF_MEDIATYPES
 from rdflib import Graph
 from rdflib import Literal as RdfLiteral

@@ -1,4 +1,4 @@
-"""."""
+"""A Class to render a single Concept."""
 
 from pyldapi.renderer import RDF_MEDIATYPES
 from pyldapi import DisplayProperty, Renderer

@@ -1,4 +1,4 @@
-"""Reads .env file and sends the config to authentication processes."""
+"""Reads .env file, checks for correct setup and is then used in the Auth process."""
 
 from starlette.config import Config
 
@@ -18,6 +18,8 @@ expected_config_keys = {
     "LOGIN_ENABLE",
     "AUTH0_CONF_URL",
     "MAX_SESSION_LENGTH",
+    "OAUTH_ROLES_NAMESPACE",
+    "USER_ROLE"
 }
 
 

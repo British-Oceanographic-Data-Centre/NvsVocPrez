@@ -15,17 +15,9 @@ from starlette.templating import Jinja2Templates
 from utilities.system_configs import DATA_URI
 from utilities.profiles import nvs
 from utilities.utility_functions import exists_triple, sparql_construct
+from utilities.templates import html_templates, paths
 
 router = APIRouter()
-
-api_home_dir = Path(__file__).parent.parent
-templates = Jinja2Templates(str(api_home_dir / "view" / "templates"))
-
-config_file_location = Path(__file__).parent.parent / "api_doc_config.json"
-with open(config_file_location, "r") as config_file:
-    paths = json.load(config_file)["paths"]
-
-
 
 
 @router.get("/mapping/{int_ext}/{mapping_id}/", **paths["/mapping/{int_ext}/{mapping_id}/"]["get"])
@@ -132,6 +124,6 @@ def mapping(request: Request):
                 "profile_token": self.profile,
             }
 
-            return templates.TemplateResponse("mapping.html", context=context)
+            return html_templates.TemplateResponse("mapping.html", context=context)
 
     return MappingRenderer().render()

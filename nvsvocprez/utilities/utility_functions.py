@@ -29,6 +29,7 @@ class TriplestoreError(Exception):
 
 
 def get_user_status(request, login_status=config_.get("LOGIN_ENABLE")):
+    """Used to determine the current status of logged in Users."""
     if login_status == "true":
         return request.session["user"]["nickname"] if "user" in request.session else "Not Logged in"
     return ""

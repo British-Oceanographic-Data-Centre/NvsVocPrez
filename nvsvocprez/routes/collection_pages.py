@@ -12,7 +12,6 @@ from rdflib import URIRef
 from rdflib.namespace import RDF, RDFS
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse, Response
-from starlette.templating import Jinja2Templates
 from utilities import concept_renderer, collection_renderer
 
 from utilities.system_configs import DATA_URI, ORDS_ENDPOINT_URL, SYSTEM_URI, acc_dep_map
@@ -27,14 +26,10 @@ from utilities.utility_functions import (
     sparql_query,
 )
 
+from utilities.templates import html_templates
+from utilities.templates import paths
+
 router = APIRouter()
-
-api_home_dir = Path(__file__).parent.parent
-templates = Jinja2Templates(str(api_home_dir / "view" / "templates"))
-
-config_file_location = Path(__file__).parent.parent / "api_doc_config.json"
-with open(config_file_location, "r") as config_file:
-    paths = json.load(config_file)["paths"]
 
 
 def concept(request: Request):
@@ -44,7 +39,6 @@ def concept(request: Request):
 @router.get("/collection/", **paths["/collection/"]["get"])
 @router.head("/collection/", include_in_schema=False)
 def collections(request: Request):
-    print('All Collections endpoint')
     return collection_renderer.CollectionsRenderer(request).render()
 
 
@@ -67,7 +61,6 @@ def collection_no_current(request: Request, collection_id):
 @router.head("/collection/{collection_id}/current/", include_in_schema=False)
 @router.head("/collection/{collection_id}/current/{acc_dep_or_concept}/", include_in_schema=False)
 def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
-    print('Single collection endpoint')
     if not exists_triple(request.url.path) and acc_dep_or_concept not in [
         "accepted",
         "deprecated",

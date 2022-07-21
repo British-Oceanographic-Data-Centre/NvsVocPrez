@@ -16,16 +16,9 @@ from utilities.system_configs import DATA_URI
 from utilities.profiles import nvs
 from utilities.utility_functions import exists_triple, sparql_construct
 from utilities import concept_renderer
+from utilities.templates import paths
 
 router = APIRouter()
-
-api_home_dir = Path(__file__).parent.parent
-templates = Jinja2Templates(str(api_home_dir / "view" / "templates"))
-
-config_file_location = Path(__file__).parent.parent / "api_doc_config.json"
-with open(config_file_location, "r") as config_file:
-    paths = json.load(config_file)["paths"]
-
 
 @router.get("/standard_name/", include_in_schema=False)
 @router.get("/standard_name/{concept_id}", include_in_schema=False)
