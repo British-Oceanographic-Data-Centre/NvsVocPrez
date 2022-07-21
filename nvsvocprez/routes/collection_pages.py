@@ -7,9 +7,9 @@ from fastapi import APIRouter, HTTPException
 from pyldapi import ContainerRenderer, Renderer
 from pyldapi.renderer import RDF_MEDIATYPES
 from rdflib import Graph
-from rdflib import Literal as RdfLiteral
+from rdflib import Literal as RdfLiteral, Namespace
 from rdflib import URIRef
-from rdflib.namespace import RDF, RDFS
+from rdflib.namespace import DC, DCTERMS, ORG, OWL, RDF, RDFS, SKOS, VOID
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse, Response
 from utilities import concept_renderer, collection_renderer
@@ -20,6 +20,8 @@ from utilities.utility_functions import (
     cache_return,
     exists_triple,
     get_alt_profiles,
+    get_collection_query,
+    get_alt_profile_objects,
     get_ontologies,
     get_user_status,
     sparql_construct,
