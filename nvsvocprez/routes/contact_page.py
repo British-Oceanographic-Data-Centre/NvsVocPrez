@@ -8,6 +8,7 @@ from utilities.templates import html_templates
 
 router = APIRouter()
 
+
 @router.get("/contact", include_in_schema=False)
 @router.get("/contact-us", include_in_schema=False)
 @router.get("/contact/", include_in_schema=False)

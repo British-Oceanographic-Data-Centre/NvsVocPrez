@@ -17,6 +17,7 @@ from utilities.templates import html_templates
 
 router = APIRouter()
 
+
 @router.get("/", include_in_schema=False)
 @router.head("/", include_in_schema=False)
 def index(request: Request):

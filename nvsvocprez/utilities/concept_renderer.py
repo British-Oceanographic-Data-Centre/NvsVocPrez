@@ -10,10 +10,15 @@ from starlette.responses import PlainTextResponse, Response
 
 from utilities.system_configs import DATA_URI
 from utilities.profiles import nvs, sdo, skos, vocpub, void
-from utilities.utility_functions import (cache_return, exists_triple,
-                   get_alt_profile_objects, get_alt_profiles,
-                   get_ontologies, sparql_construct,
-                   sparql_query)
+from utilities.utility_functions import (
+    cache_return,
+    exists_triple,
+    get_alt_profile_objects,
+    get_alt_profiles,
+    get_ontologies,
+    sparql_construct,
+    sparql_query,
+)
 
 from .templates import html_templates
 

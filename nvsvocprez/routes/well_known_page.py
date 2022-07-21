@@ -19,6 +19,7 @@ router = APIRouter()
 def well_known(request: Request):
     return RedirectResponse(url="/.well_known/void")
 
+
 @router.get("/.well_known/void", include_in_schema=False)
 @router.head("/.well_known/void", include_in_schema=False)
 def well_known_void(
@@ -26,8 +27,6 @@ def well_known_void(
     _profile: Optional[AnyStr] = None,
     _mediatype: Optional[AnyStr] = "text/turtle",
 ):
-
-
     class WkRenderer(Renderer):
         def __init__(self):
             super().__init__(

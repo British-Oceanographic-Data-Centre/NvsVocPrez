@@ -13,4 +13,6 @@ router = APIRouter()
 @router.get("/about", include_in_schema=False)
 @router.get("/about/", include_in_schema=False)
 def about(request: Request):
-    return html_templates.TemplateResponse("about.html", {"request": request, "logged_in_user": get_user_status(request)})
+    return html_templates.TemplateResponse(
+        "about.html", {"request": request, "logged_in_user": get_user_status(request)}
+    )

@@ -9,14 +9,9 @@ from starlette.responses import PlainTextResponse, Response
 
 from utilities.system_configs import DATA_URI, PORT, SYSTEM_URI, acc_dep_map
 from utilities.profiles import nvs, skos, vocpub, dd
-from utilities.utility_functions import (
-    cache_return,
-    get_user_status,
-    get_alt_profiles,
-    sparql_construct,
-    sparql_query
-)
+from utilities.utility_functions import cache_return, get_user_status, get_alt_profiles, sparql_construct, sparql_query
 from .templates import html_templates
+
 
 class CollectionsRenderer(ContainerRenderer):
     def __init__(self, request):
@@ -208,11 +203,10 @@ class CollectionsRenderer(ContainerRenderer):
             return alt
 
 
-
 class CollectionRenderer(Renderer):
     def __init__(self, request, acc_dep_or_concept):
         self.request = request
-        self.acc_dep_or_concept = acc_dep_or_concept 
+        self.acc_dep_or_concept = acc_dep_or_concept
         self.instance_uri = f"{DATA_URI}/collection/P07/current/"
         self.alt_profiles = get_alt_profiles()
 
@@ -452,5 +446,3 @@ class CollectionRenderer(Renderer):
         alt = super().render()
         if alt is not None:
             return alt
-
-

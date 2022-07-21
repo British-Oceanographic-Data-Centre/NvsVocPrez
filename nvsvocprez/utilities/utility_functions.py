@@ -24,6 +24,8 @@ with open(config_file_location, "r") as config_file:
     doc_config = json.load(config_file)
 
 api_details = doc_config["api_details"]
+
+
 class TriplestoreError(Exception):
     pass
 

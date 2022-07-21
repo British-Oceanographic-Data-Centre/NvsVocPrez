@@ -20,6 +20,7 @@ from utilities.templates import paths
 
 router = APIRouter()
 
+
 @router.get("/standard_name/", include_in_schema=False)
 @router.get("/standard_name/{concept_id}", include_in_schema=False)
 @router.get("/standard_name/{concept_id}/", **paths["/standard_name/{concept_id}/"]["get"])
@@ -40,6 +41,3 @@ def standard_name(request: Request, concept_id: str = None):
 def standard_name_concept(request: Request, standard_name_concept_id: str):
     c = concept_renderer.ConceptRenderer(request)
     return c.render()
-
-
-
