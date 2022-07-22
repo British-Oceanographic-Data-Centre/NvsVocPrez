@@ -14,12 +14,10 @@ expected_config_keys = {
     "AUTH0_DOMAIN",
     "APP_SECRET_KEY",
     "OAUTH_BASE_URL",
-    "AUTH0_CONF_URL",
     "LOGIN_ENABLE",
     "AUTH0_CONF_URL",
-    "MAX_SESSION_LENGTH",
     "OAUTH_ROLES_NAMESPACE",
-    "USER_ROLE"
+    "USER_ROLE",
 }
 
 
@@ -32,10 +30,12 @@ def verify_env_file() -> Config:
     configuration = Config(".env")
     actual_config_keys = set(configuration.file_values.keys())
 
-    if expected_config_keys == actual_config_keys:
+    if expected_config_keys == actual_config_keys or (
+        expected_config_keys | {"MAX_SESSION_LENGTH"} == actual_config_keys
+    ):
         return configuration
     elif len(actual_config_keys) < len(expected_config_keys):
-        error_str = ' '.join(expected_config_keys - actual_config_keys) + ' are missing.'
+        error_str = " ".join(expected_config_keys - actual_config_keys) + " are missing."
     elif len(actual_config_keys) > len(expected_config_keys):
-        error_str = ' '.join(actual_config_keys - expected_config_keys) + ' are unexpected extra keys.'
+        error_str = " ".join(actual_config_keys - expected_config_keys) + " are unexpected extra keys."
     raise EnvKeyError(error_str)
