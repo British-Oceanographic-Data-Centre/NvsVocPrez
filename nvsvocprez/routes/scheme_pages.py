@@ -14,23 +14,18 @@ from starlette.requests import Request
 from starlette.responses import PlainTextResponse, Response
 from starlette.templating import Jinja2Templates
 
-from .page_configs import DATA_URI, SYSTEM_URI, acc_dep_map
-from .profiles import dd, nvs, skos, vocpub
-from .utils import (
+from utilities.system_configs import DATA_URI, SYSTEM_URI, acc_dep_map
+from utilities.profiles import dd, nvs, skos, vocpub
+from utilities.utility_functions import (
     cache_return,
     exists_triple,
     get_user_status,
     sparql_construct,
     sparql_query,
 )
+from utilities.templates import html_templates, paths
 
 router = APIRouter()
-api_home_dir = Path(__file__).parent.parent
-templates = Jinja2Templates(str(api_home_dir / "view" / "templates"))
-
-config_file_location = Path(__file__).parent.parent / "api_doc_config.json"
-with open(config_file_location, "r") as config_file:
-    paths = json.load(config_file)["paths"]
 
 
 @router.get("/scheme/{scheme_id}/current/{acc_dep}", include_in_schema=False)
@@ -92,7 +87,7 @@ def conceptschemes(request: Request):
                             x for x in conceptschemes if request.query_params.get("filter") in concat_vocab_fields(x)
                         ]
 
-                    return templates.TemplateResponse(
+                    return html_templates.TemplateResponse(
                         "conceptschemes.html",
                         {
                             "request": request,
@@ -160,7 +155,7 @@ def conceptschemes(request: Request):
                     )
 
                 if self.mediatype == "text/html":
-                    return templates.TemplateResponse(
+                    return html_templates.TemplateResponse(
                         "container_mem.html",
                         {
                             "request": request,
@@ -184,7 +179,7 @@ def conceptschemes(request: Request):
                     return Response(g.serialize(format=self.mediatype), media_type=self.mediatype)
             elif self.profile == "contanno":
                 if self.mediatype == "text/html":
-                    return templates.TemplateResponse(
+                    return html_templates.TemplateResponse(
                         "container_contanno.html",
                         {
                             "request": request,
@@ -392,7 +387,7 @@ def scheme(
                     scheme["concept_hierarchy"] = self._get_concept_hierarchy()
 
                     if not scheme["concept_hierarchy"]:
-                        return templates.TemplateResponse(
+                        return html_templates.TemplateResponse(
                             "error.html",
                             {
                                 "request": request,
@@ -402,7 +397,7 @@ def scheme(
                             },
                         )
 
-                    return templates.TemplateResponse(
+                    return html_templates.TemplateResponse(
                         "scheme.html",
                         {
                             "request": request,

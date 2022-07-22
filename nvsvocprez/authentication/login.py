@@ -3,11 +3,11 @@ from starlette.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter
 from urllib.parse import quote_plus, urlencode
-from utilities import config
+from utilities import env_file_config
 from fastapi import Request
 
 router = APIRouter()
-config = config.verify_env_file()
+config = env_file_config.verify_env_file()
 oauth = OAuth(config)
 
 

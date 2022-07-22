@@ -12,17 +12,11 @@ from starlette.requests import Request
 from starlette.responses import PlainTextResponse, RedirectResponse, Response
 from starlette.templating import Jinja2Templates
 
-from .page_configs import SYSTEM_URI
-from .utils import get_accepts, get_user_status
+from utilities.system_configs import SYSTEM_URI
+from utilities.utility_functions import get_accepts, get_user_status
+from utilities.templates import html_templates, paths
 
 router = fastapi.APIRouter()
-api_home_dir = Path(__file__).parent.parent
-templates = Jinja2Templates(str(api_home_dir / "view" / "templates"))
-
-config_file_location = Path(__file__).parent.parent / "api_doc_config.json"
-with open(config_file_location, "r") as config_file:
-    paths = json.load(config_file)["paths"]
-logging.basicConfig(level=logging.DEBUG)
 
 
 @router.get("/sparql", include_in_schema=False)
@@ -44,7 +38,7 @@ def sparql(request: Request):
     accept = [x for x in accepts if x in QUERY_RESPONSE_MEDIA_TYPES][0]
 
     if accept == "text/html":
-        return templates.TemplateResponse(
+        return html_templates.TemplateResponse(
             "sparql.html", {"request": request, "logged_in_user": get_user_status(request)}
         )
     else:

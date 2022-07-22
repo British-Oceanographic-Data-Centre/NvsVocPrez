@@ -9,20 +9,20 @@ from starlette.templating import Jinja2Templates
 
 from pyldapi import Renderer
 
-from .page_configs import SYSTEM_URI
-from .profiles import dcat, sdo
-from .utils import get_user_status
+from utilities.system_configs import SYSTEM_URI
+from utilities.profiles import dcat, sdo
+from utilities.utility_functions import get_user_status
+from utilities.templates import sdo_location, dcat_location
+from utilities.templates import html_templates
 
 router = APIRouter()
-api_home_dir = Path(__file__).parent.parent
-templates = Jinja2Templates(str(api_home_dir / "view" / "templates"))
 
 
 @router.get("/", include_in_schema=False)
 @router.head("/", include_in_schema=False)
 def index(request: Request):
-    dcat_file = api_home_dir / "dcat.ttl"
-    sdo_file = api_home_dir / "sdo.ttl"
+    dcat_file = dcat_location
+    sdo_file = sdo_location
 
     class DatasetRenderer(Renderer):
         def __init__(self):
@@ -46,7 +46,7 @@ def index(request: Request):
         def render(self):
             if self.profile == "dcat":
                 if self.mediatype == "text/html":
-                    return templates.TemplateResponse(
+                    return html_templates.TemplateResponse(
                         "index.html",
                         {
                             "request": request,
