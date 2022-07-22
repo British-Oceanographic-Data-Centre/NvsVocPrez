@@ -21,6 +21,7 @@ oauth.register(
 class MissingRoleException(Exception):
     """Exception raised when user lacks the correct role in Auth0."""
 
+
 class NotVerifiedException(Exception):
     """Exception raised when user hasn't verified their email address."""
 

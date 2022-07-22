@@ -7,7 +7,6 @@ from starlette.requests import Request
 router = APIRouter()
 
 
-
 @router.get("/cache-clear", include_in_schema=False)
 def cache_clr(request: Request):
     cache_clear()
