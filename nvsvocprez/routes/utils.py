@@ -329,7 +329,7 @@ def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict):
     if profile.id != "nvs":
         # Build prefix text.
         for ontology, data in profile.ontologies.items():
-            prefix_text += f'PREFIX {data["prefix"]}: <{data["url"]}#>\n'
+            prefix_text += f'PREFIX {data["prefix"]}: <{data["url"]}>\n'
         filter_text += """
             FILTER ( ?p2 != skos:broader )
             FILTER ( ?p2 != skos:narrower )
