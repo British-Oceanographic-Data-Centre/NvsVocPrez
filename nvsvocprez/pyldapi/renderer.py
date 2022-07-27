@@ -15,7 +15,7 @@ import re
 from .profile import Profile
 import connegp
 from pathlib import Path
-from routes import utils 
+from routes import utils
 
 
 api_home_dir = Path(__file__).parent.parent
@@ -493,9 +493,8 @@ class Renderer(object, metaclass=ABCMeta):
             "profiles": profiles,
             "mediatype_names": self.mediatype_names,
             "request": self.request,
-            "logged_in_user" : utils.get_user_status(self.request)
+            "logged_in_user": utils.get_user_status(self.request),
         }
-                
 
         if template_context is not None and isinstance(template_context, dict):
             _template_context.update(template_context)

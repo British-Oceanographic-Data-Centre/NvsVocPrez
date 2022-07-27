@@ -384,7 +384,7 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                             "collection": collection,
                             "profile_token": self.profile,
                             "alt_profiles": self.alt_profiles,
-                            "logged_in_user": get_user_status(request)
+                            "logged_in_user": get_user_status(request),
                         },
                     )
                 elif self.mediatype in RDF_MEDIATYPES:
