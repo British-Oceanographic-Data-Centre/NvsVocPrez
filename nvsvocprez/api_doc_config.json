@@ -354,7 +354,7 @@
 				"name": "scheme_id",
 				"description": "Pass in the scheme ID here. A full list can be viewed at the /scheme/ endpoint.",
 				"required": true,
-				"example": "SDNDDEV"
+				"example": "EMODNET_PEST"
 			  },
 			  {
 				"in": "query",
