@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from typing import AnyStr, Literal, Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pyldapi import ContainerRenderer, Renderer, DisplayProperty
 from pyldapi.renderer import RDF_MEDIATYPES
 from rdflib import Graph

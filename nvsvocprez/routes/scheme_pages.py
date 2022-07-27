@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from typing import AnyStr, Literal, Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pyldapi import ContainerRenderer, Renderer
 from pyldapi.renderer import RDF_MEDIATYPES
 from rdflib import Graph
@@ -11,7 +11,7 @@ from rdflib import Literal as RdfLiteral
 from rdflib import URIRef
 from rdflib.namespace import RDF, RDFS
 from starlette.requests import Request
-from starlette.responses import PlainTextResponse, Response
+from starlette.responses import PlainTextResponse, Response, JSONResponse, RedirectResponse
 from starlette.templating import Jinja2Templates
 
 from .page_configs import DATA_URI, SYSTEM_URI, acc_dep_map
@@ -360,7 +360,6 @@ def scheme(
                     hier[1][None] = None
                     return '<ul class="concept-hierarchy">' + make_nested_ul(hier[0], hier[1])[23:-5]
             except RecursionError as e:
-                logging.warning("Encountered a recursion limit error for {}".format(self.vocab_uri))
                 # make a flat list of concepts
                 q = """
                     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
