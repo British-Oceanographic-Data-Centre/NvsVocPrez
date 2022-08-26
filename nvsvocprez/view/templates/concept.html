@@ -55,6 +55,14 @@
             </tr>
           {% endfor %}
         {% endif %}
+        {% if versions|length > 0 %}
+          {% for x in versions %}
+            <tr>
+              <th>{{ x.predicate_html|safe }}</th>
+              {{ x.object_html|safe }}
+            </tr>
+          {% endfor %}
+        {% endif %}
         {% if other|length > 0 %}
           {% for x in other %}
             <tr>
