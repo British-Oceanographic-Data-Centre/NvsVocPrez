@@ -24,7 +24,7 @@ from starlette.templating import Jinja2Templates
 from pyldapi.renderer import RDF_MEDIATYPES
 from pyldapi.data import RDF_FILE_EXTS
 from profiles import void, nvs, skos, dd, vocpub, dcat, sdo
-from utils import (
+from routes.utils import (
     sparql_query,
     sparql_construct,
     cache_return,
