@@ -25,7 +25,7 @@ class DisplayProperty:
             related_col_id = related_col_systemUri.replace("/collection/", "").replace("/current/", "")
             related_systemUri = "/collection/" + object_value.split("/collection/")[1]
             related_id = object_value.split("/current/")[1].rstrip("/")
-            self.object_html = f'<td><code><a href="{related_col_systemUri}">{related_col_id}</a>:<a href="{related_systemUri}">{related_id}</a></code></td><td>{object_label}</td>'
+            self.object_html = f'<td style="white-space: nowrap;"><code><a href="{related_col_systemUri}">{related_col_id}</a>:<a href="{related_systemUri}">{related_id}</a></code></td><td>{object_label}</td>'
         elif object_label is not None:  # URI with label
             self.object_html = f'<td colspan="2"><a href="{object_value}">{object_label}</a></td>'
         elif object_value.startswith("http"):  # URI, no label
