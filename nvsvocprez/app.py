@@ -1741,6 +1741,7 @@ class ConceptRenderer(Renderer):
         clean_prop_list_labels(context["other"])
         context["provenance"].sort(key=lambda x: x.predicate_html)
         clean_prop_list_labels(context["provenance"])
+        context["versions"].sort(key=lambda x: int(x.object_value))
         
 
         q1 = f"""
