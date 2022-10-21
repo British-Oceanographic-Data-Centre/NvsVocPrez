@@ -15,7 +15,9 @@ class DisplayProperty:
             "http://purl.org/pav/hasVersion",
         ]:
             related_systemUri = "/collection/" + object_value.split("/collection/")[1]
-            self.object_html = f'<td colspan="2"><a href="{related_systemUri}">{object_value.split("/")[-2]}</a></td>'
+            self.object_value = object_value.split("/")[-2]
+            self.object_link_html = f'<a href="{related_systemUri}">{self.object_value}</a>'
+            self.object_html = f'<td colspan="2">{self.object_link_html}</td>'
         elif object_notation is not None:
             # this is a related Concept, so it will have an object_label
             related_col_uri = object_value.split("/current/")[0] + "/current/"

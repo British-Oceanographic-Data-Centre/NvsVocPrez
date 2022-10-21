@@ -55,6 +55,17 @@
             </tr>
           {% endfor %}
         {% endif %}
+        {% if versions|length > 0 %}
+        <tr>
+          <th>{{versions[0].predicate_html | safe}}</th>
+          <td>
+          {% for x in versions %}  
+              {{ x.object_link_html|safe }}
+              {{ ", " if not loop.last else "" }}
+          {% endfor %}
+          </td>
+        </tr>
+        {% endif %}
         {% if other|length > 0 %}
           {% for x in other %}
             <tr>
