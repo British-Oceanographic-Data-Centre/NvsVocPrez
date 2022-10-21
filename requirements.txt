@@ -2,6 +2,7 @@ fastapi==0.78.0
 uvicorn
 httpx
 jinja2
+authlib==1.0.1
 aiofiles
 rdflib==6.0.1
 connegp
@@ -9,3 +10,5 @@ markdown
 python-multipart
 gunicorn
 requests==2.27.1
+starlette
+itsdangerous

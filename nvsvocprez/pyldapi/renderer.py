@@ -15,6 +15,7 @@ import re
 from .profile import Profile
 import connegp
 from pathlib import Path
+from routes import utils
 
 
 api_home_dir = Path(__file__).parent.parent
@@ -108,9 +109,7 @@ class Renderer(object, metaclass=ABCMeta):
         # make headers only if there's no error
         if self.vf_error is None:
             self.headers = dict()
-            self.headers["Link"] = (
-                "<" + self.profiles[self.profile].uri + '>; rel="profile"'
-            )
+            self.headers["Link"] = "<" + self.profiles[self.profile].uri + '>; rel="profile"'
             self.headers["Content-Type"] = self.mediatype
             self.headers["Content-Language"] = self.language
 
@@ -130,9 +129,7 @@ class Renderer(object, metaclass=ABCMeta):
         :rtype: list
         """
         # try QSAa and, if we have any, return them only
-        profiles_string = self.request.query_params.get(
-            "_view", self.request.query_params.get("_profile")
-        )
+        profiles_string = self.request.query_params.get("_view", self.request.query_params.get("_profile"))
         # profiles_string = None  # TODO: Change request from Flask to FastAPI
         if profiles_string is not None:
             pqsa = connegp.ProfileQsaParser(profiles_string)
@@ -161,9 +158,7 @@ class Renderer(object, metaclass=ABCMeta):
         """
         if self.request.headers.get("Accept-Profile") is not None:
             try:
-                ap = connegp.AcceptProfileHeaderParser(
-                    self.request.headers.get("Accept-Profile")
-                )
+                ap = connegp.AcceptProfileHeaderParser(self.request.headers.get("Accept-Profile"))
                 if ap.valid:
                     profiles = []
                     for p in ap.profiles:
@@ -217,9 +212,7 @@ class Renderer(object, metaclass=ABCMeta):
         """Returns a list of Media Types from QSA
         :return: list
         """
-        qsa_mediatypes = self.request.query_params.get(
-            "_format", self.request.query_params.get("_mediatype", None)
-        )
+        qsa_mediatypes = self.request.query_params.get("_format", self.request.query_params.get("_mediatype", None))
         if qsa_mediatypes is not None:
             qsa_mediatypes = str(qsa_mediatypes).replace(" ", "+").split(",")
             return qsa_mediatypes
@@ -236,9 +229,7 @@ class Renderer(object, metaclass=ABCMeta):
                 try:
                     # Chrome breaking Accept header variable by adding v=b3
                     # Issue https://github.com/RDFLib/pyLDAPI/issues/21
-                    mediatypes_string = re.sub(
-                        "v=(.*);", "", self.request.headers["Accept"]
-                    )
+                    mediatypes_string = re.sub("v=(.*);", "", self.request.headers["Accept"])
 
                     # split the header into individual URIs, with weights still attached
                     mediatypes = mediatypes_string.split(",")
@@ -249,9 +240,7 @@ class Renderer(object, metaclass=ABCMeta):
                     # split off any weights and sort by them with default weight = 1
                     mediatypes = [
                         (
-                            float(x.split(";")[1].replace("q=", ""))
-                            if ";q=" in x
-                            else 1,
+                            float(x.split(";")[1].replace("q=", "")) if ";q=" in x else 1,
                             x.split(";")[0],
                         )
                         for x in mediatypes
@@ -323,9 +312,7 @@ class Renderer(object, metaclass=ABCMeta):
                     # split off any weights and sort by them with default weight = 1
                     languages = [
                         (
-                            float(x.split(";")[1].replace("q=", ""))
-                            if len(x.split(";")) == 2
-                            else 1,
+                            float(x.split(";")[1].replace("q=", "")) if len(x.split(";")) == 2 else 1,
                             x.split(";")[0],
                         )
                         for x in languages
@@ -344,10 +331,7 @@ class Renderer(object, metaclass=ABCMeta):
         return None
 
     def _get_available_languages(self):
-        if (
-            self.profiles[self.profile].languages is not None
-            and len(self.profiles[self.profile].languages) > 0
-        ):
+        if self.profiles[self.profile].languages is not None and len(self.profiles[self.profile].languages) > 0:
             return self.profiles[self.profile].languages
         else:
             return ["en"]
@@ -479,10 +463,7 @@ class Renderer(object, metaclass=ABCMeta):
             graph.destroy({})
             del graph
 
-        return Response(
-            response_text,
-            media_type=response_mimetype, headers=headers
-        )
+        return Response(response_text, media_type=response_mimetype, headers=headers)
 
     def _render_alt_profile_html(self, template_context=None):
         profiles = {}
@@ -492,9 +473,7 @@ class Renderer(object, metaclass=ABCMeta):
                 "comment": str(profile.comment),
                 "mediatypes": profile.mediatypes,
                 "default_mediatype": str(profile.default_mediatype),
-                "languages": profile.languages
-                if profile.languages is not None
-                else ["en"],
+                "languages": profile.languages if profile.languages is not None else ["en"],
                 "default_language": str(profile.default_language),
                 "uri": str(profile.uri),
             }
@@ -514,12 +493,12 @@ class Renderer(object, metaclass=ABCMeta):
             "profiles": profiles,
             "mediatype_names": self.mediatype_names,
             "request": self.request,
+            "logged_in_user": utils.get_user_status(self.request),
         }
+
         if template_context is not None and isinstance(template_context, dict):
             _template_context.update(template_context)
-        return templates.TemplateResponse(
-            "alt.html", context=_template_context, headers=self.headers
-        )
+        return templates.TemplateResponse("alt.html", context=_template_context, headers=self.headers)
 
     def _render_alt_profile_rdf(self):
         g = self._generate_alt_profiles_rdf()
