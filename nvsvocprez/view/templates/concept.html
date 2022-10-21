@@ -58,14 +58,10 @@
         {% if versions|length > 0 %}
         <tr>
           <th>{{versions[0].predicate_html | safe}}</th>
-          {% set ns = namespace(first_version=true) %}  
           <td>
           {% for x in versions %}  
-              {% if not ns.first_version %}
-                ,&nbsp;
-              {% endif %}
-              {% set ns.first_version = false %}
               {{ x.object_link_html|safe }}
+              {{ ", " if not loop.last else "" }}
           {% endfor %}
           </td>
         </tr>
