@@ -56,12 +56,19 @@
           {% endfor %}
         {% endif %}
         {% if versions|length > 0 %}
-          {% for x in versions %}
-            <tr>
-              <th>{{ x.predicate_html|safe }}</th>
-              {{ x.object_html|safe }}
-            </tr>
+        <tr>
+          <th>{{versions[0].predicate_html | safe}}</th>
+          {% set ns = namespace(first_version=true) %}  
+          <td>
+          {% for x in versions %}  
+              {% if not ns.first_version %}
+                ,&nbsp;
+              {% endif %}
+              {% set ns.first_version = false %}
+              {{ x.object_link_html|safe }}
           {% endfor %}
+          </td>
+        </tr>
         {% endif %}
         {% if other|length > 0 %}
           {% for x in other %}
