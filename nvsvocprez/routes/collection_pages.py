@@ -624,7 +624,7 @@ class ConceptRenderer(Renderer):
             str(OWL.deprecated): {"label": "Deprecated", "group": "provenance"},
             str(PAV.previousVersion): {
                 "label": "Previous Version",
-                "group": "provenance",
+                "group": "previous_versions",
             },
             str(DCTERMS.isVersionOf): {"label": "Is Version Of", "group": "provenance"},
             str(PAV.authoredOn): {"label": "Authored On", "group": "provenance"},
@@ -651,6 +651,7 @@ class ConceptRenderer(Renderer):
             "agent": [],
             "related": [],
             "versions": [],
+            "previous_versions": [],
             "provenance": [],
             "other": [],
             "profile_token": self.profile,
@@ -724,6 +725,7 @@ class ConceptRenderer(Renderer):
         context["other"].sort(key=lambda x: x.predicate_html)
         clean_prop_list_labels(context["other"])
         context["versions"].sort(key=lambda x: int(x.object_value))
+        context["previous_versions"].sort(key=lambda x: int(x.object_value))
 
         q1 = f"""
              PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
