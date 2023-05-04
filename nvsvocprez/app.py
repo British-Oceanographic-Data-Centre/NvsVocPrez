@@ -366,7 +366,6 @@ def standard_name_concept(request: Request, standard_name_concept_id: str):
 @api.get("/mapping/{int_ext}/{mapping_id}/", **paths["/mapping/{int_ext}/{mapping_id}/"]["get"])
 @api.head("/mapping/{int_ext}/{mapping_id}/", include_in_schema=False)
 def mapping(request: Request):
-
     if not exists_triple(request.url.path):
         raise HTTPException(status_code=404)
 
@@ -485,7 +484,6 @@ def well_known_void(
     _profile: Optional[AnyStr] = None,
     _mediatype: Optional[AnyStr] = "text/turtle",
 ):
-
     void_file = api_home_dir / "void.ttl"
 
     class WkRenderer(Renderer):

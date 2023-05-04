@@ -239,7 +239,6 @@ def scheme(
     scheme_id,
     acc_dep: Literal["accepted", "deprecated", "all", None] = None,
 ):
-
     if not exists_triple(request.url.path):
         raise HTTPException(status_code=404)
 

@@ -6,7 +6,6 @@ from config import SYSTEM_URI
 
 class ContainerRenderer(Renderer):
     def __init__(self, request, instance_uri, profiles=None, default_profile_token="mem", **kwargs):
-
         contanno = Profile(
             uri="https://w3id.org/profile/contanno",
             id="contanno",
