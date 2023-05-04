@@ -253,7 +253,6 @@ def collection_no_current(request: Request, collection_id):
 @router.head("/collection/{collection_id}/current/", include_in_schema=False)
 @router.head("/collection/{collection_id}/current/{acc_dep_or_concept}/", include_in_schema=False)
 def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
-
     if not exists_triple(request.url.path) and acc_dep_or_concept not in [
         "accepted",
         "deprecated",
