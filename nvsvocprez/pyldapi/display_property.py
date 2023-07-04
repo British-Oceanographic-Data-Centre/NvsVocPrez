@@ -1,5 +1,6 @@
 import html
 
+
 class DisplayProperty:
     def __init__(
         self,
