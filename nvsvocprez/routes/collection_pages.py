@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 from typing import AnyStr, Literal, Optional, Tuple
-
+import requests as rq
 from fastapi import APIRouter, HTTPException
 from pyldapi import ContainerRenderer, Renderer, DisplayProperty
 from pyldapi.renderer import RDF_MEDIATYPES
@@ -271,7 +271,6 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
             self.alt_profiles = get_alt_profiles()
             self.ontologies = get_ontologies()
             self.instance_uri = f"{DATA_URI}/collection/{collection_id}/current/"
-
             profiles = {"nvs": nvs, "skos": skos, "vocpub": vocpub, "dd": dd}
             for collection in cache_return(collections_or_conceptschemes="collections"):
                 if collection["id"]["value"] == collection_id:
@@ -821,6 +820,27 @@ class ConceptRenderer(Renderer):
             return len(item[1]), re.search(r"(<td>)(.+?)(</td>)", item[1][0].object_html).group(2).lower()
 
         context["related"] = {k: v for k, v in sorted(create_frequency_dict(context["related"]).items(), key=_sort_by)}
+
+
+        alt_label_query = """
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        SELECT * WHERE {
+          ?x a skos:Collection .
+          ?x skos:prefLabel ?label .
+        } LIMIT 1000"""
+
+        alt_labels = self._render_sparql_response_rdf(sparql_construct(alt_label_query, "application/json")).body.decode('utf8')
+        alt_labels_json = json.loads(alt_labels)
+
+        def return_alt_label(collection: str) -> str:
+            """Pair collections with their screen friendly labels."""
+            for entry in alt_labels_json["results"]["bindings"]:
+                if collection in entry["x"]["value"]:
+                    return entry["label"]["value"]
+            return ""
+
+        context["alt_labels"] = {k : return_alt_label(k) for k in context["related"]}
+
 
         return templates.TemplateResponse("concept.html", context=context)
 

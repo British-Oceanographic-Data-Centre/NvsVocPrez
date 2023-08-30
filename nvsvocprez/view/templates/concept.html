@@ -109,13 +109,17 @@
               <tr> 
                 <th>{{ value[0].predicate_html|safe }}</th>
               </tr>
-                  <tr class="header" style="color:#007dbb;font-size:14px;">
-                    <th>{{ key}}, {{ value|length }} items <span>[+]</span> </th>
-                    {% for item in value %} 
+
+                  <tr class="header" style="color:#007dbb;font-size:10px;">
+                      <th></th>
+                      <th colspan="3">{{ "{} - {}".format(key, alt_labels[key]) }} <span>[+]</span></th>
+                      {% for item in value %} 
                       <tr style="display: none;">
                         <th></th>{{ item.object_html|safe }}
                       </tr>
                     {% endfor %}
+                    </tr>
+                    
               {% endif %}
           {% endfor %}
         {% endif %}
@@ -150,3 +154,9 @@
 });
   </script>
 {% endblock %}
+
+
+<!-- 
+# Centre the items
+# Code has to be followed by its title, so A05: AtlantOS Essential Variables
+#  -->
