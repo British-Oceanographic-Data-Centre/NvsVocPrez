@@ -555,7 +555,7 @@ class ConceptRenderer(Renderer):
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
             PREFIX owl: <http://www.w3.org/2002/07/owl#>
             {prefixes}
-            SELECT DISTINCT ?p ?o ?o_label ?o_notation ?collection_uri ?collection_systemUri ?collection_label
+            SELECT DISTINCT ?p ?o ?o_label ?o_notation ?collection_uri ?collection_systemUri ?collection_label ?murl
             WHERE {{
               BIND (<{self.instance_uri}> AS ?concept)
               ?concept ?p ?o .
@@ -563,6 +563,8 @@ class ConceptRenderer(Renderer):
               FILTER ( ?p != skos:broaderTransitive )
               FILTER ( ?p != skos:narrowerTransitive )
               {exclude_filters}
+              ?murl <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject> ?concept.
+              ?murl <http://www.w3.org/1999/02/22-rdf-syntax-ns#object> ?o .
               FILTER(!isLiteral(?o) || lang(?o) = "en" || lang(?o) = "")
             
               OPTIONAL {{
@@ -674,6 +676,7 @@ class ConceptRenderer(Renderer):
             o = x["o"]["value"]
             o_label = x["o_label"]["value"] if x.get("o_label") is not None else None
             o_notation = x["o_notation"]["value"] if x.get("o_notation") is not None else None
+            mapping_url = x["murl"]["value"]
 
             context["collection_systemUri"] = x["collection_systemUri"]["value"]
             context["collection_label"] = x["collection_label"]["value"]
@@ -692,15 +695,15 @@ class ConceptRenderer(Renderer):
                 context["date"] = o.replace(" ", "T").rstrip(".0")
             elif p in props.keys():
                 if props[p]["group"] != "ignore":
-                    context[props[p]["group"]].append(DisplayProperty(p, props[p]["label"], o, o_label, o_notation))
+                    context[props[p]["group"]].append(DisplayProperty(p, props[p]["label"], o, o_label, o_notation, mapping_url=mapping_url))
             elif profile_url and p.startswith(profile_url):
                 p_label = p[len(profile_url) :]
                 if p_label[0] == "#":
                     p_label = p_label[1:]
 
-                context["profile_properties"].append(DisplayProperty(p, p_label, o, o_label, o_notation))
+                context["profile_properties"].append(DisplayProperty(p, p_label, o, o_label, o_notation, mapping_url=mapping_url))
             else:
-                context["other"].append(DisplayProperty(p, make_predicate_label_from_uri(p), o, o_label))
+                context["other"].append(DisplayProperty(p, make_predicate_label_from_uri(p), o, o_label, mapping_url=mapping_url))
 
         def clean_prop_list_labels(prop_list):
             last_pred_html = None
