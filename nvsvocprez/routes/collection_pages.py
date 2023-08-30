@@ -821,7 +821,6 @@ class ConceptRenderer(Renderer):
 
         context["related"] = {k: v for k, v in sorted(create_frequency_dict(context["related"]).items(), key=_sort_by)}
 
-
         alt_label_query = """
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         SELECT * WHERE {
@@ -829,7 +828,9 @@ class ConceptRenderer(Renderer):
           ?x skos:prefLabel ?label .
         } LIMIT 1000"""
 
-        alt_labels = self._render_sparql_response_rdf(sparql_construct(alt_label_query, "application/json")).body.decode('utf8')
+        alt_labels = self._render_sparql_response_rdf(
+            sparql_construct(alt_label_query, "application/json")
+        ).body.decode("utf8")
         alt_labels_json = json.loads(alt_labels)
 
         def return_alt_label(collection: str) -> str:
@@ -839,8 +840,7 @@ class ConceptRenderer(Renderer):
                     return entry["label"]["value"]
             return ""
 
-        context["alt_labels"] = {k : return_alt_label(k) for k in context["related"]}
-
+        context["alt_labels"] = {k: return_alt_label(k) for k in context["related"]}
 
         return templates.TemplateResponse("concept.html", context=context)
 
