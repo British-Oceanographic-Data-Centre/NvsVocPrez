@@ -112,8 +112,9 @@
                   <tr class="header" style="color:#007dbb;font-size:14px;">
                     <th>{{ key}}, {{ value|length }} items <span>[+]</span> </th>
                     {% for item in value %} 
-                      <th></th>
-                      <tr style="display: none;">{{ item.object_html|safe }} </tr>
+                      <tr style="display: none;">
+                        <th></th>{{ item.object_html|safe }}
+                      </tr>
                     {% endfor %}
               {% endif %}
           {% endfor %}
