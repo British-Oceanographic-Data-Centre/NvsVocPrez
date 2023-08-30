@@ -99,16 +99,28 @@
           {% endif %}
         {% endif %}
         {% if related|length > 0 %}
-          {% for x in related %}
-            <tr>
-              <th>{{ x.predicate_html|safe }}</th>
-              {{ x.object_html|safe }}
-            </tr>
+          {% for key, value in related.items() %}
+              {% if value|length == 1 %}
+              <tr> 
+                <th>{{ value[0].predicate_html|safe }}</th>
+                {{ value[0].object_html|safe }}
+              </tr>
+              {% else %}
+              <tr> 
+                <th>{{ value[0].predicate_html|safe }}</th>
+              </tr>
+                  <tr class="header" style="color:#007dbb;font-size:14px;">
+                    <th>{{ key}}, {{ value|length }} items <span>[+]</span> </th>
+                    {% for item in value %} 
+                      <th></th>
+                      <tr style="display: none;">{{ item.object_html|safe }} </tr>
+                    {% endfor %}
+              {% endif %}
           {% endfor %}
         {% endif %}
+
       </table>
     </div>
-
     <div style="grid-column: 2; grid-row: 1;">
       {% include 'alt_link.html' %}
       {% if conforms_to is defined and conforms_to is not none %}
@@ -126,4 +138,14 @@
       {% endif %}
     </div>
   </div>
+
+  <script>
+   $(document).ready(function(){
+    $('tr.header').click(function(){
+        $(this).find('span').text(function(_, value){return value=='-'?'[+]':'-'});
+        $(this).nextUntil('tr.header').slideToggle(400, function(){
+        });
+    });
+});
+  </script>
 {% endblock %}
