@@ -30,11 +30,11 @@ class DisplayProperty:
             related_systemUri = "/collection/" + object_value.split("/collection/")[1]
             related_id = object_value.split("/current/")[1].rstrip("/")
             mapping_id = mapping_url.strip("/").split("/")[-1]
-            self.object_html = f'''
+            self.object_html = f"""
                 <td style="white-space: nowrap;"><code><a href="{related_col_systemUri}">{related_col_id}</a>:<a href="{related_systemUri}">{related_id}</a></code></td>
                 <td>{html.escape(object_label)}</td>
                 <td><a class="format-button" href="{mapping_url}">Mapping: {mapping_id}</a></td>
-            '''
+            """
         elif object_label is not None:  # URI with label
             self.object_html = f'<td colspan="2"><a href="{object_value}">{object_label}</a></td>'
         elif object_value.startswith("http"):  # URI, no label

@@ -695,15 +695,21 @@ class ConceptRenderer(Renderer):
                 context["date"] = o.replace(" ", "T").rstrip(".0")
             elif p in props.keys():
                 if props[p]["group"] != "ignore":
-                    context[props[p]["group"]].append(DisplayProperty(p, props[p]["label"], o, o_label, o_notation, mapping_url=mapping_url))
+                    context[props[p]["group"]].append(
+                        DisplayProperty(p, props[p]["label"], o, o_label, o_notation, mapping_url=mapping_url)
+                    )
             elif profile_url and p.startswith(profile_url):
                 p_label = p[len(profile_url) :]
                 if p_label[0] == "#":
                     p_label = p_label[1:]
 
-                context["profile_properties"].append(DisplayProperty(p, p_label, o, o_label, o_notation, mapping_url=mapping_url))
+                context["profile_properties"].append(
+                    DisplayProperty(p, p_label, o, o_label, o_notation, mapping_url=mapping_url)
+                )
             else:
-                context["other"].append(DisplayProperty(p, make_predicate_label_from_uri(p), o, o_label, mapping_url=mapping_url))
+                context["other"].append(
+                    DisplayProperty(p, make_predicate_label_from_uri(p), o, o_label, mapping_url=mapping_url)
+                )
 
         def clean_prop_list_labels(prop_list):
             last_pred_html = None
