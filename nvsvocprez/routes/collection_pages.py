@@ -799,10 +799,9 @@ class ConceptRenderer(Renderer):
 
         context["logged_in_user"] = get_user_status(self.request)
 
-
         def create_frequency_dict(items: list) -> defaultdict:
             """Group related items into their respective concepts.
-            
+
             Args:
                 items(list): A list of pyldapi objects with the raw HTML.
 
@@ -811,19 +810,17 @@ class ConceptRenderer(Renderer):
             """
             def_dict = defaultdict(list)
             for item in items:
-                result = re.search(r'(/">)([A-Z]+\d\d)(</a>)', item.object_html) 
+                result = re.search(r'(/">)([A-Z]+\d\d)(</a>)', item.object_html)
                 if result and len(result.groups()) == 3:
                     def_dict[result.group(2)].append(item)
 
             return def_dict
-        
-        
+
         def _sort_by(item: list) -> Tuple[int, str]:
             """Utility function to dictate sorting logic."""
-            return len(item[1]), re.search( r'(<td>)(.+?)(</td>)', item[1][0].object_html).group(2).lower()
-        
-        context["related"] = {k:v for k,v  in sorted(create_frequency_dict(context["related"]).items(), key=_sort_by)}
+            return len(item[1]), re.search(r"(<td>)(.+?)(</td>)", item[1][0].object_html).group(2).lower()
 
+        context["related"] = {k: v for k, v in sorted(create_frequency_dict(context["related"]).items(), key=_sort_by)}
 
         return templates.TemplateResponse("concept.html", context=context)
 
