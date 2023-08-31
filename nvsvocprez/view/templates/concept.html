@@ -99,31 +99,34 @@
           {% endif %}
         {% endif %}
         {% if related|length > 0 %}
-          {% for key, value in related.items() %}
-              {% if value|length == 1 %}
-              <tr> 
-                <th>{{ value[0].predicate_html|safe }}</th>
-                {{ value[0].object_html|safe }}
+        {% for key, groups in related.items() %}
+          <tr> 
+            <th style="color:#007dbb;font-size:16px;">
+              {{ key }}
+            </th>
+          </tr>
+          {% for k, vi in groups.items() %}
+            {% if vi|length == 1 %}
+              <tr>
+                <td>{{ vi[0].object_html|safe }}</td>
               </tr>
-              {% else %}
-              <tr> 
-                <th>{{ value[0].predicate_html|safe }}</th>
+            {% else %}
+              <tr class="group-header header">
+                <th colspan="3" style="color:#007dbb;font-size:14px;">
+                  {{ "{} - {} - ({})".format(k, alt_labels[k], vi|length) }}
+                  <span class="toggle-icon">[+]</span>
+                </th>
               </tr>
-
-                  <tr class="header" style="color:#007dbb;font-size:10px;">
-                      <th></th>
-                      <th colspan="3">{{ "{} - {}".format(key, alt_labels[key]) }} <span>[+]</span></th>
-                      {% for item in value %} 
-                      <tr style="display: none;">
-                        <th></th>{{ item.object_html|safe }}
-                      </tr>
-                    {% endfor %}
-                    </tr>
-                    
-              {% endif %}
+              {% for v in vi %}
+                <tr class="group-row hidden-row">
+                  <td>{{ v.object_html|safe }}</td>
+                </tr>
+              {% endfor %}
+            {% endif %}
           {% endfor %}
-        {% endif %}
-
+        {% endfor %}
+      {% endif %}
+      
       </table>
     </div>
     <div style="grid-column: 2; grid-row: 1;">
@@ -145,18 +148,20 @@
   </div>
 
   <script>
-   $(document).ready(function(){
-    $('tr.header').click(function(){
-        $(this).find('span').text(function(_, value){return value=='-'?'[+]':'-'});
-        $(this).nextUntil('tr.header').slideToggle(400, function(){
-        });
+    $(document).ready(function(){
+      $('.group-header').click(function(){
+        // $(this).nextUntil('.group-header').toggleClass('hidden-row');
+        $(this).nextUntil('.group-header', '.group-row').toggleClass('hidden-row');
+        const span = $(this).find('span');
+        span.text(span.text() === '[+]' ? '[-]' : '[+]');
+      });
     });
-});
-  </script>
+    </script>
+
+    <style>
+      .hidden-row {
+        display: none;
+      }
+    </style>
 {% endblock %}
 
-
-<!-- 
-# Centre the items
-# Code has to be followed by its title, so A05: AtlantOS Essential Variables
-#  -->

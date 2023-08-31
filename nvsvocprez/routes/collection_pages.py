@@ -1,5 +1,7 @@
 """Render the Collection Endpoints."""
 import json
+from bs4 import BeautifulSoup
+from itertools import groupby
 from pathlib import Path
 from typing import AnyStr, Literal, Optional, Tuple
 import requests as rq
@@ -798,28 +800,57 @@ class ConceptRenderer(Renderer):
 
         context["logged_in_user"] = get_user_status(self.request)
 
-        def create_frequency_dict(items: list) -> defaultdict:
-            """Group related items into their respective concepts.
+###### START MAIN RELATED CONTEXT CODE
+        class RelatedItem:
+            """Hold related items and provide functionality for sorting and grouping."""
+            group = ""
+            def __init__(self, object_html, predicate_html=""):
+                self.object_html = object_html
+                self.predicate_html = BeautifulSoup(predicate_html, features="html.parser").a.string if predicate_html else predicate_html
+                
 
-            Args:
-                items(list): A list of pyldapi objects with the raw HTML.
+            @property
+            def collection(self):
+                result = re.search(r'(/">)([A-Z]+\w\w)(</a>)', self.object_html)
+                if not result:
+                    print("!!!", self.object_html)
+                return result.group(2) if result and len(result.groups()) == 3 else ""
 
-            Returns:
-                defaultdict: A dict in the form of {CollectionNo: [List of associated pyldapi objects]}
-            """
-            def_dict = defaultdict(list)
-            for item in items:
-                result = re.search(r'(/">)([A-Z]+\d\d)(</a>)', item.object_html)
-                if result and len(result.groups()) == 3:
-                    def_dict[result.group(2)].append(item)
+            @property
+            def description(self):
+                return BeautifulSoup(self.object_html, features="html.parser")('td')[-1].text
 
-            return def_dict
+            def __lt__(self, other):
+                return self.description.lower() < other.description.lower()
 
-        def _sort_by(item: list) -> Tuple[int, str]:
+        # Create Instances of Items
+        contexts = [RelatedItem(predicate_html=item.predicate_html, object_html=item.object_html) for item in context["related"]]
+
+
+        # Create dict to add the categoried (related,broader etc..), and then append the items to these.
+        ddict, last_pairing = defaultdict(list), ""
+        for c in contexts:
+            if c.predicate_html and c.predicate_html != last_pairing:
+                last_pairing = c.predicate_html
+            ddict[last_pairing].append(c)
+
+        # Sort each group of items alphabetically.
+        context["related"] = {k: sorted(v) for k,v in ddict.items()}
+
+
+        def _sort_by(item: list):
             """Utility function to dictate sorting logic."""
-            return len(item[1]), re.search(r"(<td>)(.+?)(</td>)", item[1][0].object_html).group(2).lower()
+            result = re.search(r"(<td>)(.+?)(</td>)", item[1][0].object_html)
+            return len(item[1]), result.group(2).lower() if result else ""
 
-        context["related"] = {k: v for k, v in sorted(create_frequency_dict(context["related"]).items(), key=_sort_by)}
+        # Batch items together when they belong to the same collection (L22 for example)
+        # Then sort the items so the largest are at the bottom.
+        for k in context["related"].keys():
+            sorted_items = sorted(context["related"][k], key=lambda item: item.collection)
+            grouped = {item: list(lst) for item, lst in groupby(sorted_items, key=lambda item: item.collection)}
+            context["related"][k] = {k:v for k,v in sorted(grouped.items(), key=_sort_by)}
+            # context["related"][k] = {k:v for k,v in sorted(grouped.items(), key=lambda l: len(l[1]))}
+
 
         alt_label_query = """
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -833,6 +864,7 @@ class ConceptRenderer(Renderer):
         ).body.decode("utf8")
         alt_labels_json = json.loads(alt_labels)
 
+
         def return_alt_label(collection: str) -> str:
             """Pair collections with their screen friendly labels."""
             for entry in alt_labels_json["results"]["bindings"]:
@@ -840,8 +872,7 @@ class ConceptRenderer(Renderer):
                     return entry["label"]["value"]
             return ""
 
-        context["alt_labels"] = {k: return_alt_label(k) for k in context["related"]}
-
+        context["alt_labels"] = {k: return_alt_label(k) for sub_dict in context["related"].values() for k in sub_dict.keys()}
         return templates.TemplateResponse("concept.html", context=context)
 
     def _render_nvs_rdf(self):
