@@ -800,7 +800,6 @@ class ConceptRenderer(Renderer):
 
         context["logged_in_user"] = get_user_status(self.request)
 
-        ###### START MAIN RELATED CONTEXT CODE
         class RelatedItem:
             """Hold related items and provide functionality for sorting and grouping."""
 
@@ -846,8 +845,7 @@ class ConceptRenderer(Renderer):
             result = re.search(r"(<td>)(.+?)(</td>)", item[1][0].object_html)
             return len(item[1]), result.group(2).lower() if result else ""
 
-        # Batch items together when they belong to the same collection (L22 for example)
-        # Then sort the items so the largest are at the bottom.
+
         for k in context["related"].keys():
             sorted_items = sorted(context["related"][k], key=lambda item: item.collection)
             grouped = {item: list(lst) for item, lst in groupby(sorted_items, key=lambda item: item.collection)}
