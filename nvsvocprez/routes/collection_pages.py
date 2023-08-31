@@ -800,14 +800,17 @@ class ConceptRenderer(Renderer):
 
         context["logged_in_user"] = get_user_status(self.request)
 
-###### START MAIN RELATED CONTEXT CODE
+        ###### START MAIN RELATED CONTEXT CODE
         class RelatedItem:
             """Hold related items and provide functionality for sorting and grouping."""
+
             group = ""
+
             def __init__(self, object_html, predicate_html=""):
                 self.object_html = object_html
-                self.predicate_html = BeautifulSoup(predicate_html, features="html.parser").a.string if predicate_html else predicate_html
-                
+                self.predicate_html = (
+                    BeautifulSoup(predicate_html, features="html.parser").a.string if predicate_html else predicate_html
+                )
 
             @property
             def collection(self):
@@ -818,14 +821,15 @@ class ConceptRenderer(Renderer):
 
             @property
             def description(self):
-                return BeautifulSoup(self.object_html, features="html.parser")('td')[-1].text
+                return BeautifulSoup(self.object_html, features="html.parser")("td")[-1].text
 
             def __lt__(self, other):
                 return self.description.lower() < other.description.lower()
 
         # Create Instances of Items
-        contexts = [RelatedItem(predicate_html=item.predicate_html, object_html=item.object_html) for item in context["related"]]
-
+        contexts = [
+            RelatedItem(predicate_html=item.predicate_html, object_html=item.object_html) for item in context["related"]
+        ]
 
         # Create dict to add the categoried (related,broader etc..), and then append the items to these.
         ddict, last_pairing = defaultdict(list), ""
@@ -835,8 +839,7 @@ class ConceptRenderer(Renderer):
             ddict[last_pairing].append(c)
 
         # Sort each group of items alphabetically.
-        context["related"] = {k: sorted(v) for k,v in ddict.items()}
-
+        context["related"] = {k: sorted(v) for k, v in ddict.items()}
 
         def _sort_by(item: list):
             """Utility function to dictate sorting logic."""
@@ -848,9 +851,8 @@ class ConceptRenderer(Renderer):
         for k in context["related"].keys():
             sorted_items = sorted(context["related"][k], key=lambda item: item.collection)
             grouped = {item: list(lst) for item, lst in groupby(sorted_items, key=lambda item: item.collection)}
-            context["related"][k] = {k:v for k,v in sorted(grouped.items(), key=_sort_by)}
+            context["related"][k] = {k: v for k, v in sorted(grouped.items(), key=_sort_by)}
             # context["related"][k] = {k:v for k,v in sorted(grouped.items(), key=lambda l: len(l[1]))}
-
 
         alt_label_query = """
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -864,7 +866,6 @@ class ConceptRenderer(Renderer):
         ).body.decode("utf8")
         alt_labels_json = json.loads(alt_labels)
 
-
         def return_alt_label(collection: str) -> str:
             """Pair collections with their screen friendly labels."""
             for entry in alt_labels_json["results"]["bindings"]:
@@ -872,7 +873,9 @@ class ConceptRenderer(Renderer):
                     return entry["label"]["value"]
             return ""
 
-        context["alt_labels"] = {k: return_alt_label(k) for sub_dict in context["related"].values() for k in sub_dict.keys()}
+        context["alt_labels"] = {
+            k: return_alt_label(k) for sub_dict in context["related"].values() for k in sub_dict.keys()
+        }
         return templates.TemplateResponse("concept.html", context=context)
 
     def _render_nvs_rdf(self):
