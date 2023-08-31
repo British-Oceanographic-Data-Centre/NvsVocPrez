@@ -845,7 +845,6 @@ class ConceptRenderer(Renderer):
             result = re.search(r"(<td>)(.+?)(</td>)", item[1][0].object_html)
             return len(item[1]), result.group(2).lower() if result else ""
 
-
         for k in context["related"].keys():
             sorted_items = sorted(context["related"][k], key=lambda item: item.collection)
             grouped = {item: list(lst) for item, lst in groupby(sorted_items, key=lambda item: item.collection)}
