@@ -1,6 +1,6 @@
 """Render the Collection Endpoints."""
 import json
-from bs4 import BeautifulSoup
+
 from itertools import groupby
 from pathlib import Path
 from typing import AnyStr, Literal, Optional, Tuple
@@ -19,6 +19,7 @@ from starlette.templating import Jinja2Templates
 from .page_configs import DATA_URI, ORDS_ENDPOINT_URL, SYSTEM_URI, acc_dep_map
 from .profiles import void, nvs, skos, dd, vocpub, dcat, sdo
 from .utils import (
+    RelatedItem,
     cache_return,
     exists_triple,
     get_alt_profiles,
@@ -647,7 +648,7 @@ class ConceptRenderer(Renderer):
             "collection_label": None,
             "definition": None,
             "date": None,
-            "altLabels": [],
+            "altLabels": [],    
             "profile_properties": [],
             "annotation": [],
             "agent": [],
@@ -800,30 +801,7 @@ class ConceptRenderer(Renderer):
 
         context["logged_in_user"] = get_user_status(self.request)
 
-        class RelatedItem:
-            """Hold related items and provide functionality for sorting and grouping."""
-
-            def __init__(self, object_html, predicate_html=""):
-                """Initialise the HTML attributes."""
-                self.object_html = object_html
-
-                self.predicate_html = predicate_html if predicate_html else ""
-
-            @property
-            def collection(self):
-                """Return the collection or empty string for an item."""
-                result = re.search(r'(/">)([A-Z]+\w\w)(</a>)', self.object_html)
-                return result.group(2) if result and len(result.groups()) == 3 else ""
-
-            @property
-            def description(self):
-                """Parse the description from an item."""
-                return BeautifulSoup(self.object_html, features="html.parser")("td")[-1].text
-
-            def __lt__(self, other):
-                """Utility method needed for sorting items."""
-                return self.description.lower() < other.description.lower()
-
+      
         # Create Instances of Items
         contexts = [
             RelatedItem(predicate_html=item.predicate_html, object_html=item.object_html) for item in context["related"]
@@ -836,19 +814,21 @@ class ConceptRenderer(Renderer):
                 last_pairing = c.predicate_html
             ddict[last_pairing].append(c)
 
+
         # Sort each group of items alphabetically.
         context["related"] = {k: sorted(v) for k, v in ddict.items()}
 
         def _sort_by(item: list):
             """Utility function to dictate sorting logic."""
             result = re.search(r"(<td>)(.+?)(</td>)", item[1][0].object_html)
-            return len(item[1]), result.group(2).lower() if result else ""
+            return len(item[1]), item[0], result.group(2).lower() if result else ""
 
         for k in context["related"].keys():
             sorted_items = sorted(context["related"][k], key=lambda item: item.collection)
             grouped = {item: list(lst) for item, lst in groupby(sorted_items, key=lambda item: item.collection)}
             context["related"][k] = {k: v for k, v in sorted(grouped.items(), key=_sort_by)}
-
+    
+    
         alt_label_query = """
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         SELECT * WHERE {
