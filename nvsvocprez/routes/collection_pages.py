@@ -806,9 +806,9 @@ class ConceptRenderer(Renderer):
             def __init__(self, object_html, predicate_html=""):
                 """Initialise the HTML attributes."""
                 self.object_html = object_html
-                self.predicate_html = (
-                    BeautifulSoup(predicate_html, features="html.parser").a.string if predicate_html else predicate_html
-                )
+    
+                self.predicate_html = predicate_html if predicate_html else ""
+
 
             @property
             def collection(self):
@@ -849,6 +849,7 @@ class ConceptRenderer(Renderer):
             sorted_items = sorted(context["related"][k], key=lambda item: item.collection)
             grouped = {item: list(lst) for item, lst in groupby(sorted_items, key=lambda item: item.collection)}
             context["related"][k] = {k: v for k, v in sorted(grouped.items(), key=_sort_by)}
+
 
         alt_label_query = """
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>

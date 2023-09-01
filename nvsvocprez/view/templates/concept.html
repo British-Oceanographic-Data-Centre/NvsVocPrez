@@ -101,8 +101,8 @@
         {% if related|length > 0 %}
         {% for key, groups in related.items() %}
           <tr> 
-            <th style="color:#007dbb;font-size:16px;">
-              {{ key }}
+            <th>
+              {{ key|safe }}
             </th>
           </tr>
           {% for k, vi in groups.items() %}
@@ -112,7 +112,7 @@
               </tr>
             {% else %}
               <tr class="group-header header">
-                <th colspan="3" style="color:#007dbb;font-size:14px;">
+                <th colspan="3" style="color:#007dbb;font-size:12px;">
                   {{ "{} {} - ({})".format(k, alt_labels[k], vi|length) }}
                   <span class="toggle-icon">[+]</span>
                 </th>
