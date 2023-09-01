@@ -7,9 +7,10 @@ import pickle
 from pathlib import Path
 import requests
 from pyldapi.data import RDF_MEDIATYPES
-
+import re
 from pyldapi.profile import Profile
 from utilities import config
+from bs4 import BeautifulSoup
 
 
 api_home_dir = Path(__file__).parent
@@ -373,3 +374,27 @@ def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict):
         }}
     """
     return query
+
+
+class RelatedItem:
+    """Hold related items and provide functionality for sorting and grouping."""
+
+    def __init__(self, object_html, predicate_html=""):
+        """Initialise the HTML attributes."""
+        self.object_html = object_html
+        self.predicate_html = predicate_html if predicate_html else ""
+
+    @property
+    def collection(self):
+        """Return the collection or empty string for an item."""
+        result = re.search(r'(/">)([A-Z]+\w\w)(</a>)', self.object_html)
+        return result.group(2) if result and len(result.groups()) == 3 else self.object_html
+
+    @property
+    def description(self):
+        """Parse the description from an item."""
+        return BeautifulSoup(self.object_html, features="html.parser")("td")[-1].text
+
+    def __lt__(self, other):
+        """Utility method needed for sorting items."""
+        return self.description.lower() < other.description.lower()

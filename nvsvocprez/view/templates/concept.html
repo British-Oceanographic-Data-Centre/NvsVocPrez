@@ -99,16 +99,37 @@
           {% endif %}
         {% endif %}
         {% if related|length > 0 %}
-          {% for x in related %}
-            <tr>
-              <th>{{ x.predicate_html|safe }}</th>
-              {{ x.object_html|safe }}
-            </tr>
+        {% for key, groups in related.items() %}
+          <tr> 
+            <th>
+              {{ key|safe }}
+            </th>
+          </tr>
+          {% for k, vi in groups.items() %}
+            {% if vi|length == 1 %}
+              <tr>
+                <td>{{ vi[0].object_html|safe }}</td>
+              </tr>
+            {% else %}
+              <tr class="group-header header">
+                <th></th>
+                <th colspan="3" style="color:#007dbb;font-size:12px;cursor: pointer">
+                  {{ "{} {} - ({})".format(k, alt_labels[k], vi|length) }}
+                  <span class="toggle-icon">[+]</span>
+                </th>
+              </tr>
+              {% for v in vi %}
+                <tr class="group-row hidden-row">
+                  <td>{{ v.object_html|safe }}</td>
+                </tr>
+              {% endfor %}
+            {% endif %}
           {% endfor %}
-        {% endif %}
+        {% endfor %}
+      {% endif %}
+      
       </table>
     </div>
-
     <div style="grid-column: 2; grid-row: 1;">
       {% include 'alt_link.html' %}
       {% if conforms_to is defined and conforms_to is not none %}
@@ -126,4 +147,22 @@
       {% endif %}
     </div>
   </div>
+
+  <script>
+    $(document).ready(function(){
+      $('.group-header').click(function(){
+        // $(this).nextUntil('.group-header').toggleClass('hidden-row');
+        $(this).nextUntil('.group-header', '.group-row').toggleClass('hidden-row');
+        const span = $(this).find('span');
+        span.text(span.text() === '[+]' ? '[-]' : '[+]');
+      });
+    });
+    </script>
+
+    <style>
+      .hidden-row {
+        display: none;
+      }
+    </style>
 {% endblock %}
+
