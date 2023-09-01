@@ -138,7 +138,8 @@
             {% if profile in alt_profiles %}
               {% set alt = alt_profiles[profile] %}
               <p>
-                <a class="format-button" style="width:200px;" href="?_profile={{ alt['token'] }}&_mediatype=text/html">{{ alt['description'].replace("view", "html view")}}</a>
+                <a  class={{"format-button_active" if alt['token']==request.query_params.get("_profile")
+				else "format-button" }} style="width:200px;" href="?_profile={{ alt['token'] }}&_mediatype=text/html">{{ alt['description'].replace("view", "html view")}}</a>
                 <span class="tooltip" style="font-weight:bold;">?<span class="tooltiptext">{{ alt['description'].replace("view", "html view")}}.</span></span>
               </p>
             {% endif %}
