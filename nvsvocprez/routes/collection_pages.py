@@ -803,9 +803,8 @@ class ConceptRenderer(Renderer):
         class RelatedItem:
             """Hold related items and provide functionality for sorting and grouping."""
 
-            group = ""
-
             def __init__(self, object_html, predicate_html=""):
+                """Initialise the HTML attributes."""
                 self.object_html = object_html
                 self.predicate_html = (
                     BeautifulSoup(predicate_html, features="html.parser").a.string if predicate_html else predicate_html
@@ -813,16 +812,17 @@ class ConceptRenderer(Renderer):
 
             @property
             def collection(self):
+                """Return the collection or empty string for an item."""
                 result = re.search(r'(/">)([A-Z]+\w\w)(</a>)', self.object_html)
-                if not result:
-                    print("!!!", self.object_html)
                 return result.group(2) if result and len(result.groups()) == 3 else ""
 
             @property
             def description(self):
+                """Parse the description from an item."""
                 return BeautifulSoup(self.object_html, features="html.parser")("td")[-1].text
 
             def __lt__(self, other):
+                """Utility method needed for sorting items."""
                 return self.description.lower() < other.description.lower()
 
         # Create Instances of Items
@@ -849,7 +849,6 @@ class ConceptRenderer(Renderer):
             sorted_items = sorted(context["related"][k], key=lambda item: item.collection)
             grouped = {item: list(lst) for item, lst in groupby(sorted_items, key=lambda item: item.collection)}
             context["related"][k] = {k: v for k, v in sorted(grouped.items(), key=_sort_by)}
-            # context["related"][k] = {k:v for k,v in sorted(grouped.items(), key=lambda l: len(l[1]))}
 
         alt_label_query = """
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
