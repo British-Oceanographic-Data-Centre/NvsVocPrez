@@ -390,7 +390,6 @@ class RelatedItem:
         result = re.search(r'(/">)([A-Z]+\w\w)(</a>)', self.object_html)
         return result.group(2) if result and len(result.groups()) == 3 else self.object_html
 
-
     @property
     def description(self):
         """Parse the description from an item."""
