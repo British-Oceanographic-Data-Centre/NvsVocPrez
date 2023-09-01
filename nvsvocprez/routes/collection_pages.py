@@ -648,7 +648,7 @@ class ConceptRenderer(Renderer):
             "collection_label": None,
             "definition": None,
             "date": None,
-            "altLabels": [],    
+            "altLabels": [],
             "profile_properties": [],
             "annotation": [],
             "agent": [],
@@ -801,7 +801,6 @@ class ConceptRenderer(Renderer):
 
         context["logged_in_user"] = get_user_status(self.request)
 
-      
         # Create Instances of Items
         contexts = [
             RelatedItem(predicate_html=item.predicate_html, object_html=item.object_html) for item in context["related"]
@@ -813,7 +812,6 @@ class ConceptRenderer(Renderer):
             if c.predicate_html and c.predicate_html != last_pairing:
                 last_pairing = c.predicate_html
             ddict[last_pairing].append(c)
-
 
         # Sort each group of items alphabetically.
         context["related"] = {k: sorted(v) for k, v in ddict.items()}
@@ -827,8 +825,7 @@ class ConceptRenderer(Renderer):
             sorted_items = sorted(context["related"][k], key=lambda item: item.collection)
             grouped = {item: list(lst) for item, lst in groupby(sorted_items, key=lambda item: item.collection)}
             context["related"][k] = {k: v for k, v in sorted(grouped.items(), key=_sort_by)}
-    
-    
+
         alt_label_query = """
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         SELECT * WHERE {
