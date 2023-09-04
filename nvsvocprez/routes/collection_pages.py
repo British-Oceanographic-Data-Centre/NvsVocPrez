@@ -805,7 +805,6 @@ class ConceptRenderer(Renderer):
         contexts = [
             RelatedItem(predicate_html=item.predicate_html, object_html=item.object_html) for item in context["related"]
         ]
-
         # Create dict to add the categoried (related,broader etc..), and then append the items to these.
         ddict, last_pairing = defaultdict(list), ""
         for c in contexts:
@@ -823,7 +822,15 @@ class ConceptRenderer(Renderer):
 
         for k in context["related"].keys():
             sorted_items = sorted(context["related"][k], key=lambda item: item.collection)
-            grouped = {item: sorted(lst) if item != "P01" else list(lst) for item, lst in groupby(sorted_items, key=lambda item: item.collection)}
+
+            grouped = {}
+            for item, lst in groupby(sorted_items, key=lambda item: item.collection):
+                lst_ = list(lst)
+                if len(lst_) > 13000:
+                    grouped[item] = lst_
+                else:
+                    grouped[item] = sorted(lst_)
+
             context["related"][k] = {k: v for k, v in sorted(grouped.items(), key=_sort_by)}
 
 
