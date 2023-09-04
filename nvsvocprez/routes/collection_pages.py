@@ -826,7 +826,7 @@ class ConceptRenderer(Renderer):
             grouped = {}
             for item, lst in groupby(sorted_items, key=lambda item: item.collection):
                 lst_ = list(lst)
-                if len(lst_) > 13000:
+                if len(lst_) > 10000:
                     grouped[item] = lst_
                 else:
                     grouped[item] = sorted(lst_)
