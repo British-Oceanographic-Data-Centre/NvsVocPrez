@@ -814,7 +814,7 @@ class ConceptRenderer(Renderer):
             ddict[last_pairing].append(c)
 
         # Sort each group of items alphabetically.
-        context["related"] = {k: sorted(v) for k, v in ddict.items()}
+        context["related"] = {k: list(v) for k, v in ddict.items()}
 
         def _sort_by(item: list):
             """Utility function to dictate sorting logic."""
@@ -823,8 +823,9 @@ class ConceptRenderer(Renderer):
 
         for k in context["related"].keys():
             sorted_items = sorted(context["related"][k], key=lambda item: item.collection)
-            grouped = {item: list(lst) for item, lst in groupby(sorted_items, key=lambda item: item.collection)}
+            grouped = {item: sorted(lst) if item != "P01" else list(lst) for item, lst in groupby(sorted_items, key=lambda item: item.collection)}
             context["related"][k] = {k: v for k, v in sorted(grouped.items(), key=_sort_by)}
+
 
         alt_label_query = """
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
