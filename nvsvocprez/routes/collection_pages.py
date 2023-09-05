@@ -600,10 +600,6 @@ class ConceptRenderer(Renderer):
                 {exclude_filters}
             }}
         """
-
-        from time import time
-
-        start = time()
         mappings_r = sparql_query(mappings_q)
         keyed_mappings = {}
         for x in mappings_r[1]:
