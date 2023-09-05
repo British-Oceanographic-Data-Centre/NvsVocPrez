@@ -602,6 +602,7 @@ class ConceptRenderer(Renderer):
         """
 
         from time import time
+
         start = time()
         mappings_r = sparql_query(mappings_q)
         keyed_mappings = {}
