@@ -591,6 +591,8 @@ class ConceptRenderer(Renderer):
 
         mappings_q = f"""
             PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+            PREFIX owl: <http://www.w3.org/2002/07/owl#>
             {prefixes}
             SELECT ?murl ?prd ?obj WHERE {{
                 BIND (<{self.instance_uri}> AS ?concept)
