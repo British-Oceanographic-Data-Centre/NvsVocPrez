@@ -821,14 +821,18 @@ class ConceptRenderer(Renderer):
             return len(item[1]), item[0], result.group(2).lower() if result else ""
 
         for k in context["related"].keys():
+            # Sorting by collection ["P01", "OG1"] etc..
             sorted_items = sorted(context["related"][k], key=lambda item: item.collection)
 
             grouped = {}
             for item, lst in groupby(sorted_items, key=lambda item: item.collection):
                 lst_ = list(lst)
-                if len(lst_) > 13000:
+                # Any group larger than the sorting boundary will not be sorted.
+                sorting_boundary = 2000
+                if len(lst_) > sorting_boundary:
                     grouped[item] = lst_
                 else:
+                    # Sorts by description (the expensive one!)
                     grouped[item] = sorted(lst_)
 
             context["related"][k] = {k: v for k, v in sorted(grouped.items(), key=_sort_by)}
