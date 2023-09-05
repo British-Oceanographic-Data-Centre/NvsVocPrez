@@ -559,7 +559,7 @@ class ConceptRenderer(Renderer):
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
             PREFIX owl: <http://www.w3.org/2002/07/owl#>
             {prefixes}
-            SELECT DISTINCT ?p ?o ?o_label ?o_notation ?collection_uri ?collection_systemUri ?collection_label ?murl
+            SELECT DISTINCT ?p ?o ?o_label ?o_notation ?collection_uri ?collection_systemUri ?collection_label
             WHERE {{
               BIND (<{self.instance_uri}> AS ?concept)
               ?concept ?p ?o .
@@ -567,8 +567,6 @@ class ConceptRenderer(Renderer):
               FILTER ( ?p != skos:broaderTransitive )
               FILTER ( ?p != skos:narrowerTransitive )
               {exclude_filters}
-              ?murl <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject> ?concept.
-              ?murl <http://www.w3.org/1999/02/22-rdf-syntax-ns#object> ?o .
               FILTER(!isLiteral(?o) || lang(?o) = "en" || lang(?o) = "")
             
               OPTIONAL {{
@@ -590,6 +588,30 @@ class ConceptRenderer(Renderer):
               BIND (COALESCE(?x, "Climate and Forecast Standard Names") AS ?collection_label)
             }}         
         """
+
+        mappings_q = f"""
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            {prefixes}
+            SELECT ?murl ?prd ?obj WHERE {{
+                BIND (<{self.instance_uri}> AS ?concept)
+                ?murl rdf:subject ?concept .
+                ?murl rdf:object ?obj .
+                ?murl rdf:predicate ?p .
+                {exclude_filters}
+            }}
+        """
+
+        from time import time
+        start = time()
+        mappings_r = sparql_query(mappings_q)
+        keyed_mappings = {}
+        for x in mappings_r[1]:
+            object = x["obj"]["value"]
+            keyed_mappings[object] = x["murl"]["value"]
+        print("!!!!!")
+        print("time for mappings query:")
+        print(time() - start)
+        print("!!!!!")
 
         r = sparql_query(q)
         if not r[0]:
@@ -680,7 +702,8 @@ class ConceptRenderer(Renderer):
             o = x["o"]["value"]
             o_label = x["o_label"]["value"] if x.get("o_label") is not None else None
             o_notation = x["o_notation"]["value"] if x.get("o_notation") is not None else None
-            mapping_url = x["murl"]["value"]
+            mapping_url = ""
+            mapping_url = keyed_mappings.get(x["o"]["value"])
 
             context["collection_systemUri"] = x["collection_systemUri"]["value"]
             context["collection_label"] = x["collection_label"]["value"]
