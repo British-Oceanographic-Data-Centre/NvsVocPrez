@@ -609,10 +609,6 @@ class ConceptRenderer(Renderer):
         for x in mappings_r[1]:
             object = x["obj"]["value"]
             keyed_mappings[object] = x["murl"]["value"]
-        print("!!!!!")
-        print("time for mappings query:")
-        print(time() - start)
-        print("!!!!!")
 
         r = sparql_query(q)
         if not r[0]:
