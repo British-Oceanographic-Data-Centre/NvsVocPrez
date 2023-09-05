@@ -837,7 +837,6 @@ class ConceptRenderer(Renderer):
 
             context["related"][k] = {k: v for k, v in sorted(grouped.items(), key=_sort_by)}
 
-
         alt_label_query = """
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         SELECT * WHERE {
