@@ -805,7 +805,6 @@ class ConceptRenderer(Renderer):
         contexts = [
             RelatedItem(predicate_html=item.predicate_html, object_html=item.object_html) for item in context["related"]
         ]
-
         # Create dict to add the categoried (related,broader etc..), and then append the items to these.
         ddict, last_pairing = defaultdict(list), ""
         for c in contexts:
@@ -814,7 +813,7 @@ class ConceptRenderer(Renderer):
             ddict[last_pairing].append(c)
 
         # Sort each group of items alphabetically.
-        context["related"] = {k: sorted(v) for k, v in ddict.items()}
+        context["related"] = {k: list(v) for k, v in ddict.items()}
 
         def _sort_by(item: list):
             """Utility function to dictate sorting logic."""
@@ -822,8 +821,20 @@ class ConceptRenderer(Renderer):
             return len(item[1]), item[0], result.group(2).lower() if result else ""
 
         for k in context["related"].keys():
+            # Sorting by collection ["P01", "OG1"] etc..
             sorted_items = sorted(context["related"][k], key=lambda item: item.collection)
-            grouped = {item: list(lst) for item, lst in groupby(sorted_items, key=lambda item: item.collection)}
+
+            grouped = {}
+            for item, lst in groupby(sorted_items, key=lambda item: item.collection):
+                lst_ = list(lst)
+                # Any group larger than the sorting boundary will not be sorted.
+                sorting_boundary = 2000
+                if len(lst_) > sorting_boundary:
+                    grouped[item] = lst_
+                else:
+                    # Sorts by description (the expensive one!)
+                    grouped[item] = sorted(lst_)
+
             context["related"][k] = {k: v for k, v in sorted(grouped.items(), key=_sort_by)}
 
         alt_label_query = """

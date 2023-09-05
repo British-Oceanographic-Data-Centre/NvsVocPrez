@@ -127,7 +127,6 @@
           {% endfor %}
         {% endfor %}
       {% endif %}
-      
       </table>
     </div>
     <div style="grid-column: 2; grid-row: 1;">
@@ -152,18 +151,12 @@
   <script>
     $(document).ready(function(){
       $('.group-header').click(function(){
-        // $(this).nextUntil('.group-header').toggleClass('hidden-row');
-        $(this).nextUntil('.group-header', '.group-row').toggleClass('hidden-row');
+        $(this).nextUntil('.group-header').toggleClass('hidden-row');
         const span = $(this).find('span');
         span.text(span.text() === '[+]' ? '[-]' : '[+]');
       });
     });
     </script>
 
-    <style>
-      .hidden-row {
-        display: none;
-      }
-    </style>
 {% endblock %}
 
