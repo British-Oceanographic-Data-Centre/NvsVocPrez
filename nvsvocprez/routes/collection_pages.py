@@ -1,8 +1,10 @@
 """Render the Collection Endpoints."""
 import json
-from pathlib import Path
-from typing import AnyStr, Literal, Optional
 
+from itertools import groupby
+from pathlib import Path
+from typing import AnyStr, Literal, Optional, Tuple
+import requests as rq
 from fastapi import APIRouter, HTTPException
 from pyldapi import ContainerRenderer, Renderer, DisplayProperty
 from pyldapi.renderer import RDF_MEDIATYPES
@@ -17,6 +19,7 @@ from starlette.templating import Jinja2Templates
 from .page_configs import DATA_URI, ORDS_ENDPOINT_URL, SYSTEM_URI, acc_dep_map
 from .profiles import void, nvs, skos, dd, vocpub, dcat, sdo
 from .utils import (
+    RelatedItem,
     cache_return,
     exists_triple,
     get_alt_profiles,
@@ -27,6 +30,8 @@ from .utils import (
     sparql_construct,
     sparql_query,
 )
+import re
+from collections import Counter, defaultdict
 
 router = APIRouter()
 
@@ -269,7 +274,6 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
             self.alt_profiles = get_alt_profiles()
             self.ontologies = get_ontologies()
             self.instance_uri = f"{DATA_URI}/collection/{collection_id}/current/"
-
             profiles = {"nvs": nvs, "skos": skos, "vocpub": vocpub, "dd": dd}
             for collection in cache_return(collections_or_conceptschemes="collections"):
                 if collection["id"]["value"] == collection_id:
@@ -805,6 +809,54 @@ class ConceptRenderer(Renderer):
                         context["conforms_to"].append(c_item)
 
         context["logged_in_user"] = get_user_status(self.request)
+
+        # Create Instances of Items
+        contexts = [
+            RelatedItem(predicate_html=item.predicate_html, object_html=item.object_html) for item in context["related"]
+        ]
+
+        # Create dict to add the categoried (related,broader etc..), and then append the items to these.
+        ddict, last_pairing = defaultdict(list), ""
+        for c in contexts:
+            if c.predicate_html and c.predicate_html != last_pairing:
+                last_pairing = c.predicate_html
+            ddict[last_pairing].append(c)
+
+        # Sort each group of items alphabetically.
+        context["related"] = {k: sorted(v) for k, v in ddict.items()}
+
+        def _sort_by(item: list):
+            """Utility function to dictate sorting logic."""
+            result = re.search(r"(<td>)(.+?)(</td>)", item[1][0].object_html)
+            return len(item[1]), item[0], result.group(2).lower() if result else ""
+
+        for k in context["related"].keys():
+            sorted_items = sorted(context["related"][k], key=lambda item: item.collection)
+            grouped = {item: list(lst) for item, lst in groupby(sorted_items, key=lambda item: item.collection)}
+            context["related"][k] = {k: v for k, v in sorted(grouped.items(), key=_sort_by)}
+
+        alt_label_query = """
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        SELECT * WHERE {
+          ?x a skos:Collection .
+          ?x skos:prefLabel ?label .
+        } LIMIT 1000"""
+
+        alt_labels = self._render_sparql_response_rdf(
+            sparql_construct(alt_label_query, "application/json")
+        ).body.decode("utf8")
+        alt_labels_json = json.loads(alt_labels)
+
+        def return_alt_label(collection: str) -> str:
+            """Pair collections with their screen friendly labels."""
+            for entry in alt_labels_json["results"]["bindings"]:
+                if collection in entry["x"]["value"]:
+                    return entry["label"]["value"]
+            return ""
+
+        context["alt_labels"] = {
+            k: return_alt_label(k) for sub_dict in context["related"].values() for k in sub_dict.keys()
+        }
         return templates.TemplateResponse("concept.html", context=context)
 
     def _render_nvs_rdf(self):
