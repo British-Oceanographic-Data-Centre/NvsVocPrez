@@ -606,6 +606,9 @@ class ConceptRenderer(Renderer):
         keyed_mappings = {}
         for x in mappings_r[1]:
             object = x["obj"]["value"]
+            # For consistency, ensure all URls have a trailing slash
+            if object[-1] != "/":
+                object += "/"
             keyed_mappings[object] = x["murl"]["value"]
 
         r = sparql_query(q)
@@ -698,7 +701,10 @@ class ConceptRenderer(Renderer):
             o_label = x["o_label"]["value"] if x.get("o_label") is not None else None
             o_notation = x["o_notation"]["value"] if x.get("o_notation") is not None else None
             mapping_url = ""
-            mapping_url = keyed_mappings.get(x["o"]["value"])
+            if o[-1] != "/":
+                mapping_url = keyed_mappings.get(o + "/")
+            else:
+                mapping_url = keyed_mappings.get(o)
 
             context["collection_systemUri"] = x["collection_systemUri"]["value"]
             context["collection_label"] = x["collection_label"]["value"]
