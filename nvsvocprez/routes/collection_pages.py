@@ -701,10 +701,13 @@ class ConceptRenderer(Renderer):
             o_label = x["o_label"]["value"] if x.get("o_label") is not None else None
             o_notation = x["o_notation"]["value"] if x.get("o_notation") is not None else None
             mapping_url = ""
-            if o[-1] != "/":
-                mapping_url = keyed_mappings.get(o + "/")
-            else:
-                mapping_url = keyed_mappings.get(o)
+            try:
+                if o[-1] != "/":
+                    mapping_url = keyed_mappings.get(o + "/")
+                else:
+                    mapping_url = keyed_mappings.get(o)
+            except:
+                pass
 
             context["collection_systemUri"] = x["collection_systemUri"]["value"]
             context["collection_label"] = x["collection_label"]["value"]
