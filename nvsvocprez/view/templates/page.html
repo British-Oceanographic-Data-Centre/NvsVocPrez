@@ -18,7 +18,7 @@
       <a href="https://www.bodc.ac.uk/"><img src="/static/bodc-bw.svg" alt="BODC logo" style="height:110px; float:right ;" /></a>
     </div>
     <div id="header-title" style="grid-row:2;">
-    {% if logged_in_user != '' %}
+    {% if logged_in_user %}
       {% if logged_in_user == 'Not Logged in' %}
         <a href="/login/">Log-in</a>
       {% else %}
