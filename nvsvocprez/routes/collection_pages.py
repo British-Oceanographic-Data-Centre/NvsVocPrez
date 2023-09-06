@@ -979,7 +979,7 @@ class ConceptRenderer(Renderer):
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
             PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
             CONSTRUCT {
-              <DATA_URI/collection/P01/current/SAGEMSFM/>
+              <xxx>
                 a sdo:DefinedTerm ;
                 sdo:name ?pl ;
                 sdo:alternateName ?al ;
@@ -993,7 +993,7 @@ class ConceptRenderer(Renderer):
               .
             }
             WHERE {
-              <DATA_URI/collection/P01/current/SAGEMSFM/> 
+              <xxx> 
                 skos:prefLabel ?pl ;
                 skos:definition ?def ;
                 dcterms:identifier ?id ;
@@ -1003,10 +1003,10 @@ class ConceptRenderer(Renderer):
 
               BIND (STRDT(REPLACE(STRBEFORE(?date, "."), " ", "T"), xsd:dateTime) AS ?modified)
 
-              ?collection skos:member <DATA_URI/collection/P01/current/SAGEMSFM/>  .
+              ?collection skos:member <xxx>  .
 
               OPTIONAL {
-                <DATA_URI/collection/P01/current/SAGEMSFM/>
+                <xxx>
                   skos:altLabel ?al ;
                   skos:inScheme ?scheme ;
                   owl:sameAs ?sameAs ;
@@ -1014,7 +1014,7 @@ class ConceptRenderer(Renderer):
               }
             }            
             """.replace(
-            "DATA_URI", DATA_URI
+            "xxx", self.instance_uri
         )
         return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
 
