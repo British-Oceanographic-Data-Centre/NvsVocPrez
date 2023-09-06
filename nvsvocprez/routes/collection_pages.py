@@ -26,6 +26,8 @@ from .utils import (
     get_collection_query,
     get_alt_profile_objects,
     get_ontologies,
+    get_external_mappings,
+    extract_external_mapping_url,
     get_user_status,
     sparql_construct,
     sparql_query,
@@ -273,6 +275,7 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
         def __init__(self):
             self.alt_profiles = get_alt_profiles()
             self.ontologies = get_ontologies()
+
             self.instance_uri = f"{DATA_URI}/collection/{collection_id}/current/"
             profiles = {"nvs": nvs, "skos": skos, "vocpub": vocpub, "dd": dd}
             for collection in cache_return(collections_or_conceptschemes="collections"):
@@ -508,6 +511,9 @@ class ConceptRenderer(Renderer):
 
         self.alt_profiles = get_alt_profiles()
         self.ontologies = get_ontologies()
+        collection_id =  self.instance_uri.split('/collection/')[1].split("/")[0]
+        self.external_mappings = get_external_mappings(collection_id)
+
         collection_uri = self.instance_uri.split("/current/")[0] + "/current/"
         for collection in cache_return(collections_or_conceptschemes="collections"):
             if collection["uri"]["value"] == collection_uri:
@@ -522,6 +528,7 @@ class ConceptRenderer(Renderer):
                 )
 
         super().__init__(request, self.instance_uri, concept_profiles, "nvs")
+
 
     def _render_sparql_response_rdf(self, sparql_response):
         if sparql_response[0]:
@@ -660,6 +667,7 @@ class ConceptRenderer(Renderer):
             "profile_token": self.profile,
             "alt_profiles": self.alt_profiles,
             "profile_properties_for_button": [],
+            "external_mappings":self.external_mappings
         }
 
         def make_predicate_label_from_uri(uri):
@@ -851,7 +859,15 @@ class ConceptRenderer(Renderer):
             for entry in alt_labels_json["results"]["bindings"]:
                 if collection in entry["x"]["value"]:
                     return entry["label"]["value"]
-            return ""
+                else:
+                    #If it is in external mappings
+                    url = extract_external_mapping_url(collection)
+                    if (url):
+                        for ext_mapping in context['external_mappings'].keys():
+                            if ext_mapping in url:
+                                return  context['external_mappings'][ext_mapping]['title']
+                    else:
+                        return ""
 
         context["alt_labels"] = {
             k: return_alt_label(k) for sub_dict in context["related"].values() for k in sub_dict.keys()
