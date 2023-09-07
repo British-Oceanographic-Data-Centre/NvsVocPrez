@@ -594,7 +594,7 @@ class ConceptRenderer(Renderer):
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
             PREFIX owl: <http://www.w3.org/2002/07/owl#>
             {prefixes}
-            SELECT ?murl ?prd ?obj WHERE {{
+            SELECT ?murl ?p ?obj WHERE {{
                 BIND (<{self.instance_uri}> AS ?concept)
                 ?murl rdf:subject ?concept .
                 ?murl rdf:object ?obj .
@@ -609,7 +609,11 @@ class ConceptRenderer(Renderer):
             # For consistency, ensure all URls have a trailing slash
             if object[-1] != "/":
                 object += "/"
-            keyed_mappings[object] = x["murl"]["value"]
+            predicate = x["p"]["value"]
+            if predicate[-1] != "/":
+                predicate += "/"
+            key = object + predicate
+            keyed_mappings[key] = x["murl"]["value"]
 
         r = sparql_query(q)
         if not r[0]:
@@ -702,10 +706,13 @@ class ConceptRenderer(Renderer):
             o_notation = x["o_notation"]["value"] if x.get("o_notation") is not None else None
             mapping_url = ""
             try:
+                key = o
                 if o[-1] != "/":
-                    mapping_url = keyed_mappings.get(o + "/")
-                else:
-                    mapping_url = keyed_mappings.get(o)
+                    key += "/"
+                key += p
+                if p[-1] != "/":
+                    key += "/"
+                mapping_url = keyed_mappings.get(key)
             except:
                 pass
 
