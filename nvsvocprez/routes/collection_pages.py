@@ -921,9 +921,6 @@ class ConceptRenderer(Renderer):
                     alt_labels[k] = return_alt_label(k)
 
         context["alt_labels"] =  alt_labels
-        #context["alt_labels"] = {
-        #    k: return_alt_label(k) for sub_dict in context["related"].values() for k in sub_dict.keys()
-        #}
         return templates.TemplateResponse("concept.html", context=context)
 
     def _render_nvs_rdf(self):
