@@ -511,7 +511,7 @@ class ConceptRenderer(Renderer):
 
         self.alt_profiles = get_alt_profiles()
         self.ontologies = get_ontologies()
-        collection_id =  self.instance_uri.split('/collection/')[1].split("/")[0]
+        collection_id = self.instance_uri.split("/collection/")[1].split("/")[0]
         self.external_mappings = get_external_mappings(collection_id)
 
         collection_uri = self.instance_uri.split("/current/")[0] + "/current/"
@@ -528,7 +528,6 @@ class ConceptRenderer(Renderer):
                 )
 
         super().__init__(request, self.instance_uri, concept_profiles, "nvs")
-
 
     def _render_sparql_response_rdf(self, sparql_response):
         if sparql_response[0]:
@@ -693,7 +692,7 @@ class ConceptRenderer(Renderer):
             "profile_token": self.profile,
             "alt_profiles": self.alt_profiles,
             "profile_properties_for_button": [],
-            "external_mappings":self.external_mappings
+            "external_mappings": self.external_mappings,
         }
 
         def make_predicate_label_from_uri(uri):
@@ -906,24 +905,24 @@ class ConceptRenderer(Renderer):
                 if collection in entry["x"]["value"]:
                     return entry["label"]["value"]
                 else:
-                    #If it is in external mappings
+                    # If it is in external mappings
                     url = extract_external_mapping_url(collection)
-                    if (url):
-                        for ext_mapping in context['external_mappings'].keys():
+                    if url:
+                        for ext_mapping in context["external_mappings"].keys():
                             if ext_mapping in url:
-                                return  context['external_mappings'][ext_mapping]['title']
+                                return context["external_mappings"][ext_mapping]["title"]
                     else:
                         return ""
 
-        #populate the alternate labels
-        alt_labels = {}   
-        for sub_dict in context["related"].values()	:
+        # populate the alternate labels
+        alt_labels = {}
+        for sub_dict in context["related"].values():
             for k in sub_dict.copy().keys():
-                if '<td' in k:
-                    alt_labels[return_alt_label(k)] = k 
-                    #Need to swap the title and the link for ext mappings
-                    (list (context['related'].values())[0])[return_alt_label(k)]=k
-                    del list (context['related'].values())[0][k]
+                if "<td" in k:
+                    alt_labels[return_alt_label(k)] = k
+                    # Need to swap the title and the link for ext mappings
+                    (list(context["related"].values())[0])[return_alt_label(k)] = k
+                    del list(context["related"].values())[0][k]
                 else:
                     alt_labels[k] = return_alt_label(k)
 
