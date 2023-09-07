@@ -982,45 +982,27 @@ class ConceptRenderer(Renderer):
 
     def _render_sdo_rdf(self):
         q = """
+            PREFIX dce: <http://purl.org/dc/elements/1.1/>
             PREFIX dcterms: <http://purl.org/dc/terms/>
             PREFIX owl: <http://www.w3.org/2002/07/owl#>
             PREFIX sdo: <https://schema.org/>
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
             PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             CONSTRUCT {
               <xxx>
-                a sdo:DefinedTerm ;
-                sdo:name ?pl ;
-                sdo:alternateName ?al ;
-                sdo:description ?def ;
-                sdo:identifier ?id ;
-                sdo:dateModified ?modified ;
-                sdo:version ?versionInfo ;
-                sdo:inDefinedTermSet ?collection ;
-                sdo:isPartOf ?scheme ;
-                sdo:sameAs ?sameAs ;
+                rdf:type sdo:DefinedTerm ;
+                sdo:description ?description ;
+                sdo:termCode ?identifier ;
+                sdo:inDefinedTermSet <http://vocab.nerc.ac.uk/collection/C30/current/> ;
+                sdo:name ?label ;
               .
             }
             WHERE {
-              <xxx> 
-                skos:prefLabel ?pl ;
-                skos:definition ?def ;
-                dcterms:identifier ?id ;
-                dcterms:date ?date ;
-                owl:versionInfo ?versionInfo ;
-              .
-
-              BIND (STRDT(REPLACE(STRBEFORE(?date, "."), " ", "T"), xsd:dateTime) AS ?modified)
-
-              ?collection skos:member <xxx>  .
-
-              OPTIONAL {
-                <xxx>
-                  skos:altLabel ?al ;
-                  skos:inScheme ?scheme ;
-                  owl:sameAs ?sameAs ;
-                .
-              }
+              <xxx> rdf:type ?type;
+                skos:definition ?description ;
+                dce:identifier ?identifier;
+                skos:prefLabel ?label ;
             }            
             """.replace(
             "xxx", self.instance_uri
