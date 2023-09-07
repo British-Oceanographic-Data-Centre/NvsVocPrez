@@ -869,9 +869,22 @@ class ConceptRenderer(Renderer):
                     else:
                         return ""
 
-        context["alt_labels"] = {
-            k: return_alt_label(k) for sub_dict in context["related"].values() for k in sub_dict.keys()
-        }
+        #populate the alternate labels
+        alt_labels = {}   
+        for sub_dict in context["related"].values()	:
+            for k in sub_dict.copy().keys():
+                if '<td' in k:
+                    alt_labels[return_alt_label(k)] = k 
+                    #Need to swap the title and the link for ext mappings
+                    (list (context['related'].values())[0])[return_alt_label(k)]=k
+                    del list (context['related'].values())[0][k]
+                else:
+                    alt_labels[k] = return_alt_label(k)
+
+        context["alt_labels"] =  alt_labels
+        #context["alt_labels"] = {
+        #    k: return_alt_label(k) for sub_dict in context["related"].values() for k in sub_dict.keys()
+        #}
         return templates.TemplateResponse("concept.html", context=context)
 
     def _render_nvs_rdf(self):

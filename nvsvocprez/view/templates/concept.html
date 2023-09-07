@@ -111,12 +111,26 @@
 						<tr>
 						<td>
 					{% endif %}
-
 					{{ vi[0].object_html|safe }}
 					</td>
 					<td>
 					{{ "{}".format(alt_labels[k]) }}
-					</td>					
+					</td>
+				{% elif vi is string %}
+						{% if loop.index > 1 %}
+						    <tr>
+							<td colspan="1">
+						{% endif %}
+							<td colspan="1" style="color:black;font-size:12px;">
+								{{ "{}".format(k)}} 
+							</td>
+							{{alt_labels[k]|safe}}
+						{% if loop.last and loop.length == 1 %}
+							</td>
+						{% else %}
+							</td>
+							</tr>
+					{% endif %}
 				{% else %}
 					<tr class="group-header header">
 						<th></th>
