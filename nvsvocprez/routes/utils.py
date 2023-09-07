@@ -376,6 +376,37 @@ def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict):
     return query
 
 
+def get_external_mappings(collection_id: str) -> Dict:
+    """Get external mappings title from livbodcsos ords endpoint.
+
+    Returns (Dict): Dict of parsed external mappings data.
+    """
+    if page_configs.ORDS_ENDPOINT_URL is None:
+        logging.error("Environment variable ORDS_ENDPOINT_URL is not set.")
+        return {}
+    try:
+        url = f"{page_configs.ORDS_ENDPOINT_URL}/collection-external-mappings/{collection_id}"
+        resp_json = requests.get(url).json()
+        external_mapping_data = {mapping["url"]: mapping for mapping in resp_json["items"]}
+        return external_mapping_data
+    except requests.RequestException as exc:
+        logging.error("Failed to retrieve external mappings information from %s.\n%s", url, exc)
+        return {}  # Return blank dict to avoid internal server error.
+
+
+def extract_external_mapping_url(tag: str) -> str:
+    """Returns a external mappings from html tag.
+
+    Returns :The related external mappings data.
+    """
+    soup = BeautifulSoup(tag, features="html.parser")
+    aTags = soup.find("a")
+    if aTags != None:
+        return soup.find("a").getText()
+    else:
+        return ""
+
+
 class RelatedItem:
     """Hold related items and provide functionality for sorting and grouping."""
 
