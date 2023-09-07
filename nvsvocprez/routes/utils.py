@@ -376,8 +376,7 @@ def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict):
     return query
 
 
-
-def get_external_mappings(collection_id:str) -> Dict:
+def get_external_mappings(collection_id: str) -> Dict:
     """Get external mappings title from livbodcsos ords endpoint.
 
     Returns (Dict): Dict of parsed external mappings data.
@@ -394,7 +393,8 @@ def get_external_mappings(collection_id:str) -> Dict:
         logging.error("Failed to retrieve external mappings information from %s.\n%s", url, exc)
         return {}  # Return blank dict to avoid internal server error.
 
-def extract_external_mapping_url(tag:str) -> str:
+
+def extract_external_mapping_url(tag: str) -> str:
     """Returns a external mappings from html tag.
 
     Returns :The related external mappings data.
@@ -405,6 +405,7 @@ def extract_external_mapping_url(tag:str) -> str:
         return soup.find("a").getText()
     else:
         return ""
+
 
 class RelatedItem:
     """Hold related items and provide functionality for sorting and grouping."""
