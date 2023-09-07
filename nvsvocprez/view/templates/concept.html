@@ -162,16 +162,27 @@
       {% include 'alt_link.html' %}
       {% if conforms_to is defined and conforms_to is not none %}
         <div>
-        {% for profile in conforms_to %}
-            {% if profile in alt_profiles %}
-              {% set alt = alt_profiles[profile] %}
-              <p>
-                <a  class={{"format-button_active" if alt['token']==request.query_params.get("_profile")
-				else "format-button" }} style="width:200px;" href="?_profile={{ alt['token'] }}&_mediatype=text/html">{{ alt['description'].replace("view", "html view")}}</a>
-                <span class="tooltip" style="font-weight:bold;">?<span class="tooltiptext">{{ alt['description'].replace("view", "html view")}}.</span></span>
-              </p>
-            {% endif %}
-        {% endfor %}
+          <p>
+            <a  
+              class={{ "format-button_active" if request.query_params.get("_profile") == "nvs" or request.query_params.get("_profile") == none 
+                      else "format-button" }} 
+              style="width:200px;" 
+              href="{{ request.path }}">NVS html view</a>
+            <span class="tooltip" style="font-weight:bold;">?
+              <span class="tooltiptext">Default NVS html view.</span>
+            </span>
+          </p>
+          {% for profile in conforms_to %}
+              {% if profile in alt_profiles %}
+                {% set alt = alt_profiles[profile] %}
+                <p>
+                  <a  
+                    class={{"format-button_active" if alt['token']==request.query_params.get("_profile") else "format-button" }} 
+                    style="width:200px;" href="?_profile={{ alt['token'] }}&_mediatype=text/html">{{ alt['description'].replace("view", "html view")}}</a>
+                  <span class="tooltip" style="font-weight:bold;">?<span class="tooltiptext">{{ alt['description'].replace("view", "html view")}}.</span></span>
+                </p>
+              {% endif %}
+          {% endfor %}
       </div>
       {% endif %}
     </div>

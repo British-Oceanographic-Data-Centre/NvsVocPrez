@@ -596,6 +596,28 @@ class ConceptRenderer(Renderer):
             }}         
         """
 
+        mappings_q = f"""
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+            {prefixes}
+            SELECT ?murl ?prd ?obj WHERE {{
+                BIND (<{self.instance_uri}> AS ?concept)
+                ?murl rdf:subject ?concept .
+                ?murl rdf:object ?obj .
+                ?murl rdf:predicate ?p .
+                {exclude_filters}
+            }}
+        """
+        mappings_r = sparql_query(mappings_q)
+        keyed_mappings = {}
+        for x in mappings_r[1]:
+            object = x["obj"]["value"]
+            # For consistency, ensure all URls have a trailing slash
+            if object[-1] != "/":
+                object += "/"
+            keyed_mappings[object] = x["murl"]["value"]
+
         r = sparql_query(q)
         if not r[0]:
             return PlainTextResponse(
@@ -686,6 +708,14 @@ class ConceptRenderer(Renderer):
             o = x["o"]["value"]
             o_label = x["o_label"]["value"] if x.get("o_label") is not None else None
             o_notation = x["o_notation"]["value"] if x.get("o_notation") is not None else None
+            mapping_url = ""
+            try:
+                if o[-1] != "/":
+                    mapping_url = keyed_mappings.get(o + "/")
+                else:
+                    mapping_url = keyed_mappings.get(o)
+            except:
+                pass
 
             context["collection_systemUri"] = x["collection_systemUri"]["value"]
             context["collection_label"] = x["collection_label"]["value"]
@@ -704,15 +734,21 @@ class ConceptRenderer(Renderer):
                 context["date"] = o.replace(" ", "T").rstrip(".0")
             elif p in props.keys():
                 if props[p]["group"] != "ignore":
-                    context[props[p]["group"]].append(DisplayProperty(p, props[p]["label"], o, o_label, o_notation))
+                    context[props[p]["group"]].append(
+                        DisplayProperty(p, props[p]["label"], o, o_label, o_notation, mapping_url=mapping_url)
+                    )
             elif profile_url and p.startswith(profile_url):
                 p_label = p[len(profile_url) :]
                 if p_label[0] == "#":
                     p_label = p_label[1:]
 
-                context["profile_properties"].append(DisplayProperty(p, p_label, o, o_label, o_notation))
+                context["profile_properties"].append(
+                    DisplayProperty(p, p_label, o, o_label, o_notation, mapping_url=mapping_url)
+                )
             else:
-                context["other"].append(DisplayProperty(p, make_predicate_label_from_uri(p), o, o_label))
+                context["other"].append(
+                    DisplayProperty(p, make_predicate_label_from_uri(p), o, o_label, mapping_url=mapping_url)
+                )
 
         def clean_prop_list_labels(prop_list):
             last_pred_html = None
@@ -829,18 +865,21 @@ class ConceptRenderer(Renderer):
             return len(item[1]), item[0], result.group(2).lower() if result else ""
 
         for k in context["related"].keys():
+            # Sorting by collection ["P01", "OG1"] etc..
             sorted_items = sorted(context["related"][k], key=lambda item: item.collection)
 
             grouped = {}
             for item, lst in groupby(sorted_items, key=lambda item: item.collection):
                 lst_ = list(lst)
-                if len(lst_) > 13000:
+                # Any group larger than the sorting boundary will not be sorted.
+                sorting_boundary = 2000
+                if len(lst_) > sorting_boundary:
                     grouped[item] = lst_
                 else:
+                    # Sorts by description (the expensive one!)
                     grouped[item] = sorted(lst_)
 
             context["related"][k] = {k: v for k, v in sorted(grouped.items(), key=_sort_by)}
-
 
         alt_label_query = """
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -972,48 +1011,30 @@ class ConceptRenderer(Renderer):
 
     def _render_sdo_rdf(self):
         q = """
+            PREFIX dce: <http://purl.org/dc/elements/1.1/>
             PREFIX dcterms: <http://purl.org/dc/terms/>
             PREFIX owl: <http://www.w3.org/2002/07/owl#>
             PREFIX sdo: <https://schema.org/>
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
             PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             CONSTRUCT {
-              <DATA_URI/collection/P01/current/SAGEMSFM/>
-                a sdo:DefinedTerm ;
-                sdo:name ?pl ;
-                sdo:alternateName ?al ;
-                sdo:description ?def ;
-                sdo:identifier ?id ;
-                sdo:dateModified ?modified ;
-                sdo:version ?versionInfo ;
-                sdo:inDefinedTermSet ?collection ;
-                sdo:isPartOf ?scheme ;
-                sdo:sameAs ?sameAs ;
+              <xxx>
+                rdf:type sdo:DefinedTerm ;
+                sdo:description ?description ;
+                sdo:termCode ?identifier ;
+                sdo:inDefinedTermSet <http://vocab.nerc.ac.uk/collection/C30/current/> ;
+                sdo:name ?label ;
               .
             }
             WHERE {
-              <DATA_URI/collection/P01/current/SAGEMSFM/> 
-                skos:prefLabel ?pl ;
-                skos:definition ?def ;
-                dcterms:identifier ?id ;
-                dcterms:date ?date ;
-                owl:versionInfo ?versionInfo ;
-              .
-
-              BIND (STRDT(REPLACE(STRBEFORE(?date, "."), " ", "T"), xsd:dateTime) AS ?modified)
-
-              ?collection skos:member <DATA_URI/collection/P01/current/SAGEMSFM/>  .
-
-              OPTIONAL {
-                <DATA_URI/collection/P01/current/SAGEMSFM/>
-                  skos:altLabel ?al ;
-                  skos:inScheme ?scheme ;
-                  owl:sameAs ?sameAs ;
-                .
-              }
+              <xxx> rdf:type ?type;
+                skos:definition ?description ;
+                dce:identifier ?identifier;
+                skos:prefLabel ?label ;
             }            
             """.replace(
-            "DATA_URI", DATA_URI
+            "xxx", self.instance_uri
         )
         return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
 
