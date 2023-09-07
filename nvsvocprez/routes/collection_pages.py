@@ -590,15 +590,15 @@ class ConceptRenderer(Renderer):
         """
 
         mappings_q = f"""
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX sssom: <https://w3id.org/sssom/schema/>
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
             PREFIX owl: <http://www.w3.org/2002/07/owl#>
             {prefixes}
             SELECT ?murl ?prd ?obj WHERE {{
                 BIND (<{self.instance_uri}> AS ?concept)
-                ?murl rdf:subject ?concept .
-                ?murl rdf:object ?obj .
-                ?murl rdf:predicate ?p .
+                ?murl sssom:subject_id ?concept .
+                ?murl sssom:object_id ?obj .
+                ?murl sssom:predicate_id ?p .
                 {exclude_filters}
             }}
         """
@@ -908,7 +908,7 @@ class ConceptRenderer(Renderer):
             PREFIX owl: <http://www.w3.org/2002/07/owl#>
             PREFIX pav: <http://purl.org/pav/>
             PREFIX prov: <https://www.w3.org/ns/prov#>
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX sssom: <https://w3id.org/sssom/schema/>
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
             PREFIX void: <http://rdfs.org/ns/void#>
 
@@ -917,7 +917,7 @@ class ConceptRenderer(Renderer):
 
               # remove provenance, for now
               # ?s ?p2 ?o2 .              
-              # ?s rdf:subject <{self.instance_uri}> ;
+              # ?s sssom:subject_id <{self.instance_uri}> ;
               #   prov:has_provenance ?m .              
             }}
             WHERE {{
@@ -925,7 +925,7 @@ class ConceptRenderer(Renderer):
 
                 # remove provenance, for now
                 # OPTIONAL {{
-                #     ?s rdf:subject <{self.instance_uri}> ;
+                #     ?s sssom:subject_id <{self.instance_uri}> ;
                 #        prov:has_provenance ?m .
                 #         
                 #     # {{ ?s ?p2 ?o2 }}
