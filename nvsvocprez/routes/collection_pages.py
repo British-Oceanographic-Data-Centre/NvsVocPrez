@@ -929,7 +929,7 @@ class ConceptRenderer(Renderer):
                 else:
                     alt_labels[k] = return_alt_label(k)
 
-        context["alt_labels"] =  alt_labels
+        context["alt_labels"] = alt_labels
         return templates.TemplateResponse("concept.html", context=context)
 
     def _render_nvs_rdf(self):
