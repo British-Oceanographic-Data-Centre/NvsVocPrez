@@ -429,11 +429,11 @@ def mapping(request: Request):
         def _render_nvs_html(self, g):
             mapping = {}
             for p, o in g.predicate_objects(subject=URIRef(self.instance_uri)):
-                if str(p) == "http://www.w3.org/1999/02/22-rdf-syntax-ns#subject":
+                if str(p) == "https://w3id.org/sssom/schema/subject_id":
                     mapping["subject"] = str(o)
-                elif str(p) == "http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate":
+                elif str(p) == "https://w3id.org/sssom/schema/predicate_id":
                     mapping["predicate"] = str(o)
-                elif str(p) == "http://www.w3.org/1999/02/22-rdf-syntax-ns#object":
+                elif str(p) == "https://w3id.org/sssom/schema/object_id":
                     mapping["object"] = str(o)
                 elif str(p) == "http://purl.org/dc/elements/1.1/modified":
                     mapping["modified"] = str(o)

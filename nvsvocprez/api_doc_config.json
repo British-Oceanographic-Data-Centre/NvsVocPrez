@@ -469,7 +469,7 @@
 			"Mappings"
 		  ],
 		  "summary": "Retrieve a mapping",
-		  "description": "Retrieves a mapping for a concept.\n\n Use the following query at the SPARQL endpoint to discover mapping URLs for a concept.\n\n­­select * where {?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject> <http://vocab.nerc.ac.uk/collection/A05/current/EV_AIRHUM/> .}",
+		  "description": "Retrieves a mapping for a concept.\n\n Use the following query at the SPARQL endpoint to discover mapping URLs for a concept.\n\n­­select * where {?s <https://w3id.org/sssom/schema/subject_id> <http://vocab.nerc.ac.uk/collection/A05/current/EV_AIRHUM/> .}",
 		  "openapi_extra": {
 			"parameters": [
 			  {

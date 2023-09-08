@@ -10,15 +10,15 @@
           <td><a href="{{ systemUri }}">{{ uri }}</a></td>
         </tr>
         <tr>
-          <th><a href="http://www.w3.org/1999/02/22-rdf-syntax-ns#subject">Subject</a></th>
+          <th><a href="https://w3id.org/sssom/schema/subject_id">Subject</a></th>
           <td><a href="{{ subjectSystemUri }}">{{ subject }}</a></td>
         </tr>
         <tr>
-          <th><a href="http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate">Predicate</a></th>
+          <th><a href="https://w3id.org/sssom/schema/predicate_id">Predicate</a></th>
           <td><a href="{{ predicateSystemUri }}">{{ predicate.split("#")[1].rstrip("/") if "#" in predicate else predicate }}</a></td>
         </tr>
         <tr>
-          <th><a href="http://www.w3.org/1999/02/22-rdf-syntax-ns#object">Object</a></th>
+          <th><a href="https://w3id.org/sssom/schema/object_id">Object</a></th>
           <td><a href="{{ objectSystemUri }}">{{ object }}</a></td>
         </tr>
         <tr>
