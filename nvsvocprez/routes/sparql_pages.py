@@ -22,7 +22,7 @@ templates = Jinja2Templates(str(api_home_dir / "view" / "templates"))
 config_file_location = Path(__file__).parent.parent / "api_doc_config.json"
 with open(config_file_location, "r") as config_file:
     paths = json.load(config_file)["paths"]
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARNING)
 
 
 @router.get("/sparql", include_in_schema=False)
