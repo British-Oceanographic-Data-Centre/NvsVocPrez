@@ -511,8 +511,13 @@ class ConceptRenderer(Renderer):
 
         self.alt_profiles = get_alt_profiles()
         self.ontologies = get_ontologies()
-        collection_id = self.instance_uri.split("/collection/")[1].split("/")[0]
-        self.external_mappings = get_external_mappings(collection_id)
+
+        # if collection get external mappings
+        if "/collection/" in self.instance_uri:
+            collection_id = self.instance_uri.split("/collection/")[1].split("/")[0]
+            self.external_mappings = get_external_mappings(collection_id)
+        else:
+            self.external_mappings ={}
 
         collection_uri = self.instance_uri.split("/current/")[0] + "/current/"
         for collection in cache_return(collections_or_conceptschemes="collections"):
@@ -922,6 +927,8 @@ class ConceptRenderer(Renderer):
         for sub_dict in context["related"].copy().values():
             for k in sub_dict.copy().keys():
                 if "<td" in k:
+                    if not return_alt_label(k):
+                        continue
                     alt_labels[return_alt_label(k)] = k
                     # Need to swap the title and the link for ext mappings
                     (list(context["related"].values())[0])[return_alt_label(k)] = k
