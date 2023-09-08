@@ -901,22 +901,25 @@ class ConceptRenderer(Renderer):
 
         def return_alt_label(collection: str) -> str:
             """Pair collections with their screen friendly labels."""
+            label = None
             for entry in alt_labels_json["results"]["bindings"]:
                 if collection in entry["x"]["value"]:
-                    return entry["label"]["value"]
+                    label = entry["label"]["value"]
+
+            if label is None:
+                # If it is in external mappings
+                url = extract_external_mapping_url(collection)
+                if url:
+                    for ext_mapping in context["external_mappings"].keys():
+                        if ext_mapping in url:
+                            label = context["external_mappings"][ext_mapping]["title"]
                 else:
-                    # If it is in external mappings
-                    url = extract_external_mapping_url(collection)
-                    if url:
-                        for ext_mapping in context["external_mappings"].keys():
-                            if ext_mapping in url:
-                                return context["external_mappings"][ext_mapping]["title"]
-                    else:
-                        return ""
+                    label = ""
+            return label
 
         # populate the alternate labels
         alt_labels = {}
-        for sub_dict in context["related"].values():
+        for sub_dict in context["related"].copy().values():
             for k in sub_dict.copy().keys():
                 if "<td" in k:
                     alt_labels[return_alt_label(k)] = k
