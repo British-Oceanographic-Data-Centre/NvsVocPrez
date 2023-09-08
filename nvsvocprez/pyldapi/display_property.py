@@ -46,10 +46,10 @@ class DisplayProperty:
             else:
                 self.object_html += "<td/>"
         elif object_value.startswith("http"):  # URI, no label
-            self.object_html = f'<td colspan="2"><a href="{object_value}">{object_value}</a></td>'
+            self.object_html = f'<td colspan="1"><a href="{object_value}">{object_value}</a></td>'
             if mapping_url:
                 self.object_html += f'<td><a class="format-button" href="{mapping_url}">Mapping: {mapping_id}</a></td>'
             else:
-                self.object_html += "<td/>"
+                self.object_html = self.object_html.replace('colspan="1"', 'colspan="2"')
         else:  # literal
             self.object_html = f'<td colspan="2">{object_value}</td>'
