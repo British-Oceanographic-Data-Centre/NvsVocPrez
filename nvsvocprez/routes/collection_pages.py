@@ -924,15 +924,15 @@ class ConceptRenderer(Renderer):
 
         # populate the alternate labels
         alt_labels = {}
-        for sub_dict in context["related"].copy().values():
+        for index, sub_dict in enumerate(context["related"].copy().values()):
             for k in sub_dict.copy().keys():
                 if "<td" in k:
                     if not return_alt_label(k):
                         continue
                     alt_labels[return_alt_label(k)] = k
                     # Need to swap the title and the link for ext mappings
-                    (list(context["related"].values())[0])[return_alt_label(k)] = k
-                    del list(context["related"].values())[0][k]
+                    (list(context["related"].values())[index])[return_alt_label(k)] = k
+                    del list(context["related"].values())[index][k]
                 else:
                     alt_labels[k] = return_alt_label(k)
 
