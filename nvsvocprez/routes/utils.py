@@ -424,7 +424,7 @@ class RelatedItem:
     @property
     def description(self):
         """Parse the description from an item."""
-        return BeautifulSoup(self.object_html, features="html.parser")("td")[-1].text
+        return BeautifulSoup(self.object_html, features="html.parser")("td")[-2].text
 
     def __lt__(self, other):
         """Utility method needed for sorting items."""

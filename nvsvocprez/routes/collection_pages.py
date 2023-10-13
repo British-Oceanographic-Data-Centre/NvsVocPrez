@@ -517,7 +517,7 @@ class ConceptRenderer(Renderer):
             collection_id = self.instance_uri.split("/collection/")[1].split("/")[0]
             self.external_mappings = get_external_mappings(collection_id)
         else:
-            self.external_mappings ={}
+            self.external_mappings = {}
 
         collection_uri = self.instance_uri.split("/current/")[0] + "/current/"
         for collection in cache_return(collections_or_conceptschemes="collections"):
@@ -873,7 +873,7 @@ class ConceptRenderer(Renderer):
         def _sort_by(item: list):
             """Utility function to dictate sorting logic."""
             result = re.search(r"(<td>)(.+?)(</td>)", item[1][0].object_html)
-            return len(item[1]), item[0], result.group(2).lower() if result else ""
+            return len(item[1]), result.group(2).lower() if result else ""
 
         for k in context["related"].keys():
             # Sorting by collection ["P01", "OG1"] etc..
