@@ -517,7 +517,7 @@ class ConceptRenderer(Renderer):
             collection_id = self.instance_uri.split("/collection/")[1].split("/")[0]
             self.external_mappings = get_external_mappings(collection_id)
         else:
-            self.external_mappings ={}
+            self.external_mappings = {}
 
         collection_uri = self.instance_uri.split("/current/")[0] + "/current/"
         for collection in cache_return(collections_or_conceptschemes="collections"):
