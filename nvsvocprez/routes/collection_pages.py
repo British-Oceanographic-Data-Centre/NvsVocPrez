@@ -873,7 +873,7 @@ class ConceptRenderer(Renderer):
         def _sort_by(item: list):
             """Utility function to dictate sorting logic."""
             result = re.search(r"(<td>)(.+?)(</td>)", item[1][0].object_html)
-            return len(item[1]), item[0], result.group(2).lower() if result else ""
+            return len(item[1]), result.group(2).lower() if result else ""
 
         for k in context["related"].keys():
             # Sorting by collection ["P01", "OG1"] etc..
