@@ -1,4 +1,5 @@
 """Utility functions used in rendering pages."""
+
 import logging
 from typing import Dict, List, Literal
 import httpx

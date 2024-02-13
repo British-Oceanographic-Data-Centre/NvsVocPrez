@@ -128,9 +128,11 @@ def standard_name(request: Request, concept_id: str = None):
         def _render_sparql_response_rdf(self, sparql_response):
             if sparql_response[0]:
                 return Response(
-                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode() + sparql_response[1]
-                    if "xml" in self.mediatype
-                    else sparql_response[1],
+                    (
+                        '<?xml version="1.0" encoding="UTF-8"?>\n'.encode() + sparql_response[1]
+                        if "xml" in self.mediatype
+                        else sparql_response[1]
+                    ),
                     headers={"Content-Type": self.mediatype},
                 )
             else:

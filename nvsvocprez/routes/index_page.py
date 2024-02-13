@@ -1,4 +1,5 @@
 """Render the home page."""
+
 from pathlib import Path
 
 from fastapi import APIRouter
