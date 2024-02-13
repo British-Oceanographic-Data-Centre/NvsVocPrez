@@ -1,6 +1,7 @@
 """Added as a test to ensure that the collection_page can use the information here,
 
 If it can, then all information from profiles.py should live in here."""
+
 import os
 
 DEBUG = os.getenv("DEBUG", True)

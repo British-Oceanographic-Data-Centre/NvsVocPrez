@@ -1,4 +1,5 @@
 """Render the contact page."""
+
 from starlette.requests import Request
 from starlette.templating import Jinja2Templates
 from pathlib import Path
