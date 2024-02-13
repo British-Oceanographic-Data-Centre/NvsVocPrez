@@ -39,7 +39,8 @@
       </ul>
     </li>
     <li><a href="/editor/">Vocab Editor</a> - tool developed to give vocabulary editors and managers content management access on vocabularies they are authorised to edit. This includes the management of mappings between concepts from their resource to other NVS-held concepts or to concepts held in other semantic repositories</li>
-    <li><a href="http://vocab.nerc.ac.uk/nvs_atom.xml">NVS Feed</a> - NERC Vocabulary Server - Updated concept collections atom feed</li>
+    <li><a href="http://vocab.nerc.ac.uk/nvs_atom.xml">NVS Feed</a> - NERC Vocabulary Server - Updated concept collections atom feed. Note that versioned collection URI's returned by the feed are currently inactive.</li>
+    <li>NVS LDES Feed - Uses the Linked Data Event Streams (<a href="https://semiceu.github.io/LinkedDataEventStreams/">LDES</a>) specification to publish latest concept changes in Turtle format. There is one feed per collection and can be accessed using the following url structure<p>http://vocab.nerc.ac.uk/ldes/{collection}/</p><p>for example <a href="http://vocab.nerc.ac.uk/ldes/P02/">http://vocab.nerc.ac.uk/ldes/P02/</a></p><p>Concept updates will typically be accessible post 11:00 AM GMT.</p></li>
     <li><a href="http://vocab.nerc.ac.uk/.well-known/void">.well-known/void</a> - A machine readable (RDF/XML) document describing the overall content of the NVS using the <a href="http://www.w3.org/TR/void/">W3C’s VoID</a> vocabulary
   </ul>
   {% include 'alt_link.html' %}
