@@ -1,4 +1,5 @@
 """Render the Scheme Pages."""
+
 import json
 from pathlib import Path
 from typing import AnyStr, Literal, Optional
@@ -63,9 +64,11 @@ def conceptschemes(request: Request):
         def _render_sparql_response_rdf(self, sparql_response):
             if sparql_response[0]:
                 return Response(
-                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode() + sparql_response[1]
-                    if "xml" in self.mediatype
-                    else sparql_response[1],
+                    (
+                        '<?xml version="1.0" encoding="UTF-8"?>\n'.encode() + sparql_response[1]
+                        if "xml" in self.mediatype
+                        else sparql_response[1]
+                    ),
                     headers={"Content-Type": self.mediatype},
                 )
             else:
@@ -256,9 +259,11 @@ def scheme(
         def _render_sparql_response_rdf(self, sparql_response):
             if sparql_response[0]:
                 return Response(
-                    '<?xml version="1.0" encoding="UTF-8"?>\n'.encode() + sparql_response[1]
-                    if "xml" in self.mediatype
-                    else sparql_response[1],
+                    (
+                        '<?xml version="1.0" encoding="UTF-8"?>\n'.encode() + sparql_response[1]
+                        if "xml" in self.mediatype
+                        else sparql_response[1]
+                    ),
                     headers={"Content-Type": self.mediatype},
                 )
             else:
@@ -493,13 +498,15 @@ def scheme(
                 r = sparql_query(q)
                 return JSONResponse(
                     [
-                        {
-                            "uri": x["c"]["value"],
-                            "prefLabel": x["pl"]["value"],
-                            "broader": x["b"]["value"],
-                        }
-                        if x.get("b") is not None
-                        else {"uri": x["c"]["value"], "prefLabel": x["pl"]["value"]}
+                        (
+                            {
+                                "uri": x["c"]["value"],
+                                "prefLabel": x["pl"]["value"],
+                                "broader": x["b"]["value"],
+                            }
+                            if x.get("b") is not None
+                            else {"uri": x["c"]["value"], "prefLabel": x["pl"]["value"]}
+                        )
                         for x in r[1]
                     ]
                 )
