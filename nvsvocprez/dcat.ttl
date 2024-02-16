@@ -4,37 +4,28 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 <http://vocab.nerc.ac.uk/>
-    a dcat:Dataset ;
-    dcterms:title "NVS Vocabularies"@en ;
-    dcterms:description "Vocabularies managed by the National Vocabulary System (NVS)"@en ;
-    dcterms:publisher <http://vocab.nerc.ac.uk/collection/R04/current/BO/> ;
-    dcterms:subject
+  a dcat:Catalog;
+  dcat:dataset <http://vocab.nerc.ac.uk/scheme/>, <http://vocab.nerc.ac.uk/collection/> ;
+  dcterms:description "Vocabularies managed by the NERC Vocabulary Server (NVS)"@en ;
+  dcterms:title "NERC Vocabulary Server"@en ;
+  dcterms:publisher <http://vocab.nerc.ac.uk/collection/C75/current/BOD/> ;
+  dcterms:subject
         <http://dbpedia.org/resource/Earth_science> ,
         <http://dbpedia.org/resource/Environmental_science> ,
         <http://dbpedia.org/resource/Oceanography> ;
-    dcterms:hasPart <xxxcollection/> , <xxxscheme/> ;
-.
 
-<http://vocab.nerc.ac.uk/collection/R04/current/BO/>
-    a foaf:Organization ;
-    foaf:name "British Oceanographic Data Centre" ;
-    foaf:homepage "https://www.bodc.ac.uk"^^xsd:anyURI ;
-.
+dcat:service <http://vocab.nerc.ac.uk/sparql&gt;,&lt;http://vocab.nerc.ac.uk/vocab2.wsdl> .
 
-<xxx>
-    a dcat:DataService ;
-    dcterms:description "A Content Negotiation by Profile-compliant service that provides access to all of this catalogue's information"@en ;
-    dcterms:title "System ConnegP API" ;
-    dcterms:type <http://purl.org/dc/dcmitype/Service> ;
-    dcat:endpointURL <xxx> ;
-    dcat:servesDataset <http://vocab.nerc.ac.uk/> ;
-.
-
-<xxxsparql>
+<http://vocab.nerc.ac.uk/sparql>
     a dcat:DataService ;
     dcterms:description "A SPARQL Protocol-compliant service that provides access to all of this catalogue's information"@en ;
     dcterms:title "System SPARQL Service" ;
     dcterms:type <http://purl.org/dc/dcmitype/Service> ;
-    dcat:endpointURL <xxxsparql> ;
-    dcat:servesDataset <http://vocab.nerc.ac.uk/> ;
-.
+    dcat:endpointURL <http://vocab.nerc.ac.uk/sparql> .
+
+<http://vocab.nerc.ac.uk/vocab.wsdl>
+    a dcat:DataService ;
+    dcterms:description "A SOAP service for NVS vocabularies"@en ;
+    dcterms:title "System SOAP Service" ;
+    dcterms:type <http://purl.org/dc/dcmitype/Service> ;
+    dcat:endpointURL <http://vocab.nerc.ac.uk/vocab.wsdl> .
