@@ -14,7 +14,7 @@
         <http://dbpedia.org/resource/Environmental_science> ,
         <http://dbpedia.org/resource/Oceanography> ;
 
-dcat:service <http://vocab.nerc.ac.uk/sparql&gt;,&lt;http://vocab.nerc.ac.uk/vocab2.wsdl> .
+dcat:service <http://vocab.nerc.ac.uk/sparql>,<http://vocab.nerc.ac.uk/vocab2.wsdl> .
 
 <http://vocab.nerc.ac.uk/sparql>
     a dcat:DataService ;
@@ -29,3 +29,9 @@ dcat:service <http://vocab.nerc.ac.uk/sparql&gt;,&lt;http://vocab.nerc.ac.uk/voc
     dcterms:title "System SOAP Service" ;
     dcterms:type <http://purl.org/dc/dcmitype/Service> ;
     dcat:endpointURL <http://vocab.nerc.ac.uk/vocab.wsdl> .
+
+<http://vocab.nerc.ac.uk/collection/R04/current/BO/>
+    a foaf:Organization ;
+    foaf:name "British Oceanographic Data Centre" ;
+    foaf:homepage "https://www.bodc.ac.uk"^^xsd:anyURI ;
+.
