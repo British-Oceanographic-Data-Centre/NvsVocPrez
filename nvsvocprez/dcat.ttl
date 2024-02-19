@@ -30,8 +30,7 @@ dcat:service <http://vocab.nerc.ac.uk/sparql>,<http://vocab.nerc.ac.uk/vocab2.ws
     dcterms:type <http://purl.org/dc/dcmitype/Service> ;
     dcat:endpointURL <http://vocab.nerc.ac.uk/vocab.wsdl> .
 
-<http://vocab.nerc.ac.uk/collection/R04/current/BO/>
+<http://vocab.nerc.ac.uk/collection/C75/current/BOD/>
     a foaf:Organization ;
     foaf:name "British Oceanographic Data Centre" ;
-    foaf:homepage "https://www.bodc.ac.uk"^^xsd:anyURI ;
-.
+    foaf:homepage "https://www.bodc.ac.uk"^^xsd:anyURI .
