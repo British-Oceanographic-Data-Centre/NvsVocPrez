@@ -356,8 +356,8 @@ def collection(request: Request, collection_id, acc_dep_or_concept: str = None):
                         "uri": concept["c"]["value"],
                         "id": concept["id"]["value"],
                         "systemUri": concept["systemUri"]["value"],
-                        "prefLabel": concept["pl"]["value"].replace("_", " "),
-                        "definition": concept["def"]["value"].replace("_", "_ "),
+                        "prefLabel": concept["pl"]["value"],
+                        "definition": concept["def"]["value"],
                         "date": concept["date"]["value"][0:10],
                         "deprecated": True if concept.get("dep") and concept["dep"]["value"] == "true" else False,
                     }
