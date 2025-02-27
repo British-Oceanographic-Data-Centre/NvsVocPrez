@@ -42,6 +42,7 @@ artefacts_context = {
     "@language": "en",
 }
 
+
 @router.get("/artefacts", **paths["/artefacts"]["get"])
 @router.head("/artefacts", include_in_schema=False)
 def artefacts(request: Request):
@@ -61,6 +62,7 @@ def artefacts(request: Request):
     json_ld = {"@context": artefacts_context, "@graph": graph_collection_items + graph_scheme_items}
 
     return JSONResponse(content=json_ld, status_code=response.status_code)
+
 
 @router.get("/artefacts/{artefactID}", **paths["/artefacts/{artefactID}"]["get"])
 @router.head("/artefacts/{artefactID}", include_in_schema=False)
@@ -82,20 +84,16 @@ def artefactId(request: Request, artefactID: str):
     json_ld = {}
 
     if response_collection.status_code == 200:
-        a_context["@vocab"] = collection_uri        
+        a_context["@vocab"] = collection_uri
         data = response_collection.json()
         graph_items = get_collection_graph_items(data)
-        graph_item = next((item for item in graph_items if item["@id"] == collection_uri), None)        
+        graph_item = next((item for item in graph_items if item["@id"] == collection_uri), None)
     else:
         a_context["@vocab"] = scheme_uri
         data = response_scheme.json()
         graph_item = next((item for item in data["@graph"] if item["@id"] == scheme_uri), None)
 
-        graph_item = get_scheme_graph_items(
-            {
-            "@graph": [graph_item]
-            }
-        )[0]
+        graph_item = get_scheme_graph_items({"@graph": [graph_item]})[0]
 
     json_ld = {"@context": a_context}
     json_ld.update(graph_item)
@@ -107,15 +105,18 @@ def extract_collection_acronym(uri):
     match = re.search(r"/collection/(.*?)/current/", uri)
     return match.group(1)
 
+
 def extract_scheme_acronym(uri):
     match = re.search(r"/scheme/(.*?)/current/", uri)
     return match.group(1)
+
 
 def parse_date(date_str):
     try:
         return datetime.strptime(date_str["@value"], "%Y-%m-%dT%H:%M:%S")
     except (ValueError, TypeError, KeyError):
         return datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f")
+
 
 def get_collection_graph_items(data: dict):
     graph_items = []
@@ -169,13 +170,14 @@ def get_collection_graph_items(data: dict):
 
     return graph_items
 
+
 def get_scheme_graph_items(data: dict):
     graph_items = []
-    
+
     for item in data.get("@graph", []):
-        uri = item.get("@id")        
+        uri = item.get("@id")
         date_obj = parse_date(item.get("dc:date"))
-        
+
         bibliographic_citation = (
             f"[British Oceanographic Data Centre, year {date_obj.year}, "
             f"{item.get('dc:title')}, version {item.get('owl:versionInfo')}, "
