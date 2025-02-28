@@ -73,7 +73,7 @@ distributions_meta = {
     "hasRepresentationLanguage": "https://www.w3.org/2004/02/skos/",
     "conformsToKnowledgeRepresentationParadigm": "",
     "usedEngineeringMethodology": "",
-    "accessURL": f"{host}/sparql/"
+    "accessURL": f"{host}/sparql/",
 }
 
 distributions_config = [
@@ -95,7 +95,7 @@ def artefacts(request: Request):
 
     # Schemes
     with httpx.Client(follow_redirects=True) as client:
-        response = client.get(f"{host}/scheme?_mediatype=application/ld+json&_profile=nvs", timeout=timeout)        
+        response = client.get(f"{host}/scheme?_mediatype=application/ld+json&_profile=nvs", timeout=timeout)
 
     data = response.json()
     graph_scheme_items = get_scheme_graph_items(data)
@@ -161,7 +161,9 @@ def distributions(request: Request, artefactID: str):
     ]
 
     for item in distributions_json_ld:
-        item["downloadURL"] = f"{host}/collection/{artefactID.upper()}/current/?_profile=nvs&_mediatype={item['mediaType']}"
+        item["downloadURL"] = (
+            f"{host}/collection/{artefactID.upper()}/current/?_profile=nvs&_mediatype={item['mediaType']}"
+        )
         item["@id"] = f"{host}/artefacts/{artefactID.upper()}/distributions/{item['distributionId']}"
         del item["mediaType"]
 
