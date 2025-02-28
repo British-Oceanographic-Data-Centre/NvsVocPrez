@@ -132,6 +132,79 @@
 		  }
 		}
 	  },
+	  "/artefacts/{artefactID}/distributions": {
+		"get": {
+		  "tags": [
+			"artefacts"
+		  ],
+		  "summary": "Get information about a semantic artefact distributions",
+		  "description": "This endpoint will return information about a semantic artefact distributions in JSON-LD",
+		  "openapi_extra": {
+			"parameters": [
+			{
+				"in": "path",				
+				"name": "artefactID",
+				"description": "The semantic artefact identifier.",
+				"required": true,
+				"example": "P03"
+			},
+			{
+				"in": "query",
+				"name": "_mediatype",
+				"description": "artefacts JSON-LD",
+				"required": false,
+				"schema": {
+				  "type": "string",
+				  "enum": [
+					"application/ld+json"
+				  ]
+				},
+				"example": "application/ld+json"
+			  }
+			]
+		  }
+		}
+	  },
+		"/artefacts/{artefactID}/distributions/{distributionID}": {
+		"get": {
+		  "tags": [
+			"artefacts"
+		  ],
+		  "summary": "Get information about a semantic artefact distribution",
+		  "description": "This endpoint will return information about a semantic artefact distribution in JSON-LD",
+		  "openapi_extra": {
+			"parameters": [
+			{
+				"in": "path",				
+				"name": "artefactID",
+				"description": "The semantic artefact identifier.",
+				"required": true,
+				"example": "P03"
+			},
+			{
+				"in": "path",				
+				"name": "distributionID",
+				"description": "The distribution identifier",
+				"required": true,
+				"example": "1"
+			},			
+			{
+				"in": "query",
+				"name": "_mediatype",
+				"description": "artefacts JSON-LD",
+				"required": false,
+				"schema": {
+				  "type": "string",
+				  "enum": [
+					"application/ld+json"
+				  ]
+				},
+				"example": "application/ld+json"
+			  }
+			]
+		  }
+		}
+	  },
 
 
 	  "/collection/": {
