@@ -1,6 +1,7 @@
 """FAIR-IMPACT artefacts endpoint."""
 
 from datetime import date
+import os
 from pathlib import Path
 import re
 import json
@@ -19,8 +20,10 @@ with open(config_file_location, "r") as config_file:
 
 timeout = 60
 
+host = os.getenv("SYSTEM_URI", "https://vocab.nerc.ac.uk")
+
 artefacts_context = {
-    "@vocab": "http://data.bioontology.org/metadata/",
+    "@vocab": "http://purl.org/dc/terms/",
     "acronym": "https://w3id.org/mod#acronym",
     "accessRights": "http://purl.org/dc/terms/accessRights",
     "URI": "https://w3id.org/mod#URI",
@@ -44,7 +47,7 @@ artefacts_context = {
 }
 
 distributions_context = {
-    "@vocab": "http://data.bioontology.org/metadata/",
+    "@vocab": "http://purl.org/dc/terms/",
     "distributionId": "http://data.bioontology.org/metadata/distributionId",
     "title": "http://purl.org/dc/terms/title",
     "hasRepresentationLanguage": "https://w3id.org/mod#hasRepresentationLanguage",
@@ -70,7 +73,7 @@ distributions_meta = {
     "hasRepresentationLanguage": "https://www.w3.org/2004/02/skos/",
     "conformsToKnowledgeRepresentationParadigm": "",
     "usedEngineeringMethodology": "",
-    "accessURL": "https://vocab.nerc.ac.uk/sparql/",
+    "accessURL": f"{host}/sparql/",
 }
 
 distributions_config = [
@@ -85,18 +88,14 @@ distributions_config = [
 def artefacts(request: Request):
     # Collections
     with httpx.Client(follow_redirects=True) as client:
-        response = client.get(
-            "http://vocab.nerc.ac.uk/collection?_mediatype=application/ld+json&_profile=nvs", timeout=timeout
-        )
+        response = client.get(f"{host}/collection?_mediatype=application/ld+json&_profile=nvs", timeout=timeout)
 
     data = response.json()
     graph_collection_items = get_collection_graph_items(data)
 
     # Schemes
     with httpx.Client(follow_redirects=True) as client:
-        response = client.get(
-            "http://vocab.nerc.ac.uk/scheme?_mediatype=application/ld+json&_profile=nvs", timeout=timeout
-        )
+        response = client.get(f"{host}/scheme?_mediatype=application/ld+json&_profile=nvs", timeout=timeout)
 
     data = response.json()
     graph_scheme_items = get_scheme_graph_items(data)
@@ -109,8 +108,8 @@ def artefacts(request: Request):
 @router.head("/artefacts/{artefactID}", include_in_schema=False)
 def artefactId(request: Request, artefactID: str):
 
-    collection_uri = f"http://vocab.nerc.ac.uk/collection/{artefactID.upper()}/current/"
-    scheme_uri = f"http://vocab.nerc.ac.uk/scheme/{artefactID.upper()}/current/"
+    collection_uri = f"{host}/collection/{artefactID.upper()}/current/"
+    scheme_uri = f"{host}/scheme/{artefactID.upper()}/current/"
 
     with httpx.Client(follow_redirects=True) as client:
         response_collection = client.get(
@@ -163,9 +162,9 @@ def distributions(request: Request, artefactID: str):
 
     for item in distributions_json_ld:
         item["downloadURL"] = (
-            f"https://vocab.nerc.ac.uk/collection/{artefactID.upper()}/current/?_profile=nvs&_mediatype={item['mediaType']}"
+            f"{host}/collection/{artefactID.upper()}/current/?_profile=nvs&_mediatype={item['mediaType']}"
         )
-        item["@id"] = f"http://vocab.nerc.ac.uk/artefacts/{artefactID.upper()}/distributions/{item['distributionId']}"
+        item["@id"] = f"{host}/artefacts/{artefactID.upper()}/distributions/{item['distributionId']}"
         del item["mediaType"]
 
     graph_items = {"@graph": distributions_json_ld}
@@ -261,7 +260,7 @@ def get_collection_graph_items(data: dict):
                 "contactPoint": ["vocab.services@bodc.ac.uk"],
                 "publisher": [item.get("dc:publisher")],
                 "createdWith": ["https://github.com/RDFLib/VocPrez"],
-                "includedInDataCatalog": ["http://vocab.nerc.ac.uk/"],
+                "includedInDataCatalog": [host],
                 "@id": uri,
                 "@type": ["https://w3id.org/mod#SemanticArtefact", "http://www.w3.org/2004/02/skos/core#Collection"],
                 "links": {
@@ -306,7 +305,7 @@ def get_scheme_graph_items(data: dict):
                 "contactPoint": ["vocab.services@bodc.ac.uk"],
                 "publisher": [item.get("dc:publisher")],
                 "createdWith": ["https://github.com/RDFLib/VocPrez"],
-                "includedInDataCatalog": ["http://vocab.nerc.ac.uk/"],
+                "includedInDataCatalog": [host],
                 "@id": uri,
                 "@type": ["https://w3id.org/mod#SemanticArtefact", "http://www.w3.org/2004/02/skos/core#ConceptScheme"],
                 "links": {
