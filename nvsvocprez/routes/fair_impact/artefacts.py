@@ -17,30 +17,67 @@ config_file_location = Path(__file__).parent.parent.parent / "api_doc_config.jso
 with open(config_file_location, "r") as config_file:
     paths = json.load(config_file)["paths"]
 
+timeout = 60
+
 artefacts_context = {
-    "@vocab": ["http://vocab.nerc.ac.uk/collection/", "http://vocab.nerc.ac.uk/scheme/"],
+    "@vocab": "http://data.bioontology.org/metadata/",
     "acronym": "https://w3id.org/mod#acronym",
     "accessRights": "http://purl.org/dc/terms/accessRights",
-    "subject": "http://purl.org/dc/terms/subject",
     "URI": "https://w3id.org/mod#URI",
     "identifier": "http://purl.org/dc/terms/identifier",
     "creator": "http://purl.org/dc/terms/creator",
     "status": "https://w3id.org/mod#status",
-    "language": "http://purl.org/dc/terms/language",
     "license": "http://purl.org/dc/terms/license",
     "rightsHolder": "http://purl.org/dc/terms/rightsHolder",
+    "title": "http://purl.org/dc/terms/title",
     "description": "http://purl.org/dc/terms/description",
+    "modified": "http://purl.org/dc/terms/modified",
     "landingPage": "http://www.w3.org/ns/dcat#landingPage",
-    "keyword": "http://www.w3.org/ns/dcat#keyword",
     "bibliographicCitation": "http://purl.org/dc/terms/bibliographicCitation",
     "contactPoint": "http://www.w3.org/ns/dcat#contactPoint",
     "contributor": "http://purl.org/dc/terms/contributor",
     "publisher": "http://purl.org/dc/terms/publisher",
     "createdWith": "http://purl.org/pav/createdWith",
-    "accrualPeriodicity": "http://purl.org/dc/terms/accrualPeriodicity",
     "includedInDataCatalog": "http://schema.org/includedInDataCatalog",
+    "language": "http://purl.org/dc/terms/language",
     "@language": "en",
 }
+
+distributions_context = {
+    "@vocab": "http://data.bioontology.org/metadata/",
+    "distributionId": "http://data.bioontology.org/metadata/distributionId",
+    "title": "http://purl.org/dc/terms/title",
+    "hasRepresentationLanguage": "https://w3id.org/mod#hasRepresentationLanguage",
+    "hasSyntax": "https://w3id.org/mod#hasSyntax",
+    "description": "http://purl.org/dc/terms/description",
+    "modified": "http://purl.org/dc/terms/modified",
+    "conformsToKnowledgeRepresentationParadigm": "https://w3id.org/mod#conformsToKnowledgeRepresentationParadigm",
+    "usedEngineeringMethodology": "https://w3id.org/mod#usedEngineeringMethodology",
+    "prefLabelProperty": "https://w3id.org/mod#prefLabelProperty",
+    "synonymProperty": "https://w3id.org/mod#synonymProperty",
+    "definitionProperty": "https://w3id.org/mod#definitionProperty",
+    "accessURL": "http://www.w3.org/ns/dcat#accessURL",
+    "downloadURL": "http://www.w3.org/ns/dcat#downloadURL",
+    "language": "http://purl.org/dc/terms/language",
+    "@language": "en",
+}
+
+distributions_meta = {
+    "@type": "https://w3id.org/mod#SemanticArtefactDistribution",
+    "language": ["http://lexvo.org/id/iso639-1/en"],
+    "prefLabelProperty": "http://www.w3.org/2004/02/skos/core#prefLabel",
+    "definitionProperty": "http://purl.org/dc/terms/description",
+    "hasRepresentationLanguage": "https://www.w3.org/2004/02/skos/",
+    "conformsToKnowledgeRepresentationParadigm": "",
+    "usedEngineeringMethodology": "",
+    "accessURL": "https://vocab.nerc.ac.uk/sparql/",
+}
+
+distributions_config = [
+    {"distributionId": "1", "hasSyntax": "http://www.w3.org/ns/formats/RDF_XML", "mediaType": "application/rdf+xml"},
+    {"distributionId": "2", "hasSyntax": "http://www.w3.org/ns/formats/Turtle", "mediaType": "text/turtle"},
+    {"distributionId": "3", "hasSyntax": "http://www.w3.org/ns/formats/JSON-LD", "mediaType": "application/ld+json"},
+]
 
 
 @router.get("/artefacts", **paths["/artefacts"]["get"])
@@ -48,14 +85,18 @@ artefacts_context = {
 def artefacts(request: Request):
     # Collections
     with httpx.Client(follow_redirects=True) as client:
-        response = client.get("http://vocab.nerc.ac.uk/collection?_mediatype=application/ld+json&_profile=nvs")
+        response = client.get(
+            "http://vocab.nerc.ac.uk/collection?_mediatype=application/ld+json&_profile=nvs", timeout=timeout
+        )
 
     data = response.json()
     graph_collection_items = get_collection_graph_items(data)
 
     # Schemes
     with httpx.Client(follow_redirects=True) as client:
-        response = client.get("http://vocab.nerc.ac.uk/scheme?_mediatype=application/ld+json&_profile=nvs")
+        response = client.get(
+            "http://vocab.nerc.ac.uk/scheme?_mediatype=application/ld+json&_profile=nvs", timeout=timeout
+        )
 
     data = response.json()
     graph_scheme_items = get_scheme_graph_items(data)
@@ -72,31 +113,93 @@ def artefactId(request: Request, artefactID: str):
     scheme_uri = f"http://vocab.nerc.ac.uk/scheme/{artefactID.upper()}/current/"
 
     with httpx.Client(follow_redirects=True) as client:
-        response_collection = client.get(f"{collection_uri}?_mediatype=application/ld+json&_profile=nvs")
+        response_collection = client.get(
+            f"{collection_uri}?_mediatype=application/ld+json&_profile=nvs", timeout=timeout
+        )
 
     with httpx.Client(follow_redirects=True) as client:
-        response_scheme = client.get(f"{scheme_uri}?_mediatype=application/ld+json&_profile=nvs")
+        response_scheme = client.get(f"{scheme_uri}?_mediatype=application/ld+json&_profile=nvs", timeout=timeout)
 
     if response_collection.status_code != 200 and response_scheme.status_code != 200:
         return JSONResponse(content={"error": "artefactID not found"}, status_code=404)
 
-    a_context = artefacts_context
     json_ld = {}
 
     if response_collection.status_code == 200:
-        a_context["@vocab"] = collection_uri
         data = response_collection.json()
         graph_items = get_collection_graph_items(data)
         graph_item = next((item for item in graph_items if item["@id"] == collection_uri), None)
     else:
-        a_context["@vocab"] = scheme_uri
         data = response_scheme.json()
         graph_item = next((item for item in data["@graph"] if item["@id"] == scheme_uri), None)
-
         graph_item = get_scheme_graph_items({"@graph": [graph_item]})[0]
 
-    json_ld = {"@context": a_context}
+    json_ld = {"@context": artefacts_context}
     json_ld.update(graph_item)
+
+    return JSONResponse(content=json_ld, status_code=200)
+
+
+@router.get("/artefacts/{artefactID}/distributions", **paths["/artefacts/{artefactID}/distributions"]["get"])
+@router.head("/artefacts/{artefactID}/distributions", include_in_schema=False)
+def distributions(request: Request, artefactID: str):
+
+    response = artefactId(request, artefactID)
+
+    if response.status_code != 200:
+        return JSONResponse(content={"error": "artefactID not found"}, status_code=404)
+
+    body = response.body
+    data = json.loads(body.decode("utf-8"))
+
+    distributions_json_ld = [
+        {
+            **{"title": data["title"], "description": data["description"], "modified": data["modified"]},
+            **item,
+            **distributions_meta,
+        }
+        for item in distributions_config
+    ]
+
+    for item in distributions_json_ld:
+        item["downloadURL"] = (
+            f"https://vocab.nerc.ac.uk/collection/{artefactID.upper()}/current/?_profile=nvs&_mediatype={item['mediaType']}"
+        )
+        item["@id"] = f"http://vocab.nerc.ac.uk/artefacts/{artefactID.upper()}/distributions/{item['distributionId']}"
+        del item["mediaType"]
+
+    graph_items = {"@graph": distributions_json_ld}
+
+    json_ld = {"@context": distributions_context}
+    json_ld.update(graph_items)
+
+    return JSONResponse(content=json_ld, status_code=200)
+
+
+@router.get(
+    "/artefacts/{artefactID}/distributions/{distributionID}",
+    **paths["/artefacts/{artefactID}/distributions/{distributionID}"]["get"],
+)
+@router.head("/artefacts/{artefactID}/distributions/{distributionID}", include_in_schema=False)
+def distributionsId(request: Request, artefactID: str, distributionID: str):
+
+    response = distributions(request, artefactID)
+
+    if response.status_code != 200:
+        return JSONResponse(content={"error": "artefactID not found"}, status_code=404)
+
+    valid_ids = [str(i) for i in range(1, len(distributions_config) + 1)]
+
+    if distributionID not in valid_ids:
+        return JSONResponse(content={"error": "distributionID not found"}, status_code=404)
+
+    body = response.body
+    data = json.loads(body.decode("utf-8"))
+
+    distribution_item = next(item for item in data["@graph"] if item["distributionId"] == distributionID)
+
+    json_ld = {"@context": distributions_context}
+    json_ld.update(distribution_item)
 
     return JSONResponse(content=json_ld, status_code=200)
 
@@ -143,22 +246,21 @@ def get_collection_graph_items(data: dict):
             {
                 "@acronym": extract_collection_acronym(uri),
                 "accessRights": "public",
-                "subject": ["TBD"],
                 "URI": uri,
                 "creator": [item.get("dc:creator")],
                 "identifier": uri,
                 "status": status,
-                "language": ["en"],
+                "language": ["http://lexvo.org/id/iso639-1/en"],
                 "rightsHolder": item.get("dc:creator"),
                 "license": "https://creativecommons.org/licenses/by/4.0/",
+                "title": item.get("skos:prefLabel"),
                 "description": item.get("dc:description"),
+                "modified": date_str,
                 "landingPage": uri,
-                "keyword": [""],
                 "bibliographicCitation": bibliographic_citation,
                 "contactPoint": ["vocab.services@bodc.ac.uk"],
                 "publisher": [item.get("dc:publisher")],
                 "createdWith": ["https://github.com/RDFLib/VocPrez"],
-                "accrualPeriodicity": "http://purl.org/cld/freq/daily",
                 "includedInDataCatalog": ["http://vocab.nerc.ac.uk/"],
                 "@id": uri,
                 "@type": ["https://w3id.org/mod#SemanticArtefact", "http://www.w3.org/2004/02/skos/core#Collection"],
@@ -190,16 +292,16 @@ def get_scheme_graph_items(data: dict):
             {
                 "acronym": extract_scheme_acronym(uri),
                 "accessRights": "public",
-                "subject": [],
                 "URI": uri,
                 "creator": [item.get("dc:creator")],
                 "identifier": [uri],
                 "status": "production",
-                "language": ["en"],
+                "language": ["http://lexvo.org/id/iso639-1/en"],
                 "rightsHolder": item.get("dc:creator"),
+                "title": item.get("skos:prefLabel"),
                 "description": item.get("dc:description"),
+                "modified": item.get("dc:date"),
                 "landingPage": uri,
-                "keyword": [""],
                 "bibliographicCitation": bibliographic_citation,
                 "contactPoint": ["vocab.services@bodc.ac.uk"],
                 "publisher": [item.get("dc:publisher")],
