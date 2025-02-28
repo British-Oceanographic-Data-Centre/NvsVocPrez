@@ -17,7 +17,7 @@ config_file_location = Path(__file__).parent.parent.parent / "api_doc_config.jso
 with open(config_file_location, "r") as config_file:
     paths = json.load(config_file)["paths"]
 
-timeout=60
+timeout = 60
 
 artefacts_context = {
     "@vocab": "http://data.bioontology.org/metadata/",
@@ -40,7 +40,7 @@ artefacts_context = {
     "createdWith": "http://purl.org/pav/createdWith",
     "includedInDataCatalog": "http://schema.org/includedInDataCatalog",
     "language": "http://purl.org/dc/terms/language",
-    "@language": "en"
+    "@language": "en",
 }
 
 distributions_context = {
@@ -59,7 +59,7 @@ distributions_context = {
     "accessURL": "http://www.w3.org/ns/dcat#accessURL",
     "downloadURL": "http://www.w3.org/ns/dcat#downloadURL",
     "language": "http://purl.org/dc/terms/language",
-    "@language": "en"
+    "@language": "en",
 }
 
 distributions_meta = {
@@ -70,25 +70,13 @@ distributions_meta = {
     "hasRepresentationLanguage": "https://www.w3.org/2004/02/skos/",
     "conformsToKnowledgeRepresentationParadigm": "",
     "usedEngineeringMethodology": "",
-    "accessURL": "https://vocab.nerc.ac.uk/sparql/"
+    "accessURL": "https://vocab.nerc.ac.uk/sparql/",
 }
 
 distributions_config = [
-    {
-        "distributionId": "1",
-        "hasSyntax": "http://www.w3.org/ns/formats/RDF_XML",
-        "mediaType": "application/rdf+xml"
-    },
-    {
-        "distributionId": "2",
-        "hasSyntax": "http://www.w3.org/ns/formats/Turtle",
-        "mediaType": "text/turtle"        
-    },
-    {
-        "distributionId": "3",
-        "hasSyntax": "http://www.w3.org/ns/formats/JSON-LD",
-        "mediaType": "application/ld+json"
-    }
+    {"distributionId": "1", "hasSyntax": "http://www.w3.org/ns/formats/RDF_XML", "mediaType": "application/rdf+xml"},
+    {"distributionId": "2", "hasSyntax": "http://www.w3.org/ns/formats/Turtle", "mediaType": "text/turtle"},
+    {"distributionId": "3", "hasSyntax": "http://www.w3.org/ns/formats/JSON-LD", "mediaType": "application/ld+json"},
 ]
 
 
@@ -97,21 +85,22 @@ distributions_config = [
 def artefacts(request: Request):
     # Collections
     with httpx.Client(follow_redirects=True) as client:
-        response = client.get("http://vocab.nerc.ac.uk/collection?_mediatype=application/ld+json&_profile=nvs", timeout=timeout)
+        response = client.get(
+            "http://vocab.nerc.ac.uk/collection?_mediatype=application/ld+json&_profile=nvs", timeout=timeout
+        )
 
     data = response.json()
     graph_collection_items = get_collection_graph_items(data)
 
     # Schemes
     with httpx.Client(follow_redirects=True) as client:
-        response = client.get("http://vocab.nerc.ac.uk/scheme?_mediatype=application/ld+json&_profile=nvs", timeout=timeout)
+        response = client.get(
+            "http://vocab.nerc.ac.uk/scheme?_mediatype=application/ld+json&_profile=nvs", timeout=timeout
+        )
 
     data = response.json()
     graph_scheme_items = get_scheme_graph_items(data)
-    json_ld = {
-        "@context": artefacts_context, 
-        "@graph": graph_collection_items + graph_scheme_items
-    }
+    json_ld = {"@context": artefacts_context, "@graph": graph_collection_items + graph_scheme_items}
 
     return JSONResponse(content=json_ld, status_code=response.status_code)
 
@@ -124,7 +113,9 @@ def artefactId(request: Request, artefactID: str):
     scheme_uri = f"http://vocab.nerc.ac.uk/scheme/{artefactID.upper()}/current/"
 
     with httpx.Client(follow_redirects=True) as client:
-        response_collection = client.get(f"{collection_uri}?_mediatype=application/ld+json&_profile=nvs", timeout=timeout)
+        response_collection = client.get(
+            f"{collection_uri}?_mediatype=application/ld+json&_profile=nvs", timeout=timeout
+        )
 
     with httpx.Client(follow_redirects=True) as client:
         response_scheme = client.get(f"{scheme_uri}?_mediatype=application/ld+json&_profile=nvs", timeout=timeout)
@@ -163,23 +154,21 @@ def distributions(request: Request, artefactID: str):
 
     distributions_json_ld = [
         {
-            **{
-                "title": data["title"], 
-                "description": data["description"],
-                "modified": data["modified"]
-            }, **item, **distributions_meta
+            **{"title": data["title"], "description": data["description"], "modified": data["modified"]},
+            **item,
+            **distributions_meta,
         }
         for item in distributions_config
     ]
 
     for item in distributions_json_ld:
-        item["downloadURL"] = f"https://vocab.nerc.ac.uk/collection/{artefactID.upper()}/current/?_profile=nvs&_mediatype={item['mediaType']}"
+        item["downloadURL"] = (
+            f"https://vocab.nerc.ac.uk/collection/{artefactID.upper()}/current/?_profile=nvs&_mediatype={item['mediaType']}"
+        )
         item["@id"] = f"http://vocab.nerc.ac.uk/artefacts/{artefactID.upper()}/distributions/{item['distributionId']}"
         del item["mediaType"]
 
-    graph_items = {
-        "@graph": distributions_json_ld
-    }
+    graph_items = {"@graph": distributions_json_ld}
 
     json_ld = {"@context": distributions_context}
     json_ld.update(graph_items)
@@ -187,7 +176,10 @@ def distributions(request: Request, artefactID: str):
     return JSONResponse(content=json_ld, status_code=200)
 
 
-@router.get("/artefacts/{artefactID}/distributions/{distributionID}", **paths["/artefacts/{artefactID}/distributions/{distributionID}"]["get"])
+@router.get(
+    "/artefacts/{artefactID}/distributions/{distributionID}",
+    **paths["/artefacts/{artefactID}/distributions/{distributionID}"]["get"],
+)
 @router.head("/artefacts/{artefactID}/distributions/{distributionID}", include_in_schema=False)
 def distributionsId(request: Request, artefactID: str, distributionID: str):
 
@@ -196,7 +188,7 @@ def distributionsId(request: Request, artefactID: str, distributionID: str):
     if response.status_code != 200:
         return JSONResponse(content={"error": "artefactID not found"}, status_code=404)
 
-    valid_ids = [str(i) for i in range(1, len(distributions_config)+1)]
+    valid_ids = [str(i) for i in range(1, len(distributions_config) + 1)]
 
     if distributionID not in valid_ids:
         return JSONResponse(content={"error": "distributionID not found"}, status_code=404)
@@ -205,7 +197,7 @@ def distributionsId(request: Request, artefactID: str, distributionID: str):
     data = json.loads(body.decode("utf-8"))
 
     distribution_item = next(item for item in data["@graph"] if item["distributionId"] == distributionID)
-    
+
     json_ld = {"@context": distributions_context}
     json_ld.update(distribution_item)
 
@@ -220,6 +212,7 @@ def extract_collection_acronym(uri):
 def extract_scheme_acronym(uri):
     match = re.search(r"/scheme/(.*?)/current/", uri)
     return match.group(1)
+
 
 def parse_date(date_str):
     try:
