@@ -121,17 +121,17 @@ def artefactId(request: Request, artefactID: str):
 
     if response_collection.status_code != 200 and response_scheme.status_code != 200:
         return JSONResponse(content={"error": "artefactID not found"}, status_code=404)
-   
+
     json_ld = {}
 
     if response_collection.status_code == 200:
         data = response_collection.json()
         graph_items = get_collection_graph_items(data)
-        artefact_uri = collection_uri.replace("collection", "artefacts").replace("/current/","")
+        artefact_uri = collection_uri.replace("collection", "artefacts").replace("/current/", "")
         graph_item = next((item for item in graph_items if item["@id"] == artefact_uri), None)
     else:
         data = response_scheme.json()
-        artefact_uri = scheme_uri.replace("scheme", "artefacts").replace("/current/",""),
+        artefact_uri = (scheme_uri.replace("scheme", "artefacts").replace("/current/", ""),)
         graph_item = next((item for item in data["@graph"] if item["@id"] == artefact_uri), None)
         graph_item = get_scheme_graph_items({"@graph": [graph_item]})[0]
 
