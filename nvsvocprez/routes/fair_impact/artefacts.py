@@ -258,8 +258,8 @@ def get_collection_graph_items(data: dict):
                 "contactPoint": ["vocab.services@bodc.ac.uk"],
                 "publisher": [item.get("dc:publisher")],
                 "createdWith": ["https://github.com/RDFLib/VocPrez"],
-                "includedInDataCatalog": [host],
-                "@id": uri,
+                "includedInDataCatalog": [host],                
+                "@id": uri.replace("collection", "artefacts").replace("/current/",""),
                 "@type": ["https://w3id.org/mod#SemanticArtefact", "http://www.w3.org/2004/02/skos/core#Collection"],
                 "links": {
                     "distributions": uri.replace("collection", "artefacts").replace("/current/", "/distributions"),
@@ -304,7 +304,7 @@ def get_scheme_graph_items(data: dict):
                 "publisher": [item.get("dc:publisher")],
                 "createdWith": ["https://github.com/RDFLib/VocPrez"],
                 "includedInDataCatalog": [host],
-                "@id": uri,
+                "@id": uri.replace("scheme", "artefacts").replace("/current/",""),
                 "@type": ["https://w3id.org/mod#SemanticArtefact", "http://www.w3.org/2004/02/skos/core#ConceptScheme"],
                 "links": {
                     "distributions": uri.replace("scheme", "artefacts").replace("/current/", "/distributions"),
