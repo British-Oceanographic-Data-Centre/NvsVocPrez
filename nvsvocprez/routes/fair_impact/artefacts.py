@@ -108,7 +108,7 @@ def artefacts(request: Request):
 @router.head("/artefacts/{artefactID}", include_in_schema=False)
 def artefactId(request: Request, artefactID: str):
 
-    collection_uri = f"{host}/collection/{artefactID.upper()}/current/"
+    collection_uri = f"{host}/collection/{artefactID.upper()}/current/"  # !!! This is slow particularly for large vocabs like P01. Get Much quicker response if we call direct to function artefacts(request: Request) and pick out the collection from the json.
     scheme_uri = f"{host}/scheme/{artefactID.upper()}/current/"
 
     with httpx.Client(follow_redirects=True) as client:
