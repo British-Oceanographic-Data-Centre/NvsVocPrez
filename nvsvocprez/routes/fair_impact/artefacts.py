@@ -108,38 +108,21 @@ def artefacts(request: Request):
 @router.head("/artefacts/{artefactID}", include_in_schema=False)
 def artefactId(request: Request, artefactID: str):
 
-    collection_uri = f"{host}/collection/{artefactID.upper()}/current/"  # !!! This is slow particularly for large vocabs like P01. Get Much quicker response if we call direct to function artefacts(request: Request) and pick out the collection from the json.
-    scheme_uri = f"{host}/scheme/{artefactID.upper()}/current/"
+    response = artefacts(request)
 
-    with httpx.Client(follow_redirects=True) as client:
-        response_collection = client.get(
-            f"{collection_uri}?_mediatype=application/ld+json&_profile=nvs", timeout=timeout
-        )
+    body = response.body
+    data = json.loads(body.decode("utf-8"))
+    
+    graph_item = [item for item in data["@graph"] if item.get("acronym") == artefactID]
 
-    with httpx.Client(follow_redirects=True) as client:
-        response_scheme = client.get(f"{scheme_uri}?_mediatype=application/ld+json&_profile=nvs", timeout=timeout)
-
-    if response_collection.status_code != 200 and response_scheme.status_code != 200:
+    if not graph_item:
         return JSONResponse(content={"error": "artefactID not found"}, status_code=404)
 
     json_ld = {}
-
-    if response_collection.status_code == 200:
-        data = response_collection.json()
-        graph_items = get_collection_graph_items(data)
-        artefact_uri = collection_uri.replace("collection", "artefacts").replace("/current/", "")
-        graph_item = next((item for item in graph_items if item["@id"] == artefact_uri), None)
-    else:
-        data = response_scheme.json()
-        artefact_uri = (scheme_uri.replace("scheme", "artefacts").replace("/current/", ""),)
-        graph_item = next((item for item in data["@graph"] if item["@id"] == artefact_uri), None)
-        graph_item = get_scheme_graph_items({"@graph": [graph_item]})[0]
-
     json_ld = {"@context": artefacts_context}
-    json_ld.update(graph_item)
+    json_ld.update(graph_item[0])
 
     return JSONResponse(content=json_ld, status_code=200)
-
 
 @router.get("/artefacts/{artefactID}/distributions", **paths["/artefacts/{artefactID}/distributions"]["get"])
 @router.head("/artefacts/{artefactID}/distributions", include_in_schema=False)
@@ -245,7 +228,7 @@ def get_collection_graph_items(data: dict):
 
         graph_items.append(
             {
-                "@acronym": extract_collection_acronym(uri),
+                "acronym": extract_collection_acronym(uri),
                 "accessRights": "public",
                 "URI": uri,
                 "creator": [item.get("dc:creator")],
