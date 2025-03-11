@@ -112,7 +112,7 @@ def artefactId(request: Request, artefactID: str):
 
     body = response.body
     data = json.loads(body.decode("utf-8"))
-    
+
     graph_item = [item for item in data["@graph"] if item.get("acronym") == artefactID]
 
     if not graph_item:
@@ -123,6 +123,7 @@ def artefactId(request: Request, artefactID: str):
     json_ld.update(graph_item[0])
 
     return JSONResponse(content=json_ld, status_code=200)
+
 
 @router.get("/artefacts/{artefactID}/distributions", **paths["/artefacts/{artefactID}/distributions"]["get"])
 @router.head("/artefacts/{artefactID}/distributions", include_in_schema=False)
