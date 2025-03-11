@@ -136,7 +136,7 @@ def distributions(request: Request, artefactID: str):
 
     body = response.body
     data = json.loads(body.decode("utf-8"))
-
+    
     distributions_json_ld = [
         {
             **{"title": data["title"], "description": data["description"], "modified": data["modified"]},
@@ -147,8 +147,8 @@ def distributions(request: Request, artefactID: str):
     ]
 
     for item in distributions_json_ld:
-        item["downloadURL"] = (
-            f"{host}/collection/{artefactID.upper()}/current/?_profile=nvs&_mediatype={item['mediaType']}"
+        item["downloadURL"] = (            
+            f"{data['identifier']}?_profile=nvs&_mediatype={item['mediaType']}"
         )
         item["@id"] = f"{host}/artefacts/{artefactID.upper()}/distributions/{item['distributionId']}"
         del item["mediaType"]
@@ -279,7 +279,7 @@ def get_scheme_graph_items(data: dict):
                 "accessRights": "public",
                 "URI": uri,
                 "creator": [item.get("dc:creator")],
-                "identifier": [uri],
+                "identifier": uri,
                 "status": "production",
                 "language": ["http://lexvo.org/id/iso639-1/en"],
                 "rightsHolder": item.get("dc:creator"),
