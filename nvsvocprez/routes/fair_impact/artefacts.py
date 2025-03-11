@@ -136,7 +136,7 @@ def distributions(request: Request, artefactID: str):
 
     body = response.body
     data = json.loads(body.decode("utf-8"))
-    
+
     distributions_json_ld = [
         {
             **{"title": data["title"], "description": data["description"], "modified": data["modified"]},
@@ -147,9 +147,7 @@ def distributions(request: Request, artefactID: str):
     ]
 
     for item in distributions_json_ld:
-        item["downloadURL"] = (            
-            f"{data['identifier']}?_profile=nvs&_mediatype={item['mediaType']}"
-        )
+        item["downloadURL"] = f"{data['identifier']}?_profile=nvs&_mediatype={item['mediaType']}"
         item["@id"] = f"{host}/artefacts/{artefactID.upper()}/distributions/{item['distributionId']}"
         del item["mediaType"]
 
