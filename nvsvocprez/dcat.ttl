@@ -13,13 +13,13 @@
   dc:language "English"@en-gb ;
   dc:license "CCBY4" ;
   mod:status "alpha"@en ;
-  dcat:dataset <http://vocab.nerc.ac.uk/scheme/&gt;, <http://vocab.nerc.ac.uk/collection/> ;
+  dcat:dataset <http://vocab.nerc.ac.uk/scheme/>, <http://vocab.nerc.ac.uk/collection/> ;
   dc:description "Vocabularies hosted on the NERC Vocabulary Server (NVS)"@en ;
   dc:title "NERC Vocabulary Server"@en ;
   dc:publisher <http://vocab.nerc.ac.uk/collection/C75/current/BOD/> ;
-  dc:subject <http://dbpedia.org/resource/Earth_science&gt;, <http://dbpedia.org/resource/Environmental_science&gt;, <http://dbpedia.org/resource/Oceanography> ;
+  dc:subject <http://dbpedia.org/resource/Earth_science>, <http://dbpedia.org/resource/Environmental_science>, <http://dbpedia.org/resource/Oceanography> ;
 dc:rightsHolder <http://vocab.nerc.ac.uk/collection/C75/current/BOD/> ;
-dcat:landingPage <https://vocab.nerc.ac.uk/&gt;;
+dcat:landingPage <https://vocab.nerc.ac.uk/>;
 
 dcat:keyword "vocabularies"@en, "oceanography"@en, "marine"@en ,"parameters"@en,"instruments"@en, "sensors"@en, "data standardisation"@en;
 dc:bibliographicCitation "The NERC Vocabulary Server (NVS), National Oceanography Centre - British Oceanographic Data Centre (BODC), https://vocab.nerc.ac.uk";
@@ -33,7 +33,7 @@ dc:coverage "null";
 dc:accrualMethod "null";
 dc:accrualPeriodicity <http://purl.org/cld/freq/daily> ;
 prov:wasGeneratedBy "";
-dcat:service <http://vocab.nerc.ac.uk/sparql&gt;, <http://vocab.nerc.ac.uk/vocab2.wsdl> .
+dcat:service <http://vocab.nerc.ac.uk/sparql>, <http://vocab.nerc.ac.uk/vocab2.wsdl> .
 
 <http://vocab.nerc.ac.uk/sparql>
   a dcat:DataService ;
