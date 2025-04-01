@@ -1,36 +1,38 @@
 @prefix dcat: <http://www.w3.org/ns/dcat#> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix ns0: <https://w3id.org/mod#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 <http://vocab.nerc.ac.uk/>
-  a dcat:Catalog;
-  dcat:dataset <http://vocab.nerc.ac.uk/scheme/>, <http://vocab.nerc.ac.uk/collection/> ;
-  dcterms:description "Vocabularies managed by the NERC Vocabulary Server (NVS)"@en ;
-  dcterms:title "NERC Vocabulary Server"@en ;
-  dcterms:publisher <http://vocab.nerc.ac.uk/collection/C75/current/BOD/> ;
-  dcterms:subject
-        <http://dbpedia.org/resource/Earth_science> ,
-        <http://dbpedia.org/resource/Environmental_science> ,
-        <http://dbpedia.org/resource/Oceanography> ;
-
-dcat:service <http://vocab.nerc.ac.uk/sparql>,<http://vocab.nerc.ac.uk/vocab2.wsdl> .
+  a dcat:Catalog, <https://w3id.org/mod#SemanticArtefactCatalog> ;
+  dc:accessRights "public" ;
+  dc:language "English"@en ;
+  dc:license "CCBY4" ;
+  ns0:status "alpha"@en ;
+  dcat:dataset <http://vocab.nerc.ac.uk/scheme/&gt;, <http://vocab.nerc.ac.uk/collection/> ;
+  dc:description "Vocabularies managed by the NERC Vocabulary Server (NVS)"@en ;
+  dc:title "NERC Vocabulary Server"@en ;
+  dc:publisher <http://vocab.nerc.ac.uk/collection/C75/current/BOD/> ;
+  dc:subject <http://dbpedia.org/resource/Earth_science&gt;, <http://dbpedia.org/resource/Environmental_science&gt;, <http://dbpedia.org/resource/Oceanography> ;
+  dcat:service <http://vocab.nerc.ac.uk/sparql&gt;, <http://vocab.nerc.ac.uk/vocab2.wsdl> .
 
 <http://vocab.nerc.ac.uk/sparql>
-    a dcat:DataService ;
-    dcterms:description "A SPARQL Protocol-compliant service that provides access to all of this catalogue's information"@en ;
-    dcterms:title "System SPARQL Service" ;
-    dcterms:type <http://purl.org/dc/dcmitype/Service> ;
-    dcat:endpointURL <http://vocab.nerc.ac.uk/sparql> .
+  a dcat:DataService ;
+  dc:description "A SPARQL Protocol-compliant service that provides access to all of this catalogue's information"@en ;
+  dc:title "System SPARQL Service" ;
+  dc:type <http://purl.org/dc/dcmitype/Service> ;
+  dcat:endpointURL <http://vocab.nerc.ac.uk/sparql> .
 
 <http://vocab.nerc.ac.uk/vocab.wsdl>
-    a dcat:DataService ;
-    dcterms:description "A SOAP service for NVS vocabularies"@en ;
-    dcterms:title "System SOAP Service" ;
-    dcterms:type <http://purl.org/dc/dcmitype/Service> ;
-    dcat:endpointURL <http://vocab.nerc.ac.uk/vocab.wsdl> .
+  a dcat:DataService ;
+  dc:description "A SOAP service for NVS vocabularies"@en ;
+  dc:title "System SOAP Service" ;
+  dc:type <http://purl.org/dc/dcmitype/Service> ;
+  dcat:endpointURL <http://vocab.nerc.ac.uk/vocab.wsdl> .
 
 <http://vocab.nerc.ac.uk/collection/C75/current/BOD/>
-    a foaf:Organization ;
-    foaf:name "British Oceanographic Data Centre" ;
-    foaf:homepage "https://www.bodc.ac.uk"^^xsd:anyURI .
+  a foaf:Organization ;
+  foaf:name "British Oceanographic Data Centre" ;
+  foaf:homepage "https://www.bodc.ac.uk"^^xsd:anyURI .
+ 

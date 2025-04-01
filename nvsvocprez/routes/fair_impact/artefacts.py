@@ -44,6 +44,18 @@ artefacts_context = {
     "includedInDataCatalog": "http://schema.org/includedInDataCatalog",
     "language": "http://purl.org/dc/terms/language",
     "@language": "en",
+    "subject": [],
+    "versionIRI": None,
+    "keyword": [],
+    "contributor": [],
+    "coverage": [],
+    "accrualMethod": [],
+    "accrualPeriodicity": None,
+    "competencyQuestion": [],
+    "wasGeneratedBy": [],
+    "hasFormat": [],
+    "includedInDataCatalog": [],
+    "semanticArtefactRelation": [],
 }
 
 distributions_context = {
@@ -74,6 +86,9 @@ distributions_meta = {
     "conformsToKnowledgeRepresentationParadigm": "",
     "usedEngineeringMethodology": "",
     "accessURL": f"{host}/sparql/",
+    "created": None,
+    "synonymProperty": "http://www.w3.org/2004/02/skos/core#altLabel",
+    "bytesize": None,
 }
 
 distributions_config = [
@@ -136,7 +151,7 @@ def distributions(request: Request, artefactID: str):
 
     body = response.body
     data = json.loads(body.decode("utf-8"))
-    
+
     distributions_json_ld = [
         {
             **{"title": data["title"], "description": data["description"], "modified": data["modified"]},
@@ -147,10 +162,10 @@ def distributions(request: Request, artefactID: str):
     ]
 
     for item in distributions_json_ld:
-        item["downloadURL"] = (            
-            f"{data['identifier']}?_profile=nvs&_mediatype={item['mediaType']}"
-        )
+        item["downloadURL"] = f"{data['identifier']}?_profile=nvs&_mediatype={item['mediaType']}"
         item["@id"] = f"{host}/artefacts/{artefactID.upper()}/distributions/{item['distributionId']}"
+        item["bytesize"] = get_response_bytesize(item["downloadURL"])
+        ## print(get_response_bytesize(item["downloadURL"]))
         del item["mediaType"]
 
     graph_items = {"@graph": distributions_json_ld}
@@ -301,3 +316,10 @@ def get_scheme_graph_items(data: dict):
         )
 
     return graph_items
+
+
+def get_response_bytesize(url):
+    with httpx.Client() as client:
+        response = client.get(url)
+        response.raise_for_status()
+        return len(response.content)
