@@ -132,6 +132,46 @@
 		  }
 		}
 	  },
+
+
+	  "/artefacts/{artefactID}/resources/concepts": {
+		"get": {
+		  "tags": [
+			"artefacts"
+		  ],
+		  "summary": "Get concepts within artefactID",
+		  "description": "This endpoint will return the concepts within a specified NVS collection",
+		  "openapi_extra": {
+			"parameters": [
+			{
+				"in": "path",				
+				"name": "artefactID",
+				"description": "The semantic artefact identifier.",
+				"required": true,
+				"example": "P03"
+			},
+			{
+				"in": "query",
+				"name": "_mediatype",
+				"description": "artefacts JSON-LD",
+				"required": false,
+				"schema": {
+				  "type": "string",
+				  "enum": [
+					"application/json"
+				  ]
+				},
+				"example": "application/json"
+			  }
+			]
+		  }
+		}
+	  },
+
+
+
+
+
 	  "/artefacts/{artefactID}/distributions": {
 		"get": {
 		  "tags": [
@@ -165,6 +205,11 @@
 		  }
 		}
 	  },
+
+
+
+
+
 		"/artefacts/{artefactID}/distributions/{distributionID}": {
 		"get": {
 		  "tags": [
@@ -205,6 +250,49 @@
 		  }
 		}
 	  },
+
+	"/search/metadata": {
+		"get": {
+		  "tags": [
+			"search metadata"
+		  ],
+		  "summary": "Search all of the metadata in a catalogue",
+		  "description": "This endpoint will search for metadata across all NVS collections",
+		  "openapi_extra": {
+			"parameters": [
+			{
+				"in": "query",
+				"name": "q",
+				"description": "Search on query string",
+				"required": true,
+				"example": "water"
+			}			
+			]
+		  }
+		}
+	  },
+
+	  "/search/content": {
+		"get": {
+		  "tags": [
+			"search content"
+		  ],
+		  "summary": "Search all of the content in a catalogue",
+		  "description": "This endpoint will search for concepts across all NVS collections",
+		  "openapi_extra": {
+			"parameters": [
+			{
+				"in": "query",
+				"name": "q",
+				"description": "Search on query string",
+				"required": true,
+				"example": "water"
+			}			
+			]
+		  }
+		}
+	  },
+
 
 
 	  "/collection/": {

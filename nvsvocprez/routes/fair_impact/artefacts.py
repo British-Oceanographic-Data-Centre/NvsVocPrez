@@ -12,6 +12,8 @@ from starlette.responses import JSONResponse
 
 import httpx
 
+from ..utils import sparql_query
+
 router = APIRouter()
 
 config_file_location = Path(__file__).parent.parent.parent / "api_doc_config.json"
@@ -165,7 +167,6 @@ def distributions(request: Request, artefactID: str):
         item["downloadURL"] = f"{data['identifier']}?_profile=nvs&_mediatype={item['mediaType']}"
         item["@id"] = f"{host}/artefacts/{artefactID.upper()}/distributions/{item['distributionId']}"
         item["bytesize"] = get_response_bytesize(item["downloadURL"])
-        ## print(get_response_bytesize(item["downloadURL"]))
         del item["mediaType"]
 
     graph_items = {"@graph": distributions_json_ld}
@@ -202,6 +203,238 @@ def distributionsId(request: Request, artefactID: str, distributionID: str):
     json_ld.update(distribution_item)
 
     return JSONResponse(content=json_ld, status_code=200)
+
+
+@router.get(
+    "/search/metadata",
+    **paths["/search/metadata"]["get"],
+)
+@router.head("/search/metadata", include_in_schema=False)
+def metadata(request: Request):
+    
+    query_param = request.query_params.get("q")
+
+    if query_param is None:
+        return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=404)
+
+
+    print(f"Search in metadata for: {query_param}")
+    
+    q_count = """
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX owl: <http://www.w3.org/2002/07/owl#>
+        PREFIX dc: <http://purl.org/dc/terms/>
+
+        SELECT COUNT(DISTINCT ?x) 
+        WHERE { 
+            ?x a skos:Collection .
+            OPTIONAL { ?x dc:creator ?cre } .
+            ?x dc:title ?dt ;
+            dc:description ?desc ;
+            skos:altLabel ?alt .
+            
+            FILTER (
+                regex(str(?x), "<Q>", "i") || 
+                regex(str(?dt), "<Q>", "i") || 
+                regex(str(?alt), "<Q>", "i") || 
+                regex(str(?desc), "<Q>", "i") || 
+                regex(str(?cre), "<Q>", "i")
+            )
+        }
+    """.replace("<Q>", query_param)
+
+    sparql_count_result = sparql_query(q_count)
+    count = sparql_count_result[1][0]['.1']['value']
+
+    print(f"Got {count} results")
+
+    q_result = """
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX owl: <http://www.w3.org/2002/07/owl#>
+        PREFIX dc: <http://purl.org/dc/terms/>
+
+        SELECT DISTINCT 
+            (?localnam AS ?Collection) 
+            (?dt AS ?Title) 
+            (?alt AS ?AlternativeLabel) 
+            (?desc AS ?Description) 
+            (?crex AS ?Governance) 
+            (?x AS ?URL) 
+        WHERE { 
+            ?x a skos:Collection .
+            OPTIONAL { ?x dc:creator ?cre } .
+            ?x dc:title ?dt ;
+            dc:description ?desc ;
+            skos:altLabel ?alt .
+            
+            FILTER (
+                regex(str(?x), "<Q>", "i") || 
+                regex(str(?dt), "<Q>", "i") || 
+                regex(str(?alt), "<Q>", "i") || 
+                regex(str(?desc), "<Q>", "i") || 
+                regex(str(?cre), "<Q>", "i")
+            ) .
+            
+            BIND(REPLACE(str(?x), "<HOST>/collection/", "") AS ?localname)
+            BIND(REPLACE(str(?localname), "/current/", "") AS ?localnam)
+            BIND(IF(EXISTS { ?x dc:creator ?cre }, ?cre, "") AS ?crex)
+        } 
+        ORDER BY DESC(?Rank) 
+        OFFSET 0 
+        LIMIT 100
+    """.replace("<Q>", query_param).replace("<HOST>", host)
+
+    sparql_result = sparql_query(q_result)
+    
+    return sparql_result[1]
+
+
+@router.get(
+    "/search/content",
+    **paths["/search/content"]["get"],
+)
+@router.head("/search/content", include_in_schema=False)
+def content(request: Request):
+    
+    query_param = request.query_params.get("q")
+
+    if query_param is None:
+        return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=404)
+
+
+    print(f"Search in content for: {query_param}")
+    
+    q_count = """
+        PREFIX lang: <http://ontologi.es/lang/core#> 
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+        PREFIX text: <http://jena.apache.org/text#> 
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+        PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+        PREFIX dc: <http://purl.org/dc/terms/> 
+
+        SELECT COUNT(DISTINCT ?dci) 
+        WHERE { 
+            ?x text:query ('*<Q>*' 500000) . 
+            ?z skos:member ?x . 
+            ?x dc:identifier ?dci . 
+
+            OPTIONAL { 
+                ?x skos:altLabel ?alt 
+                FILTER(langMatches(lang(?alt), "")) 
+            } 
+            
+            OPTIONAL { 
+                ?x skos:definition ?def . 
+                FILTER(
+                    langMatches(lang(?def), "en") || 
+                    langMatches(lang(?def), "")
+                ) 
+            } 
+            
+            ?x skos:prefLabel ?pl . 
+            FILTER(langMatches(lang(?pl), "en")) . 
+
+            ?x owl:deprecated ?depr . 
+            FILTER(str(?depr) = "false") 
+        }
+    """.replace("<Q>", query_param)
+
+
+    sparql_count_result = sparql_query(q_count)
+    count = sparql_count_result[1][0]['.1']['value']
+
+    print(f"Got {count} results")
+
+    q_result = """
+        PREFIX lang: <http://ontologi.es/lang/core#> 
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+        PREFIX text: <http://jena.apache.org/text#> 
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+        PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+        PREFIX dc: <http://purl.org/dc/terms/> 
+
+        SELECT DISTINCT 
+            (?dci AS ?Identifier) 
+            (?pl AS ?PrefLabel) 
+            (?alt AS ?AlternativeLabel) 
+            (?def AS ?Definition) 
+            (?z AS ?Collection) 
+            (?dt AS ?Title) 
+        WHERE { 
+            ?x text:query ('*<Q>*' 500000) . 
+            ?z skos:member ?x . 
+            ?x dc:identifier ?dci . 
+            
+            OPTIONAL { 
+                ?x skos:altLabel ?alt 
+                FILTER(langMatches(lang(?alt), "")) 
+            } 
+            
+            OPTIONAL { 
+                ?x skos:definition ?def . 
+                FILTER(
+                    langMatches(lang(?def), "en") || 
+                    langMatches(lang(?def), "")
+                ) 
+            } 
+            
+            ?x skos:prefLabel ?pl . 
+            FILTER(langMatches(lang(?pl), "en")) . 
+            
+            ?x owl:deprecated ?depr . 
+            FILTER(str(?depr) = "false") 
+        }
+        ORDER BY DESC(?z) 
+        OFFSET 0 
+        LIMIT 10
+    """.replace("<Q>", query_param)
+
+    sparql_result = sparql_query(q_result)
+    
+    return sparql_result[1]
+
+
+@router.get("/artefacts/{artefactID}/resources/concepts", **paths["/artefacts/{artefactID}/resources/concepts"]["get"])
+@router.head("/artefacts/{artefactID}/resources/concepts", include_in_schema=False)
+def concepts_in_collection(request: Request, artefactID: str):
+    
+    response = artefactId(request, artefactID)
+
+    if response.status_code != 200:
+        return JSONResponse(content={"error": "artefactID not found"}, status_code=404)
+    
+    q_count = """
+        PREFIX dcterms: <http://purl.org/dc/terms/> 
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+        
+        SELECT (COUNT(DISTINCT ?c) AS ?count)
+        WHERE { 
+            <<HOST>/collection/<artefactID>/current/> skos:member ?c .
+            ?c skos:prefLabel ?pl .
+            FILTER(LANG(?pl) = "en")
+
+        }  
+    """.replace("<artefactID>",artefactID).replace("<HOST>",host)
+
+    sparql_count_result = sparql_query(q_count)
+    count = sparql_count_result[1][0]['count']['value']
+    
+    print(f"Got {count} results")
+
+    q_results = """
+        PREFIX dcterms: <http://purl.org/dc/terms/>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        SELECT DISTINCT ?c ?pl
+        WHERE {
+                <<HOST>/collection/<artefactID>/current/> skos:member ?c .
+                ?c skos:prefLabel ?pl .
+                FILTER(LANG(?pl) = "en")
+        }            
+    """.replace("<artefactID>",artefactID).replace("<HOST>",host)
+    
+    sparql_result = sparql_query(q_results)
+    return JSONResponse([{"uri": x["c"]["value"], "prefLabel": x["pl"]["value"]} for x in sparql_result[1]])
+
 
 
 def extract_collection_acronym(uri):
