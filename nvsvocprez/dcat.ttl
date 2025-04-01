@@ -1,21 +1,39 @@
 @prefix dcat: <http://www.w3.org/ns/dcat#> .
 @prefix dc: <http://purl.org/dc/terms/> .
-@prefix ns0: <https://w3id.org/mod#> .
+@prefix mod: <https://w3id.org/mod#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix pav: <http://purl.org/pav/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
 
 <http://vocab.nerc.ac.uk/>
   a dcat:Catalog, <https://w3id.org/mod#SemanticArtefactCatalog> ;
   dc:accessRights "public" ;
-  dc:language "English"@en ;
+  dc:language "English"@en-gb ;
   dc:license "CCBY4" ;
-  ns0:status "alpha"@en ;
+  mod:status "alpha"@en ;
   dcat:dataset <http://vocab.nerc.ac.uk/scheme/&gt;, <http://vocab.nerc.ac.uk/collection/> ;
-  dc:description "Vocabularies managed by the NERC Vocabulary Server (NVS)"@en ;
+  dc:description "Vocabularies hosted on the NERC Vocabulary Server (NVS)"@en ;
   dc:title "NERC Vocabulary Server"@en ;
   dc:publisher <http://vocab.nerc.ac.uk/collection/C75/current/BOD/> ;
   dc:subject <http://dbpedia.org/resource/Earth_science&gt;, <http://dbpedia.org/resource/Environmental_science&gt;, <http://dbpedia.org/resource/Oceanography> ;
-  dcat:service <http://vocab.nerc.ac.uk/sparql&gt;, <http://vocab.nerc.ac.uk/vocab2.wsdl> .
+dc:rightsHolder <http://vocab.nerc.ac.uk/collection/C75/current/BOD/> ;
+dcat:landingPage <https://vocab.nerc.ac.uk/&gt;;
+
+dcat:keyword "vocabularies"@en, "oceanography"@en, "marine"@en ,"parameters"@en,"instruments"@en, "sensors"@en, "data standardisation"@en;
+dc:bibliographicCitation "The NERC Vocabulary Server (NVS), National Oceanography Centre - British Oceanographic Data Centre (BODC), https://vocab.nerc.ac.uk";
+dc:created "2005";
+dc:modified "Latest modified date?" ;
+pav:createdWith <https://github.com/rdflib/VocPrez> ;
+dc:creator <http://vocab.nerc.ac.uk/collection/C75/current/BOD/> ;
+dc:contributor "";
+dcat:contactPoint "vocab.services@bodc.ac.uk";
+dc:coverage "null";
+dc:accrualMethod "null";
+dc:accrualPeriodicity <http://purl.org/cld/freq/daily> ;
+prov:wasGeneratedBy "";
+dcat:service <http://vocab.nerc.ac.uk/sparql&gt;, <http://vocab.nerc.ac.uk/vocab2.wsdl> .
 
 <http://vocab.nerc.ac.uk/sparql>
   a dcat:DataService ;
@@ -35,4 +53,3 @@
   a foaf:Organization ;
   foaf:name "British Oceanographic Data Centre" ;
   foaf:homepage "https://www.bodc.ac.uk"^^xsd:anyURI .
- 
