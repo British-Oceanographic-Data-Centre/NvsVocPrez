@@ -53,4 +53,3 @@ dcat:service <http://vocab.nerc.ac.uk/sparql&gt;, <http://vocab.nerc.ac.uk/vocab
   a foaf:Organization ;
   foaf:name "British Oceanographic Data Centre" ;
   foaf:homepage "https://www.bodc.ac.uk"^^xsd:anyURI .
- 
