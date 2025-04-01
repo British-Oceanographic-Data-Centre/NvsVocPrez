@@ -47,7 +47,7 @@ artefacts_context = {
     "subject": [],
     "versionIRI": None,
     "keyword": [],
-    "contributor":[],
+    "contributor": [],
     "coverage": [],
     "accrualMethod": [],
     "accrualPeriodicity": None,
@@ -55,7 +55,7 @@ artefacts_context = {
     "wasGeneratedBy": [],
     "hasFormat": [],
     "includedInDataCatalog": [],
-    "semanticArtefactRelation": []
+    "semanticArtefactRelation": [],
 }
 
 distributions_context = {
@@ -88,7 +88,7 @@ distributions_meta = {
     "accessURL": f"{host}/sparql/",
     "created": None,
     "synonymProperty": "http://www.w3.org/2004/02/skos/core#altLabel",
-    "bytesize": None
+    "bytesize": None,
 }
 
 distributions_config = [
@@ -323,4 +323,3 @@ def get_response_bytesize(url):
         response = client.get(url)
         response.raise_for_status()
         return len(response.content)
-
