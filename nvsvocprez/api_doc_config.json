@@ -206,6 +206,14 @@
 			},
 			{
 				"in": "query",
+				"name": "display",
+				"description": "The parameters to display",
+				"required": false,				
+				"default": "all"
+			}
+			,
+			{
+				"in": "query",
 				"name": "_mediatype",
 				"description": "artefacts JSON-LD",
 				"required": false,
@@ -221,10 +229,6 @@
 		  }
 		}
 	  },
-
-
-
-
 
 		"/artefacts/{artefactID}/distributions/{distributionID}": {
 		"get": {
@@ -248,7 +252,15 @@
 				"description": "The distribution identifier",
 				"required": true,
 				"example": "1"
-			},			
+			},
+			{
+				"in": "query",
+				"name": "display",
+				"description": "The parameters to display",
+				"required": false,				
+				"default": "all"
+			}
+			,
 			{
 				"in": "query",
 				"name": "_mediatype",

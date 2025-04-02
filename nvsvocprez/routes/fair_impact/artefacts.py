@@ -90,7 +90,7 @@ distributions_meta = {
     "accessURL": f"{host}/sparql/",
     "created": None,
     "synonymProperty": "http://www.w3.org/2004/02/skos/core#altLabel",
-    "bytesize": None,
+    "byteSize": None,
 }
 
 distributions_config = [
@@ -118,8 +118,10 @@ def artefacts(request: Request):
     graph_scheme_items = get_scheme_graph_items(data)
     json_ld = {"@context": artefacts_context, "@graph": graph_collection_items + graph_scheme_items}
 
-    display_param = request.query_params.get("display", "all")
-    filter_fields_in_graph(json_ld, display_param)
+    display_param = request.query_params.get("display", "all")        
+    protected_fields = {"acronym", "@id", "links"}
+
+    filter_fields_in_graph_artefacts(json_ld, display_param, protected_fields)
 
     return JSONResponse(content=json_ld, status_code=response.status_code)
 
@@ -169,13 +171,18 @@ def distributions(request: Request, artefactID: str):
     for item in distributions_json_ld:
         item["downloadURL"] = f"{data['identifier']}?_profile=nvs&_mediatype={item['mediaType']}"
         item["@id"] = f"{host}/artefacts/{artefactID.upper()}/distributions/{item['distributionId']}"
-        item["bytesize"] = get_response_bytesize(item["downloadURL"])
+        item["byteSize"] = get_response_bytesize(item["downloadURL"])
         del item["mediaType"]
 
     graph_items = {"@graph": distributions_json_ld}
 
     json_ld = {"@context": distributions_context}
     json_ld.update(graph_items)
+
+    # display_param = request.query_params.get("display", "all")        
+    # protected_fields = {"downloadURL", "@id"}
+
+    # filter_fields_in_graph_artefacts(json_ld, display_param, protected_fields)
 
     return JSONResponse(content=json_ld, status_code=200)
 
@@ -575,15 +582,12 @@ def get_response_bytesize(url):
         return len(response.content)
 
 
-def filter_fields_in_graph(json_data: dict, fields_to_remove: str) -> str:
+def filter_fields_in_graph_artefacts(json_data: dict, fields_to_display: str, protected_fields: str) -> str:
 
-    fields_to_display = [field.strip() for field in fields_to_remove.split(",")]
+    fields_to_display = [field.strip() for field in fields_to_display.split(",")]
 
     if "all" in fields_to_display:
         return
-
-    # Mandatory fields
-    protected_fields = {"acronym", "@id", "links"}
 
     for item in json_data.get("@graph", []):
         keys_to_remove = [key for key in item if key not in fields_to_display and key not in protected_fields]
