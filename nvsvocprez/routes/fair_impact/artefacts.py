@@ -214,15 +214,14 @@ def distributionsId(request: Request, artefactID: str, distributionID: str):
 )
 @router.head("/search/metadata", include_in_schema=False)
 def metadata(request: Request):
-    
+
     query_param = request.query_params.get("q")
 
     if query_param is None:
         return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=404)
 
-
     print(f"Search in metadata for: {query_param}")
-    
+
     q_count = """
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -244,10 +243,12 @@ def metadata(request: Request):
                 regex(str(?cre), "<Q>", "i")
             )
         }
-    """.replace("<Q>", query_param)
+    """.replace(
+        "<Q>", query_param
+    )
 
     sparql_count_result = sparql_query(q_count)
-    count = sparql_count_result[1][0]['.1']['value']
+    count = sparql_count_result[1][0][".1"]["value"]
 
     print(f"Got {count} results")
 
@@ -285,10 +286,14 @@ def metadata(request: Request):
         ORDER BY DESC(?Rank) 
         OFFSET 0 
         LIMIT 100
-    """.replace("<Q>", query_param).replace("<HOST>", host)
+    """.replace(
+        "<Q>", query_param
+    ).replace(
+        "<HOST>", host
+    )
 
     sparql_result = sparql_query(q_result)
-    
+
     return sparql_result[1]
 
 
@@ -298,15 +303,14 @@ def metadata(request: Request):
 )
 @router.head("/search/content", include_in_schema=False)
 def content(request: Request):
-    
+
     query_param = request.query_params.get("q")
 
     if query_param is None:
         return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=404)
 
-
     print(f"Search in content for: {query_param}")
-    
+
     q_count = """
         PREFIX lang: <http://ontologi.es/lang/core#> 
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
@@ -340,11 +344,12 @@ def content(request: Request):
             ?x owl:deprecated ?depr . 
             FILTER(str(?depr) = "false") 
         }
-    """.replace("<Q>", query_param)
-
+    """.replace(
+        "<Q>", query_param
+    )
 
     sparql_count_result = sparql_query(q_count)
-    count = sparql_count_result[1][0]['.1']['value']
+    count = sparql_count_result[1][0][".1"]["value"]
 
     print(f"Got {count} results")
 
@@ -390,22 +395,24 @@ def content(request: Request):
         ORDER BY DESC(?z) 
         OFFSET 0 
         LIMIT 10
-    """.replace("<Q>", query_param)
+    """.replace(
+        "<Q>", query_param
+    )
 
     sparql_result = sparql_query(q_result)
-    
+
     return sparql_result[1]
 
 
 @router.get("/artefacts/{artefactID}/resources/concepts", **paths["/artefacts/{artefactID}/resources/concepts"]["get"])
 @router.head("/artefacts/{artefactID}/resources/concepts", include_in_schema=False)
 def concepts_in_collection(request: Request, artefactID: str):
-    
+
     response = artefactId(request, artefactID)
 
     if response.status_code != 200:
         return JSONResponse(content={"error": "artefactID not found"}, status_code=404)
-    
+
     q_count = """
         PREFIX dcterms: <http://purl.org/dc/terms/> 
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
@@ -417,11 +424,15 @@ def concepts_in_collection(request: Request, artefactID: str):
             FILTER(LANG(?pl) = "en")
 
         }  
-    """.replace("<artefactID>",artefactID).replace("<HOST>",host)
+    """.replace(
+        "<artefactID>", artefactID
+    ).replace(
+        "<HOST>", host
+    )
 
     sparql_count_result = sparql_query(q_count)
-    count = sparql_count_result[1][0]['count']['value']
-    
+    count = sparql_count_result[1][0]["count"]["value"]
+
     print(f"Got {count} results")
 
     q_results = """
@@ -433,11 +444,14 @@ def concepts_in_collection(request: Request, artefactID: str):
                 ?c skos:prefLabel ?pl .
                 FILTER(LANG(?pl) = "en")
         }            
-    """.replace("<artefactID>",artefactID).replace("<HOST>",host)
-    
+    """.replace(
+        "<artefactID>", artefactID
+    ).replace(
+        "<HOST>", host
+    )
+
     sparql_result = sparql_query(q_results)
     return JSONResponse([{"uri": x["c"]["value"], "prefLabel": x["pl"]["value"]} for x in sparql_result[1]])
-
 
 
 def extract_collection_acronym(uri):
@@ -562,7 +576,7 @@ def get_response_bytesize(url):
 
 
 def filter_fields_in_graph(json_data: dict, fields_to_remove: str) -> str:
-    
+
     fields_to_display = [field.strip() for field in fields_to_remove.split(",")]
 
     if "all" in fields_to_display:
