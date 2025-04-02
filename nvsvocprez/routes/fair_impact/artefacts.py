@@ -44,18 +44,18 @@ artefacts_context = {
     "includedInDataCatalog": "http://schema.org/includedInDataCatalog",
     "language": "http://purl.org/dc/terms/language",
     "@language": "en",
-    "subject": [],
-    "versionIRI": None,
-    "keyword": [],
-    "contributor": [],
-    "coverage": [],
-    "accrualMethod": [],
-    "accrualPeriodicity": None,
-    "competencyQuestion": [],
-    "wasGeneratedBy": [],
-    "hasFormat": [],
-    "includedInDataCatalog": [],
-    "semanticArtefactRelation": [],
+    # "subject": [],
+    # "versionIRI": None,
+    # "keyword": [],
+    # "contributor": [],
+    # "coverage": [],
+    # "accrualMethod": [],
+    # "accrualPeriodicity": None,
+    # "competencyQuestion": [],
+    # "wasGeneratedBy": [],
+    # "hasFormat": [],
+    # "includedInDataCatalog": [],
+    # "semanticArtefactRelation": []
 }
 
 distributions_context = {
@@ -88,7 +88,7 @@ distributions_meta = {
     "accessURL": f"{host}/sparql/",
     "created": None,
     "synonymProperty": "http://www.w3.org/2004/02/skos/core#altLabel",
-    "bytesize": None,
+    "byteSize": None,
 }
 
 distributions_config = [
@@ -164,8 +164,7 @@ def distributions(request: Request, artefactID: str):
     for item in distributions_json_ld:
         item["downloadURL"] = f"{data['identifier']}?_profile=nvs&_mediatype={item['mediaType']}"
         item["@id"] = f"{host}/artefacts/{artefactID.upper()}/distributions/{item['distributionId']}"
-        item["bytesize"] = get_response_bytesize(item["downloadURL"])
-        ## print(get_response_bytesize(item["downloadURL"]))
+        item["byteSize"] = get_response_bytesize(item["downloadURL"])
         del item["mediaType"]
 
     graph_items = {"@graph": distributions_json_ld}
@@ -267,6 +266,18 @@ def get_collection_graph_items(data: dict):
                 "links": {
                     "distributions": uri.replace("collection", "artefacts").replace("/current/", "/distributions"),
                 },
+                "subject": [],
+                "versionIRI": None,
+                "keyword": [],
+                "contributor": [],
+                "coverage": [],
+                "accrualMethod": [],
+                "accrualPeriodicity": None,
+                "competencyQuestion": [],
+                "wasGeneratedBy": [],
+                "hasFormat": [],
+                "includedInDataCatalog": [],
+                "semanticArtefactRelation": [],
             }
         )
 
@@ -312,6 +323,18 @@ def get_scheme_graph_items(data: dict):
                 "links": {
                     "distributions": uri.replace("scheme", "artefacts").replace("/current/", "/distributions"),
                 },
+                "subject": [],
+                "versionIRI": None,
+                "keyword": [],
+                "contributor": [],
+                "coverage": [],
+                "accrualMethod": [],
+                "accrualPeriodicity": None,
+                "competencyQuestion": [],
+                "wasGeneratedBy": [],
+                "hasFormat": [],
+                "includedInDataCatalog": [],
+                "semanticArtefactRelation": [],
             }
         )
 
