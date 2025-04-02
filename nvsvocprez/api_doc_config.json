@@ -236,7 +236,24 @@
 				"description": "The parameters to display",
 				"required": false,				
 				"default": "all"
-			},
+			}
+			,
+			{
+				"in": "query",
+				"name": "pagesize",
+				"description": "The number of results to display per page (minimum is 50)",
+				"required": false,
+				"default": "50"
+			}			
+			,
+			{
+				"in": "query",
+				"name": "page",
+				"description": "The page number to visit",
+				"required": false,				
+				"default": "1"
+			}			
+			,			
 			{
 				"in": "query",
 				"name": "_mediatype",

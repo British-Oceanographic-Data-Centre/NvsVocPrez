@@ -165,7 +165,7 @@ def artefactId(request: Request, artefactID: str, do_filter="yes"):
 
 @router.get("/artefacts/{artefactID}/distributions", **paths["/artefacts/{artefactID}/distributions"]["get"])
 @router.head("/artefacts/{artefactID}/distributions", include_in_schema=False)
-def distributions(request: Request, artefactID: str, do_filter=None):
+def distributions(request: Request, artefactID: str, do_filter=None, do_pagination="yes"):
 
     response = artefactId(request, artefactID, do_filter)
 
@@ -199,6 +199,31 @@ def distributions(request: Request, artefactID: str, do_filter=None):
     protected_fields = {"distributionId", "downloadURL", "@id"}
 
     filter_fields_in_graph_artefacts(json_ld, display_param, protected_fields)
+
+    if do_pagination is not None:
+        page_size = get_positive_int(request.query_params.get("pagesize"), 50)
+        page = get_positive_int(request.query_params.get("page"), 1)
+
+        graph_count = len(json_ld.get("@graph", []))
+        page_size = min(page_size, graph_count)
+        page_count = math.ceil(graph_count / page_size)
+
+        page = min(page, page_count)
+        prev_page = None if page == 1 else max(1, page - 1)
+        next_page = None if page == page_count else page + 1
+
+        start_index = (page - 1) * page_size
+        end_index = min(page * page_size - 1, graph_count - 1)
+
+        subset_graph = json_ld["@graph"][start_index : end_index + 1]
+        paged_json_ld = {"@context": json_ld["@context"], "@graph": subset_graph}
+
+        paged_json_ld = {
+            **pagination(page, page_count, page_size, graph_count, prev_page, next_page, str(request.url)),
+            **paged_json_ld,
+        }
+
+        json_ld = paged_json_ld
 
     return JSONResponse(content=json_ld, status_code=200)
 
