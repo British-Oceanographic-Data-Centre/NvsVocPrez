@@ -92,9 +92,9 @@
 			{
 				"in": "query",
 				"name": "pagesize",
-				"description": "The number of results to display per page (minimum is 5)",
+				"description": "The number of results to display per page (minimum is 50)",
 				"required": false,
-				"default": "5"
+				"default": "50"
 			}			
 			,
 			{
@@ -184,9 +184,9 @@
 			{
 				"in": "query",
 				"name": "pagesize",
-				"description": "The number of results to display per page (minimum is 5)",
+				"description": "The number of results to display per page (minimum is 50)",
 				"required": false,
-				"default": "5"
+				"default": "50"
 			}			
 			,
 			{
@@ -321,9 +321,9 @@
 			{
 				"in": "query",
 				"name": "pagesize",
-				"description": "The number of results to display per page (minimum is 5)",
+				"description": "The number of results to display per page (minimum is 50)",
 				"required": false,
-				"default": "5"
+				"default": "50"
 			},
 			{
 				"in": "query",
@@ -356,9 +356,9 @@
 			{
 				"in": "query",
 				"name": "pagesize",
-				"description": "The number of results to display per page (minimum is 5)",
+				"description": "The number of results to display per page (minimum is 50)",
 				"required": false,
-				"default": "5"
+				"default": "50"
 			},
 			{
 				"in": "query",
