@@ -112,44 +112,24 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
     if do_filter is not None:
         display_param = request.query_params.get("display", "all")
         protected_fields = {"acronym", "@id", "links"}
-
         filter_fields_in_graph_artefacts(json_ld, display_param, protected_fields)
 
-    print("++++++++++++++++++++++ PAGINATION ++++++++++++++++++++")
-
-    if do_pagination is not None:
-
-        print("111111111111111111111111111111111111111111111111")
-
-        print(request.query_params.get("pagesize"))
-
-        print("111111111111111111111111111111111111111111111111")
-
+    if do_pagination is not None:        
         page_size = get_positive_int(request.query_params.get("pagesize"), 5)
         page = get_positive_int(request.query_params.get("page"), 1)
 
         graph_count = len(json_ld.get("@graph", []))
         page_size = min(page_size, graph_count)
         page_count = math.ceil(graph_count / page_size)
-        print("Number of elements in @graph:", graph_count)
 
         page = min(page, page_count)
         prev_page = None if page == 1 else max(1, page - 1)
         next_page = None if page == page_count else page + 1
 
-        print("Page size wanted: ", page_size)
-        print("Page number to visit: ", page)
-        print("Page count: ", page_count)
-        print("Request url:", request.url)
-
         start_index = (page - 1) * page_size
         end_index = min(page * page_size - 1, graph_count - 1)
 
-        print("Start index: ", start_index)
-        print("End index: ", end_index)
-
         subset_graph = json_ld["@graph"][start_index : end_index + 1]
-
         paged_json_ld = {"@context": json_ld["@context"], "@graph": subset_graph}
 
         paged_json_ld = {
@@ -263,8 +243,6 @@ def metadata(request: Request):
     if query_param is None:
         return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=404)
 
-    print(f"Search in metadata for: {query_param}")
-
     q_count = """
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -303,16 +281,9 @@ def metadata(request: Request):
         page_size = min(page_size, results_count)
         page_count = math.ceil(results_count / page_size)
 
-        print(f"Got {count} results")
-
         page = min(page, page_count)
         prev_page = None if page == 1 else max(1, page - 1)
         next_page = None if page == page_count else page + 1
-
-        print("Page size wanted: ", page_size)
-        print("Page number to visit: ", page)
-        print("Page count: ", page_count)
-        print("Request url:", request.url)
 
         start_index = (page - 1) * page_size
         pgn = pagination(page, page_count, page_size, results_count, prev_page, next_page, str(request.url))
@@ -378,8 +349,6 @@ def content(request: Request):
     if query_param is None:
         return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=404)
 
-    print(f"Search in content for: {query_param}")
-
     q_count = """
         PREFIX lang: <http://ontologi.es/lang/core#> 
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
@@ -420,8 +389,6 @@ def content(request: Request):
     sparql_count_result = sparql_query(q_count)
     count = sparql_count_result[1][0][".1"]["value"]
 
-    print(f"Got {count} results")
-
     results_count = int(count)
     sparql_result = []
     if results_count > 0:
@@ -432,16 +399,9 @@ def content(request: Request):
         page_size = min(page_size, results_count)
         page_count = math.ceil(results_count / page_size)
 
-        print(f"Got {count} results")
-
         page = min(page, page_count)
         prev_page = None if page == 1 else max(1, page - 1)
         next_page = None if page == page_count else page + 1
-
-        print("Page size wanted: ", page_size)
-        print("Page number to visit: ", page)
-        print("Page count: ", page_count)
-        print("Request url:", request.url)
 
         start_index = (page - 1) * page_size
         pgn = pagination(page, page_count, page_size, results_count, prev_page, next_page, str(request.url))
@@ -532,8 +492,6 @@ def concepts_in_collection(request: Request, artefactID: str):
     sparql_count_result = sparql_query(q_count)
     count = sparql_count_result[1][0]["count"]["value"]
 
-    print(f"Got {count} results")
-
     results_count = int(count)
     sparql_result = []
     if results_count > 0:
@@ -547,12 +505,6 @@ def concepts_in_collection(request: Request, artefactID: str):
         page = min(page, page_count)
         prev_page = None if page == 1 else max(1, page - 1)
         next_page = None if page == page_count else page + 1
-
-        print("Page size wanted: ", page_size)
-        print("Page number to visit: ", page)
-        print("Page count: ", page_count)
-        print("Request url:", request.url)
-
         start_index = (page - 1) * page_size
         pgn = pagination(page, page_count, page_size, results_count, prev_page, next_page, str(request.url))
 

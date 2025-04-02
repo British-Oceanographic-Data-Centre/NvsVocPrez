@@ -12,11 +12,11 @@
 		"name": "CC BY 4.0",
 		"url": "https://creativecommons.org/licenses/by/4.0/legalcode"
 	  },
-	  "docs_url": "/docs"
+	  "docs_url": "/doc/api"
 	},
 	"tags": [
 		{
-			"name": "artefacts",
+			"name": "MOD-API",
 			"description": "Get information about all semantic artefacts",
 			"externalDocs": {
 			  "description": "Find out more",
@@ -75,7 +75,7 @@
 	  "/artefacts": {
 		"get": {
 		  "tags": [
-			"artefacts"
+			"MOD-API"
 		  ],
 		  "summary": "Get information about all semantic artefacts",
 		  "description": "This endpoint will return information about all available3 semantic artefacts in JSON-LD",
@@ -127,7 +127,7 @@
 	  "/artefacts/{artefactID}": {
 		"get": {
 		  "tags": [
-			"artefacts"
+			"MOD-API"
 		  ],
 		  "summary": "Get information about a semantic artefact",
 		  "description": "This endpoint will return information about a semantic artefact in JSON-LD",
@@ -168,7 +168,7 @@
 	  "/artefacts/{artefactID}/resources/concepts": {
 		"get": {
 		  "tags": [
-			"artefacts"
+			"MOD-API"
 		  ],
 		  "summary": "Get concepts within artefactID",
 		  "description": "This endpoint will return the concepts within a specified NVS collection",
@@ -217,7 +217,7 @@
 	  "/artefacts/{artefactID}/distributions": {
 		"get": {
 		  "tags": [
-			"artefacts"
+			"MOD-API"
 		  ],
 		  "summary": "Get information about a semantic artefact distributions",
 		  "description": "This endpoint will return information about a semantic artefact distributions in JSON-LD",
@@ -236,8 +236,7 @@
 				"description": "The parameters to display",
 				"required": false,				
 				"default": "all"
-			}
-			,
+			},
 			{
 				"in": "query",
 				"name": "_mediatype",
@@ -258,7 +257,7 @@
 		"/artefacts/{artefactID}/distributions/{distributionID}": {
 		"get": {
 		  "tags": [
-			"artefacts"
+			"MOD-API"
 		  ],
 		  "summary": "Get information about a semantic artefact distribution",
 		  "description": "This endpoint will return information about a semantic artefact distribution in JSON-LD",
@@ -284,8 +283,7 @@
 				"description": "The parameters to display",
 				"required": false,				
 				"default": "all"
-			}
-			,
+			},
 			{
 				"in": "query",
 				"name": "_mediatype",
@@ -307,7 +305,7 @@
 	"/search/metadata": {
 		"get": {
 		  "tags": [
-			"search metadata"
+			"MOD-API"
 		  ],
 		  "summary": "Search all of the metadata in a catalogue",
 		  "description": "This endpoint will search for metadata across all NVS collections",
@@ -319,16 +317,14 @@
 				"description": "Search on query string",
 				"required": true,
 				"example": "water"
-			}
-			,
+			},
 			{
 				"in": "query",
 				"name": "pagesize",
 				"description": "The number of results to display per page (minimum is 5)",
 				"required": false,
 				"default": "5"
-			}			
-			,
+			},
 			{
 				"in": "query",
 				"name": "page",
@@ -344,7 +340,7 @@
 	  "/search/content": {
 		"get": {
 		  "tags": [
-			"search content"
+			"MOD-API"
 		  ],
 		  "summary": "Search all of the content in a catalogue",
 		  "description": "This endpoint will search for concepts across all NVS collections",
@@ -356,16 +352,14 @@
 				"description": "Search on query string",
 				"required": true,
 				"example": "water"
-			}
-			,
+			},
 			{
 				"in": "query",
 				"name": "pagesize",
 				"description": "The number of results to display per page (minimum is 5)",
 				"required": false,
 				"default": "5"
-			}			
-			,
+			},
 			{
 				"in": "query",
 				"name": "page",
@@ -377,7 +371,6 @@
 		  }
 		}
 	  },
-
 
 
 	  "/collection/": {
