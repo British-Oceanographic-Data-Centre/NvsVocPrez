@@ -164,7 +164,7 @@ def distributions(request: Request, artefactID: str):
     for item in distributions_json_ld:
         item["downloadURL"] = f"{data['identifier']}?_profile=nvs&_mediatype={item['mediaType']}"
         item["@id"] = f"{host}/artefacts/{artefactID.upper()}/distributions/{item['distributionId']}"
-        item["byteSize"] = get_response_bytesize(item["downloadURL"])        
+        item["byteSize"] = get_response_bytesize(item["downloadURL"])
         del item["mediaType"]
 
     graph_items = {"@graph": distributions_json_ld}
@@ -277,7 +277,7 @@ def get_collection_graph_items(data: dict):
                 "wasGeneratedBy": [],
                 "hasFormat": [],
                 "includedInDataCatalog": [],
-                "semanticArtefactRelation": []
+                "semanticArtefactRelation": [],
             }
         )
 
@@ -334,7 +334,7 @@ def get_scheme_graph_items(data: dict):
                 "wasGeneratedBy": [],
                 "hasFormat": [],
                 "includedInDataCatalog": [],
-                "semanticArtefactRelation": []
+                "semanticArtefactRelation": [],
             }
         )
 
