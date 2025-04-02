@@ -3,8 +3,7 @@ import json
 
 from routes import about_page, contact_page, collection_pages, index_page, scheme_pages, sparql_pages
 
-# from routes.fair_impact.artefacts import artefacts
-from routes.fair_impact import artefacts
+from routes.fair_impact import endpoints as modapi_endpoints
 
 from authentication import login
 
@@ -99,7 +98,7 @@ api.include_router(collection_pages.router)
 api.include_router(login.router)
 api.include_router(scheme_pages.router)
 api.include_router(sparql_pages.router)
-api.include_router(artefacts.router)
+api.include_router(modapi_endpoints.router)
 
 
 @api.get("/standard_name/", include_in_schema=False)
