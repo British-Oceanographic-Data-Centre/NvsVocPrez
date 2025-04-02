@@ -115,7 +115,7 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
         filter_fields_in_graph_artefacts(json_ld, display_param, protected_fields)
 
     if do_pagination is not None:
-        page_size = get_positive_int(request.query_params.get("pagesize"), 5)
+        page_size = get_positive_int(request.query_params.get("pagesize"), 50)
         page = get_positive_int(request.query_params.get("page"), 1)
 
         graph_count = len(json_ld.get("@graph", []))
@@ -275,7 +275,7 @@ def metadata(request: Request):
     sparql_result = []
     if results_count > 0:
 
-        page_size = get_positive_int(request.query_params.get("pagesize"), 5)
+        page_size = get_positive_int(request.query_params.get("pagesize"), 50)
         page = get_positive_int(request.query_params.get("page"), 1)
 
         page_size = min(page_size, results_count)
@@ -393,7 +393,7 @@ def content(request: Request):
     sparql_result = []
     if results_count > 0:
 
-        page_size = get_positive_int(request.query_params.get("pagesize"), 5)
+        page_size = get_positive_int(request.query_params.get("pagesize"), 50)
         page = get_positive_int(request.query_params.get("page"), 1)
 
         page_size = min(page_size, results_count)
@@ -496,7 +496,7 @@ def concepts_in_collection(request: Request, artefactID: str):
     sparql_result = []
     if results_count > 0:
 
-        page_size = get_positive_int(request.query_params.get("pagesize"), 5)
+        page_size = get_positive_int(request.query_params.get("pagesize"), 50)
         page = get_positive_int(request.query_params.get("page"), 1)
 
         page_size = min(page_size, results_count)
