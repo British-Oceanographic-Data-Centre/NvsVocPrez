@@ -81,6 +81,14 @@
 		  "description": "This endpoint will return information about all available3 semantic artefacts in JSON-LD",
 		  "openapi_extra": {
 			"parameters": [
+			{
+				"in": "query",
+				"name": "display",
+				"description": "The parameters to display",
+				"required": false,				
+				"default": "all"
+			}
+			,
 			  {
 				"in": "query",
 				"name": "_mediatype",
@@ -115,6 +123,14 @@
 				"required": true,
 				"example": "P03"
 			},
+			{
+				"in": "query",
+				"name": "display",
+				"description": "The parameters to display",
+				"required": false,				
+				"default": "all"
+			}
+			,
 			{
 				"in": "query",
 				"name": "_mediatype",
