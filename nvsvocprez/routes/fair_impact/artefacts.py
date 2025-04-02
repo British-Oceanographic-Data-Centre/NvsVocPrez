@@ -114,7 +114,7 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
         protected_fields = {"acronym", "@id", "links"}
         filter_fields_in_graph_artefacts(json_ld, display_param, protected_fields)
 
-    if do_pagination is not None:        
+    if do_pagination is not None:
         page_size = get_positive_int(request.query_params.get("pagesize"), 5)
         page = get_positive_int(request.query_params.get("page"), 1)
 
