@@ -46,18 +46,18 @@ artefacts_context = {
     "includedInDataCatalog": "http://schema.org/includedInDataCatalog",
     "language": "http://purl.org/dc/terms/language",
     "@language": "en",
-    "subject": [],
-    "versionIRI": None,
-    "keyword": [],
-    "contributor": [],
-    "coverage": [],
-    "accrualMethod": [],
-    "accrualPeriodicity": None,
-    "competencyQuestion": [],
-    "wasGeneratedBy": [],
-    "hasFormat": [],
-    "includedInDataCatalog": [],
-    "semanticArtefactRelation": [],
+    # "subject": [],
+    # "versionIRI": None,
+    # "keyword": [],
+    # "contributor": [],
+    # "coverage": [],
+    # "accrualMethod": [],
+    # "accrualPeriodicity": None,
+    # "competencyQuestion": [],
+    # "wasGeneratedBy": [],
+    # "hasFormat": [],
+    # "includedInDataCatalog": [],
+    # "semanticArtefactRelation": []
 }
 
 distributions_context = {
@@ -524,6 +524,18 @@ def get_collection_graph_items(data: dict):
                 "links": {
                     "distributions": uri.replace("collection", "artefacts").replace("/current/", "/distributions"),
                 },
+                "subject": [],
+                "versionIRI": None,
+                "keyword": [],
+                "contributor": [],
+                "coverage": [],
+                "accrualMethod": [],
+                "accrualPeriodicity": None,
+                "competencyQuestion": [],
+                "wasGeneratedBy": [],
+                "hasFormat": [],
+                "includedInDataCatalog": [],
+                "semanticArtefactRelation": [],
             }
         )
 
@@ -569,6 +581,18 @@ def get_scheme_graph_items(data: dict):
                 "links": {
                     "distributions": uri.replace("scheme", "artefacts").replace("/current/", "/distributions"),
                 },
+                "subject": [],
+                "versionIRI": None,
+                "keyword": [],
+                "contributor": [],
+                "coverage": [],
+                "accrualMethod": [],
+                "accrualPeriodicity": None,
+                "competencyQuestion": [],
+                "wasGeneratedBy": [],
+                "hasFormat": [],
+                "includedInDataCatalog": [],
+                "semanticArtefactRelation": [],
             }
         )
 
