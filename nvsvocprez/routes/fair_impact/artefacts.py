@@ -1,16 +1,20 @@
-"""FAIR-IMPACT artefacts endpoint."""
+"""FAIR-IMPACT endpoints."""
 
 from datetime import date
+import math
 import os
 from pathlib import Path
 import re
 import json
 from datetime import datetime
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 from fastapi import APIRouter
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 import httpx
+
+from ..utils import sparql_query
 
 router = APIRouter()
 
@@ -44,18 +48,6 @@ artefacts_context = {
     "includedInDataCatalog": "http://schema.org/includedInDataCatalog",
     "language": "http://purl.org/dc/terms/language",
     "@language": "en",
-    # "subject": [],
-    # "versionIRI": None,
-    # "keyword": [],
-    # "contributor": [],
-    # "coverage": [],
-    # "accrualMethod": [],
-    # "accrualPeriodicity": None,
-    # "competencyQuestion": [],
-    # "wasGeneratedBy": [],
-    # "hasFormat": [],
-    # "includedInDataCatalog": [],
-    # "semanticArtefactRelation": []
 }
 
 distributions_context = {
@@ -100,7 +92,7 @@ distributions_config = [
 
 @router.get("/artefacts", **paths["/artefacts"]["get"])
 @router.head("/artefacts", include_in_schema=False)
-def artefacts(request: Request):
+def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
     # Collections
     with httpx.Client(follow_redirects=True) as client:
         response = client.get(f"{host}/collection?_mediatype=application/ld+json&_profile=nvs", timeout=timeout)
@@ -114,16 +106,47 @@ def artefacts(request: Request):
 
     data = response.json()
     graph_scheme_items = get_scheme_graph_items(data)
+
     json_ld = {"@context": artefacts_context, "@graph": graph_collection_items + graph_scheme_items}
+
+    if do_filter is not None:
+        display_param = request.query_params.get("display", "all")
+        protected_fields = {"acronym", "@id", "links"}
+        filter_fields_in_graph_artefacts(json_ld, display_param, protected_fields)
+
+    if do_pagination is not None:
+        page_size = get_positive_int(request.query_params.get("pagesize"), 5)
+        page = get_positive_int(request.query_params.get("page"), 1)
+
+        graph_count = len(json_ld.get("@graph", []))
+        page_size = min(page_size, graph_count)
+        page_count = math.ceil(graph_count / page_size)
+
+        page = min(page, page_count)
+        prev_page = None if page == 1 else max(1, page - 1)
+        next_page = None if page == page_count else page + 1
+
+        start_index = (page - 1) * page_size
+        end_index = min(page * page_size - 1, graph_count - 1)
+
+        subset_graph = json_ld["@graph"][start_index : end_index + 1]
+        paged_json_ld = {"@context": json_ld["@context"], "@graph": subset_graph}
+
+        paged_json_ld = {
+            **pagination(page, page_count, page_size, graph_count, prev_page, next_page, str(request.url)),
+            **paged_json_ld,
+        }
+
+        json_ld = paged_json_ld
 
     return JSONResponse(content=json_ld, status_code=response.status_code)
 
 
 @router.get("/artefacts/{artefactID}", **paths["/artefacts/{artefactID}"]["get"])
 @router.head("/artefacts/{artefactID}", include_in_schema=False)
-def artefactId(request: Request, artefactID: str):
+def artefactId(request: Request, artefactID: str, do_filter="yes"):
 
-    response = artefacts(request)
+    response = artefacts(request, do_filter, do_pagination=None)
 
     body = response.body
     data = json.loads(body.decode("utf-8"))
@@ -142,9 +165,9 @@ def artefactId(request: Request, artefactID: str):
 
 @router.get("/artefacts/{artefactID}/distributions", **paths["/artefacts/{artefactID}/distributions"]["get"])
 @router.head("/artefacts/{artefactID}/distributions", include_in_schema=False)
-def distributions(request: Request, artefactID: str):
+def distributions(request: Request, artefactID: str, do_filter=None):
 
-    response = artefactId(request, artefactID)
+    response = artefactId(request, artefactID, do_filter)
 
     if response.status_code != 200:
         return JSONResponse(content={"error": "artefactID not found"}, status_code=404)
@@ -171,6 +194,11 @@ def distributions(request: Request, artefactID: str):
 
     json_ld = {"@context": distributions_context}
     json_ld.update(graph_items)
+
+    display_param = request.query_params.get("display", "all")
+    protected_fields = {"distributionId", "downloadURL", "@id"}
+
+    filter_fields_in_graph_artefacts(json_ld, display_param, protected_fields)
 
     return JSONResponse(content=json_ld, status_code=200)
 
@@ -201,6 +229,310 @@ def distributionsId(request: Request, artefactID: str, distributionID: str):
     json_ld.update(distribution_item)
 
     return JSONResponse(content=json_ld, status_code=200)
+
+
+@router.get(
+    "/search/metadata",
+    **paths["/search/metadata"]["get"],
+)
+@router.head("/search/metadata", include_in_schema=False)
+def metadata(request: Request):
+
+    query_param = request.query_params.get("q")
+
+    if query_param is None:
+        return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=404)
+
+    q_count = """
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX owl: <http://www.w3.org/2002/07/owl#>
+        PREFIX dc: <http://purl.org/dc/terms/>
+
+        SELECT COUNT(DISTINCT ?x) 
+        WHERE { 
+            ?x a skos:Collection .
+            OPTIONAL { ?x dc:creator ?cre } .
+            ?x dc:title ?dt ;
+            dc:description ?desc ;
+            skos:altLabel ?alt .
+            
+            FILTER (
+                regex(str(?x), "<Q>", "i") || 
+                regex(str(?dt), "<Q>", "i") || 
+                regex(str(?alt), "<Q>", "i") || 
+                regex(str(?desc), "<Q>", "i") || 
+                regex(str(?cre), "<Q>", "i")
+            )
+        }
+    """.replace(
+        "<Q>", query_param
+    )
+
+    sparql_count_result = sparql_query(q_count)
+    count = sparql_count_result[1][0][".1"]["value"]
+
+    results_count = int(count)
+    sparql_result = []
+    if results_count > 0:
+
+        page_size = get_positive_int(request.query_params.get("pagesize"), 5)
+        page = get_positive_int(request.query_params.get("page"), 1)
+
+        page_size = min(page_size, results_count)
+        page_count = math.ceil(results_count / page_size)
+
+        page = min(page, page_count)
+        prev_page = None if page == 1 else max(1, page - 1)
+        next_page = None if page == page_count else page + 1
+
+        start_index = (page - 1) * page_size
+        pgn = pagination(page, page_count, page_size, results_count, prev_page, next_page, str(request.url))
+
+        q_result = (
+            """
+            PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+            PREFIX dc: <http://purl.org/dc/terms/>
+
+            SELECT DISTINCT 
+                (?localnam AS ?Collection) 
+                (?dt AS ?Title) 
+                (?alt AS ?AlternativeLabel) 
+                (?desc AS ?Description) 
+                (?crex AS ?Governance) 
+                (?x AS ?URL) 
+            WHERE { 
+                ?x a skos:Collection .
+                OPTIONAL { ?x dc:creator ?cre } .
+                ?x dc:title ?dt ;
+                dc:description ?desc ;
+                skos:altLabel ?alt .
+                
+                FILTER (
+                    regex(str(?x), "<Q>", "i") || 
+                    regex(str(?dt), "<Q>", "i") || 
+                    regex(str(?alt), "<Q>", "i") || 
+                    regex(str(?desc), "<Q>", "i") || 
+                    regex(str(?cre), "<Q>", "i")
+                ) .
+                
+                BIND(REPLACE(str(?x), "<HOST>/collection/", "") AS ?localname)
+                BIND(REPLACE(str(?localname), "/current/", "") AS ?localnam)
+                BIND(IF(EXISTS { ?x dc:creator ?cre }, ?cre, "") AS ?crex)
+            } 
+            ORDER BY DESC(?Rank) 
+            OFFSET <OFFSET>
+            LIMIT <LIMIT>
+            """.replace(
+                "<Q>", query_param
+            )
+            .replace("<HOST>", host)
+            .replace("<OFFSET>", str(start_index))
+            .replace("<LIMIT>", str(page_size))
+        )
+
+        sparql_result = sparql_query(q_result)
+        sparql_result = {**pgn, "results": sparql_result[1]}
+
+    return sparql_result
+
+
+@router.get(
+    "/search/content",
+    **paths["/search/content"]["get"],
+)
+@router.head("/search/content", include_in_schema=False)
+def content(request: Request):
+
+    query_param = request.query_params.get("q")
+
+    if query_param is None:
+        return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=404)
+
+    q_count = """
+        PREFIX lang: <http://ontologi.es/lang/core#> 
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+        PREFIX text: <http://jena.apache.org/text#> 
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+        PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+        PREFIX dc: <http://purl.org/dc/terms/> 
+
+        SELECT COUNT(DISTINCT ?dci) 
+        WHERE { 
+            ?x text:query ('*<Q>*' 500000) . 
+            ?z skos:member ?x . 
+            ?x dc:identifier ?dci . 
+
+            OPTIONAL { 
+                ?x skos:altLabel ?alt 
+                FILTER(langMatches(lang(?alt), "")) 
+            } 
+            
+            OPTIONAL { 
+                ?x skos:definition ?def . 
+                FILTER(
+                    langMatches(lang(?def), "en") || 
+                    langMatches(lang(?def), "")
+                ) 
+            } 
+            
+            ?x skos:prefLabel ?pl . 
+            FILTER(langMatches(lang(?pl), "en")) . 
+
+            ?x owl:deprecated ?depr . 
+            FILTER(str(?depr) = "false") 
+        }
+    """.replace(
+        "<Q>", query_param
+    )
+
+    sparql_count_result = sparql_query(q_count)
+    count = sparql_count_result[1][0][".1"]["value"]
+
+    results_count = int(count)
+    sparql_result = []
+    if results_count > 0:
+
+        page_size = get_positive_int(request.query_params.get("pagesize"), 5)
+        page = get_positive_int(request.query_params.get("page"), 1)
+
+        page_size = min(page_size, results_count)
+        page_count = math.ceil(results_count / page_size)
+
+        page = min(page, page_count)
+        prev_page = None if page == 1 else max(1, page - 1)
+        next_page = None if page == page_count else page + 1
+
+        start_index = (page - 1) * page_size
+        pgn = pagination(page, page_count, page_size, results_count, prev_page, next_page, str(request.url))
+
+        q_result = (
+            """
+            PREFIX lang: <http://ontologi.es/lang/core#> 
+            PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+            PREFIX text: <http://jena.apache.org/text#> 
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+            PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+            PREFIX dc: <http://purl.org/dc/terms/> 
+
+            SELECT DISTINCT 
+                (?dci AS ?Identifier) 
+                (?pl AS ?PrefLabel) 
+                (?alt AS ?AlternativeLabel) 
+                (?def AS ?Definition) 
+                (?z AS ?Collection) 
+                (?dt AS ?Title) 
+            WHERE { 
+                ?x text:query ('*<Q>*' 500000) . 
+                ?z skos:member ?x . 
+                ?x dc:identifier ?dci . 
+                
+                OPTIONAL { 
+                    ?x skos:altLabel ?alt 
+                    FILTER(langMatches(lang(?alt), "")) 
+                } 
+                
+                OPTIONAL { 
+                    ?x skos:definition ?def . 
+                    FILTER(
+                        langMatches(lang(?def), "en") || 
+                        langMatches(lang(?def), "")
+                    ) 
+                } 
+                
+                ?x skos:prefLabel ?pl . 
+                FILTER(langMatches(lang(?pl), "en")) . 
+                
+                ?x owl:deprecated ?depr . 
+                FILTER(str(?depr) = "false") 
+            }
+            ORDER BY DESC(?z) 
+            OFFSET <OFFSET>
+            LIMIT <LIMIT>
+            """.replace(
+                "<Q>", query_param
+            )
+            .replace("<HOST>", host)
+            .replace("<OFFSET>", str(start_index))
+            .replace("<LIMIT>", str(page_size))
+        )
+
+        sparql_result = sparql_query(q_result)
+        sparql_result = {**pgn, "results": sparql_result[1]}
+
+    return sparql_result
+
+
+@router.get("/artefacts/{artefactID}/resources/concepts", **paths["/artefacts/{artefactID}/resources/concepts"]["get"])
+@router.head("/artefacts/{artefactID}/resources/concepts", include_in_schema=False)
+def concepts_in_collection(request: Request, artefactID: str):
+
+    response = artefactId(request, artefactID)
+
+    if response.status_code != 200:
+        return JSONResponse(content={"error": "artefactID not found"}, status_code=404)
+
+    q_count = """
+        PREFIX dcterms: <http://purl.org/dc/terms/> 
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+        
+        SELECT (COUNT(DISTINCT ?c) AS ?count)
+        WHERE { 
+            <<HOST>/collection/<artefactID>/current/> skos:member ?c .
+            ?c skos:prefLabel ?pl .
+            FILTER(LANG(?pl) = "en")
+
+        }  
+    """.replace(
+        "<artefactID>", artefactID
+    ).replace(
+        "<HOST>", host
+    )
+
+    sparql_count_result = sparql_query(q_count)
+    count = sparql_count_result[1][0]["count"]["value"]
+
+    results_count = int(count)
+    sparql_result = []
+    if results_count > 0:
+
+        page_size = get_positive_int(request.query_params.get("pagesize"), 5)
+        page = get_positive_int(request.query_params.get("page"), 1)
+
+        page_size = min(page_size, results_count)
+        page_count = math.ceil(results_count / page_size)
+
+        page = min(page, page_count)
+        prev_page = None if page == 1 else max(1, page - 1)
+        next_page = None if page == page_count else page + 1
+        start_index = (page - 1) * page_size
+        pgn = pagination(page, page_count, page_size, results_count, prev_page, next_page, str(request.url))
+
+        q_result = (
+            """
+        PREFIX dcterms: <http://purl.org/dc/terms/>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        SELECT DISTINCT ?c ?pl
+        WHERE {
+                <<HOST>/collection/<artefactID>/current/> skos:member ?c .
+                ?c skos:prefLabel ?pl .
+                FILTER(LANG(?pl) = "en")
+        }
+        OFFSET <OFFSET>
+        LIMIT <LIMIT>
+        """.replace(
+                "<artefactID>", artefactID
+            )
+            .replace("<HOST>", host)
+            .replace("<OFFSET>", str(start_index))
+            .replace("<LIMIT>", str(page_size))
+        )
+
+        sparql_result = sparql_query(q_result)
+        sparql_result = [{"uri": x["c"]["value"], "prefLabel": x["pl"]["value"]} for x in sparql_result[1]]
+        sparql_result = {**pgn, "results": sparql_result}
+
+    return sparql_result
 
 
 def extract_collection_acronym(uri):
@@ -346,3 +678,55 @@ def get_response_bytesize(url):
         response = client.get(url)
         response.raise_for_status()
         return len(response.content)
+
+
+def filter_fields_in_graph_artefacts(json_data: dict, fields_to_display: str, protected_fields: str) -> str:
+
+    fields_to_display = [field.strip() for field in fields_to_display.split(",")]
+
+    if "all" in fields_to_display:
+        return
+
+    for item in json_data.get("@graph", []):
+        keys_to_remove = [key for key in item if key not in fields_to_display and key not in protected_fields]
+        for key in keys_to_remove:
+            item.pop(key, None)
+
+
+def get_positive_int(value, default):
+    try:
+        return max(int(value), default)
+    except (ValueError, TypeError):
+        return default
+
+
+def pagination(page: int, page_count: int, page_size: int, total_count: int, prev_page: int, next_page: int, url: str):
+    next_page_link = None if not next_page else update_url_pagination(url, next_page, page_size)
+    prev_page_link = None if not prev_page else update_url_pagination(url, prev_page, page_size)
+
+    page_links = {
+        "page": page,
+        "pageCount": page_count,
+        "pageSize": page_size,
+        "totalCount": total_count,
+        "prevPage": prev_page,
+        "nextPage": next_page,
+        "links": {"nextPage": next_page_link, "prevPage": prev_page_link},
+    }
+    return page_links
+
+
+def update_url_pagination(url: str, page: int, page_size: int) -> str:
+    parsed_url = urlparse(url)
+    query_params = parse_qs(parsed_url.query)
+
+    if "pagesize" in query_params and "page" in query_params:
+        query_params["page"] = [str(page)]
+    else:
+        query_params["pagesize"] = [str(page_size)]
+        query_params["page"] = [str(page)]
+
+    new_query = urlencode(query_params, doseq=True)
+    modified_url = urlunparse(parsed_url._replace(query=new_query))
+
+    return modified_url
