@@ -515,8 +515,11 @@ def content(request: Request):
         }
 
         sparql_result = [{key_mappings.get(k, k): v for k, v in d.items()} for d in sparql_result]
-
         sparql_result = [{k: v["value"] for k, v in d.items()} for d in sparql_result]
+
+        for item in sparql_result:
+            identifier_suffix = item["dc:identifier"].split("::")[-1]
+            item["@id"] = f"{item['skos:collection']}{identifier_suffix}"
 
         context = {
             "dc": "http://purl.org/dc/terms/",
