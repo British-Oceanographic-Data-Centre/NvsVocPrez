@@ -358,38 +358,32 @@ def metadata(request: Request):
         sparql_result = sparql_query(q_result)[1]
 
         key_mappings = {
-            'skos_prefLabel': 'skos:prefLabel',
-            'skos_altLabel': 'skos:altLabel',
-            'skos_definition': 'skos:definition',
-            'skos_collection': 'skos:collection',
-            'dc_identifier': 'dc:identifier',
-            'dc_title': 'dc:title',
-            'dc_description': 'dc:description',
+            "skos_prefLabel": "skos:prefLabel",
+            "skos_altLabel": "skos:altLabel",
+            "skos_definition": "skos:definition",
+            "skos_collection": "skos:collection",
+            "dc_identifier": "dc:identifier",
+            "dc_title": "dc:title",
+            "dc_description": "dc:description",
         }
 
-        sparql_result = [
-            {key_mappings.get(k, k): v for k, v in d.items()} 
-            for d in sparql_result
-        ]
-        
-        sparql_result = [
-            {k: v["value"] for k, v in d.items()} 
-            for d in sparql_result
-        ]
+        sparql_result = [{key_mappings.get(k, k): v for k, v in d.items()} for d in sparql_result]
+
+        sparql_result = [{k: v["value"] for k, v in d.items()} for d in sparql_result]
 
         context = {
             "dc": "http://purl.org/dc/terms/",
             "grg": "http://www.isotc211.org/schemas/grg/",
             "owl": "http://www.w3.org/2002/07/owl#",
             "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-            "skos": "http://www.w3.org/2004/02/skos/core#"
+            "skos": "http://www.w3.org/2004/02/skos/core#",
         }
-        
-        sparql_result = {**pgn, "@context": context,"@graph": sparql_result}
-                
+
+        sparql_result = {**pgn, "@context": context, "@graph": sparql_result}
+
     return JSONResponse(content=sparql_result, status_code=200)
 
-    
+
 @router.get(
     "/search/content",
     **paths["/search/content"]["get"],
@@ -513,34 +507,29 @@ def content(request: Request):
         sparql_result = sparql_query(q_result)[1]
 
         key_mappings = {
-            'skos_prefLabel': 'skos:prefLabel',
-            'skos_altLabel': 'skos:altLabel',
-            'skos_definition': 'skos:definition',
-            'skos_collection': 'skos:collection',
-            'dc_identifier': 'dc:identifier'
+            "skos_prefLabel": "skos:prefLabel",
+            "skos_altLabel": "skos:altLabel",
+            "skos_definition": "skos:definition",
+            "skos_collection": "skos:collection",
+            "dc_identifier": "dc:identifier",
         }
 
-        sparql_result = [
-            {key_mappings.get(k, k): v for k, v in d.items()} 
-            for d in sparql_result
-        ]
-        
-        sparql_result = [
-            {k: v["value"] for k, v in d.items()} 
-            for d in sparql_result
-        ]
+        sparql_result = [{key_mappings.get(k, k): v for k, v in d.items()} for d in sparql_result]
+
+        sparql_result = [{k: v["value"] for k, v in d.items()} for d in sparql_result]
 
         context = {
             "dc": "http://purl.org/dc/terms/",
             "grg": "http://www.isotc211.org/schemas/grg/",
             "owl": "http://www.w3.org/2002/07/owl#",
             "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-            "skos": "http://www.w3.org/2004/02/skos/core#"
+            "skos": "http://www.w3.org/2004/02/skos/core#",
         }
-        
-        sparql_result = {**pgn, "@context": context,"@graph": sparql_result}
+
+        sparql_result = {**pgn, "@context": context, "@graph": sparql_result}
 
     return JSONResponse(content=sparql_result, status_code=200)
+
 
 @router.get("/artefacts/{artefactID}/resources/concepts", **paths["/artefacts/{artefactID}/resources/concepts"]["get"])
 @router.head("/artefacts/{artefactID}/resources/concepts", include_in_schema=False)
@@ -615,7 +604,7 @@ def concepts_in_collection(request: Request, artefactID: str):
             "grg": "http://www.isotc211.org/schemas/grg/",
             "owl": "http://www.w3.org/2002/07/owl#",
             "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-            "skos": "http://www.w3.org/2004/02/skos/core#"
+            "skos": "http://www.w3.org/2004/02/skos/core#",
         }
 
         sparql_result = {**pgn, "@context": context, "@graph": sparql_result}
@@ -793,8 +782,7 @@ def pagination(page: int, page_count: int, page_size: int, total_count: int, pre
     prev_page_link = None if not prev_page else update_url_pagination(url, prev_page, page_size)
 
     page_links = {
-        "pagination" :
-        {
+        "pagination": {
             "page": page,
             "pageCount": page_count,
             "pageSize": page_size,
