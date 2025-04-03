@@ -9,6 +9,7 @@ import json
 from datetime import datetime
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 from fastapi import APIRouter
+from fastapi.responses import RedirectResponse
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
@@ -111,7 +112,8 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
 
     if do_filter is not None:
         display_param = request.query_params.get("display", "all")
-        protected_fields = {"acronym", "@id", "links"}
+
+        protected_fields = {"@id", "acronym"}
         filter_fields_in_graph_artefacts(json_ld, display_param, protected_fields)
 
     if do_pagination is not None:
@@ -170,7 +172,7 @@ def distributions(request: Request, artefactID: str, do_filter=None, do_paginati
     response = artefactId(request, artefactID, do_filter)
 
     if response.status_code != 200:
-        return JSONResponse(content={"error": "artefactID not found"}, status_code=404)
+        return JSONResponse(content={"error": "artefactID not found"}, status_code=200)
 
     body = response.body
     data = json.loads(body.decode("utf-8"))
@@ -196,7 +198,7 @@ def distributions(request: Request, artefactID: str, do_filter=None, do_paginati
     json_ld.update(graph_items)
 
     display_param = request.query_params.get("display", "all")
-    protected_fields = {"distributionId", "downloadURL", "@id"}
+    protected_fields = {"distributionId", "@id"}
 
     filter_fields_in_graph_artefacts(json_ld, display_param, protected_fields)
 
@@ -238,12 +240,12 @@ def distributionsId(request: Request, artefactID: str, distributionID: str):
     response = distributions(request, artefactID)
 
     if response.status_code != 200:
-        return JSONResponse(content={"error": "artefactID not found"}, status_code=404)
+        return JSONResponse(content={"error": "artefactID not found"}, status_code=200)
 
     valid_ids = [str(i) for i in range(1, len(distributions_config) + 1)]
 
     if distributionID not in valid_ids:
-        return JSONResponse(content={"error": "distributionID not found"}, status_code=404)
+        return JSONResponse(content={"error": "distributionID not found"}, status_code=200)
 
     body = response.body
     data = json.loads(body.decode("utf-8"))
@@ -266,9 +268,13 @@ def metadata(request: Request):
     query_param = request.query_params.get("q")
 
     if query_param is None:
-        return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=404)
+       return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=200)
 
-    q_count = """
+    # if query_param is None:
+    #     new_url = str(request.url.include_query_params(q="all"))
+    #     return RedirectResponse(url=new_url)
+
+    q_count_query = """
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         PREFIX owl: <http://www.w3.org/2002/07/owl#>
         PREFIX dc: <http://purl.org/dc/terms/>
@@ -293,11 +299,43 @@ def metadata(request: Request):
         "<Q>", query_param.replace(" ", "\\\\ ")
     )
 
+    q_count_all = """
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX owl: <http://www.w3.org/2002/07/owl#>
+        PREFIX dc: <http://purl.org/dc/terms/>
+
+        SELECT COUNT(DISTINCT ?x) 
+        WHERE { 
+            ?x a skos:Collection .
+
+            OPTIONAL { 
+                ?x dc:creator ?cre 
+            } 
+
+            ?x dc:title ?dt ;
+            dc:description ?desc ;
+            skos:altLabel ?alt .
+        }
+    """
+
+    q_count = q_count_all if query_param == "all" else q_count_query
+
     sparql_count_result = sparql_query(q_count)
     count = sparql_count_result[1][0][".1"]["value"]
 
     results_count = int(count)
     sparql_result = []
+
+    context = {
+            "@vocab": "http://purl.org/dc/terms/",
+            "acronym": "https://w3id.org/mod#acronym",
+            "URI": "https://w3id.org/mod#URI",
+            "identifier": "http://purl.org/dc/terms/identifier",
+            "title": "http://purl.org/dc/terms/title",
+            "description": "http://purl.org/dc/terms/description",
+            "@language": "en",
+        }
+
     if results_count > 0:
 
         page_size = get_positive_int(request.query_params.get("pagesize"), 50)
@@ -312,6 +350,18 @@ def metadata(request: Request):
 
         start_index = (page - 1) * page_size
         pgn = pagination(page, page_count, page_size, results_count, prev_page, next_page, str(request.url))
+
+        filter = """
+            FILTER (
+                regex(str(?x), "<Q>", "i") || 
+                regex(str(?dt), "<Q>", "i") || 
+                regex(str(?alt), "<Q>", "i") || 
+                regex(str(?desc), "<Q>", "i") || 
+                regex(str(?cre), "<Q>", "i")
+            ) .
+        """
+
+        query_filter = "" if query_param == "all" else filter
 
         q_result = (
             """
@@ -332,13 +382,7 @@ def metadata(request: Request):
                 dc:description ?desc ;
                 skos:altLabel ?alt .
                 
-                FILTER (
-                    regex(str(?x), "<Q>", "i") || 
-                    regex(str(?dt), "<Q>", "i") || 
-                    regex(str(?alt), "<Q>", "i") || 
-                    regex(str(?desc), "<Q>", "i") || 
-                    regex(str(?cre), "<Q>", "i")
-                ) .
+                <QUERY_FILTER>
                 
                 BIND(REPLACE(str(?x), "<HOST>/collection/", "") AS ?localname)
                 BIND(REPLACE(str(?localname), "/current/", "") AS ?localnam)
@@ -347,7 +391,8 @@ def metadata(request: Request):
             ORDER BY DESC(?Rank) 
             OFFSET <OFFSET>
             LIMIT <LIMIT>
-            """.replace(
+            """.replace("<QUERY_FILTER>", query_filter
+            ).replace(
                 "<Q>", query_param.replace(" ", "\\\\ ")
             )
             .replace("<HOST>", host)
@@ -362,17 +407,17 @@ def metadata(request: Request):
             item["@id"] = item["URI"]
             item["@type"] = ["https://w3id.org/mod#SemanticArtefact", "http://www.w3.org/2004/02/skos/core#Collection"]
 
-        context = {
-            "@vocab": "http://purl.org/dc/terms/",
-            "acronym": "https://w3id.org/mod#acronym",
-            "URI": "https://w3id.org/mod#URI",
-            "identifier": "http://purl.org/dc/terms/identifier",
-            "title": "http://purl.org/dc/terms/title",
-            "description": "http://purl.org/dc/terms/description",
-            "@language": "en",
-        }
 
-        sparql_result = {**pgn, "@context": context, "@graph": sparql_result}
+        display_param = request.query_params.get("display", "all")
+        protected_fields = {"@id"}        
+        graph = {"@graph": sparql_result}
+        filter_fields_in_graph_artefacts(graph, display_param, protected_fields)
+
+        sparql_result = {**pgn, "@context": context, **graph}
+
+    else:
+        pgn = pagination(1, 1, 1, 0, None, None, str(request.url))
+        sparql_result = {**pgn, "@context": context, "@graph": []}
 
     return JSONResponse(content=sparql_result, status_code=200)
 
@@ -387,7 +432,13 @@ def content(request: Request):
     query_param = request.query_params.get("q")
 
     if query_param is None:
-        return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=404)
+       return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=200)
+    
+    # if query_param is None:
+    #     new_url = str(request.url.include_query_params(q="all"))
+    #     return RedirectResponse(url=new_url)
+
+    text_query = "" if query_param == "all" else "?x text:query ('*<Q>*' 500000) . "
 
     q_count = """
         PREFIX lang: <http://ontologi.es/lang/core#> 
@@ -399,7 +450,7 @@ def content(request: Request):
 
         SELECT COUNT(DISTINCT ?dci) 
         WHERE { 
-            ?x text:query ('*<Q>*' 500000) . 
+            <TEXT_QUERY>
             ?z skos:member ?x . 
             ?x dc:identifier ?dci . 
 
@@ -422,7 +473,8 @@ def content(request: Request):
             ?x owl:deprecated ?depr . 
             FILTER(str(?depr) = "false") 
         }
-    """.replace(
+    """.replace("<TEXT_QUERY>", text_query
+    ).replace(
         "<Q>", query_param.replace(" ", "\\\\ ")
     )
 
@@ -431,6 +483,9 @@ def content(request: Request):
 
     results_count = int(count)
     sparql_result = []
+
+    context = {"sdo": "https://schema.org/", "skos": "http://www.w3.org/2004/02/skos/core#"}
+
     if results_count > 0:
 
         page_size = get_positive_int(request.query_params.get("pagesize"), 50)
@@ -461,7 +516,7 @@ def content(request: Request):
                 (?z AS ?skos_collection) 
 
             WHERE { 
-                ?x text:query ('*<Q>*' 500000) . 
+                <TEXT_QUERY>
                 ?z skos:member ?x . 
                 ?x dc:identifier ?dci . 
                 
@@ -487,7 +542,8 @@ def content(request: Request):
             ORDER BY DESC(?z) 
             OFFSET <OFFSET>
             LIMIT <LIMIT>
-            """.replace(
+            """.replace("<TEXT_QUERY>", text_query
+            ).replace(
                 "<Q>", query_param.replace(" ", "\\\\ ")
             )
             .replace("<HOST>", host)
@@ -512,10 +568,16 @@ def content(request: Request):
             item["sdo:termCode"] = identifier_suffix
             item["@type"] = ["sdo:DefinedTerm", "skos:Concept"]
             item.pop("skos_collection", [])
+        
+        display_param = request.query_params.get("display", "all")
+        protected_fields = {"@id"}        
+        graph = {"@graph": sparql_result}
+        filter_fields_in_graph_artefacts(graph, display_param, protected_fields)
 
-        context = {"sdo": "https://schema.org/", "skos": "http://www.w3.org/2004/02/skos/core#"}
-
-        sparql_result = {**pgn, "@context": context, "@graph": sparql_result}
+        sparql_result = {**pgn, "@context": context, **graph}
+    else:
+        pgn = pagination(1, 1, 1, 0, None, None, str(request.url))
+        sparql_result = {**pgn, "@context": context, "@graph": []}
 
     return JSONResponse(content=sparql_result, status_code=200)
 
@@ -527,7 +589,7 @@ def concepts_in_collection(request: Request, artefactID: str):
     response = artefactId(request, artefactID)
 
     if response.status_code != 200:
-        return JSONResponse(content={"error": "artefactID not found"}, status_code=404)
+        return JSONResponse(content={"error": "artefactID not found"}, status_code=200)
 
     q_count = """
         PREFIX dcterms: <http://purl.org/dc/terms/> 
@@ -599,7 +661,13 @@ def concepts_in_collection(request: Request, artefactID: str):
             "skos": "http://www.w3.org/2004/02/skos/core#",
         }
 
-        sparql_result = {**pgn, "@context": context, "@graph": sparql_result}
+        display_param = request.query_params.get("display", "all")
+        protected_fields = {"@id"}        
+        graph = {"@graph": sparql_result}
+        filter_fields_in_graph_artefacts(graph, display_param, protected_fields)
+
+        # sparql_result = {**pgn, "@context": context, "@graph": sparql_result}
+        sparql_result = {**pgn, "@context": context, **graph}
 
     return JSONResponse(content=sparql_result, status_code=200)
 
