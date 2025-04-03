@@ -81,19 +81,32 @@
 		  "description": "This endpoint will return information about all available3 semantic artefacts in JSON-LD",
 		  "openapi_extra": {
 			"parameters": [
-			{
+				{
 				"in": "query",
 				"name": "display",
-				"description": "The parameters to display",
-				"required": false,				
-				"default": "all"
-			}			
+				"description": "The parameters to display (Type 'all' in a string item to display all parameters)",
+				"required": false,
+				"schema": {
+					"type": "array",
+					"items": {
+					"type": "string"
+					},
+					"default": ["acronym","URI","creator","publisher","title"]
+				}
+				,
+				"style": "form",
+				"explode": false
+				}
 			,
 			{
 				"in": "query",
 				"name": "pagesize",
 				"description": "The number of results to display per page (minimum is 50)",
 				"required": false,
+				"schema": {
+					"type": "integer",
+					"minimum": 50
+				},
 				"default": "50"
 			}			
 			,
@@ -101,7 +114,11 @@
 				"in": "query",
 				"name": "page",
 				"description": "The page number to visit",
-				"required": false,				
+				"required": false,
+				"schema": {
+					"type": "integer",
+					"minimum": 1
+				},
 				"default": "1"
 			}			
 			,			
@@ -143,10 +160,19 @@
 			{
 				"in": "query",
 				"name": "display",
-				"description": "The parameters to display",
-				"required": false,				
-				"default": "all"
-			}
+				"description": "The parameters to display (Type 'all' in a string item to display all parameters)",
+				"required": false,
+				"schema": {
+					"type": "array",
+					"items": {
+					"type": "string"
+					},
+					"default": ["acronym","URI","creator","publisher","title"]
+				}
+				,
+				"style": "form",
+				"explode": false
+				}
 			,
 			{
 				"in": "query",
@@ -186,6 +212,10 @@
 				"name": "pagesize",
 				"description": "The number of results to display per page (minimum is 50)",
 				"required": false,
+				"schema": {
+					"type": "integer",
+					"minimum": 50
+				},
 				"default": "50"
 			}			
 			,
@@ -194,6 +224,10 @@
 				"name": "page",
 				"description": "The page number to visit",
 				"required": false,				
+				"schema": {
+					"type": "integer",
+					"minimum": 1
+				},
 				"default": "1"
 			},
 
@@ -209,7 +243,23 @@
 				  ]
 				},
 				"example": "application/json"
-			  }
+			  },
+			  {
+				"in": "query",
+				"name": "display",
+				"description": "The parameters to display (Type 'all' in a string item to display all parameters)",
+				"required": false,
+				"schema": {
+					"type": "array",
+					"items": {
+					"type": "string"
+					},
+					"default": ["@id","skos:prefLabel","@type"]
+				}
+				,
+				"style": "form",
+				"explode": false
+				}
 			]
 		  }
 		}
@@ -233,16 +283,29 @@
 			{
 				"in": "query",
 				"name": "display",
-				"description": "The parameters to display",
-				"required": false,				
-				"default": "all"
-			}
+				"description": "The parameters to display (Type 'all' in a string item to display all parameters)",
+				"required": false,
+				"schema": {
+					"type": "array",
+					"items": {
+					"type": "string"
+					},
+					"default": ["title","description","distributionId","downloadURL"]
+				}
+				,
+				"style": "form",
+				"explode": false
+				}
 			,
 			{
 				"in": "query",
 				"name": "pagesize",
 				"description": "The number of results to display per page (minimum is 50)",
 				"required": false,
+				"schema": {
+					"type": "integer",
+					"minimum": 50
+				},
 				"default": "50"
 			}			
 			,
@@ -250,7 +313,11 @@
 				"in": "query",
 				"name": "page",
 				"description": "The page number to visit",
-				"required": false,				
+				"required": false,
+				"schema": {
+					"type": "integer",
+					"minimum": 1
+				},
 				"default": "1"
 			}			
 			,			
@@ -297,10 +364,20 @@
 			{
 				"in": "query",
 				"name": "display",
-				"description": "The parameters to display",
-				"required": false,				
-				"default": "all"
-			},
+				"description": "The parameters to display (Type 'all' in a string item to display all parameters)",
+				"required": false,
+				"schema": {
+					"type": "array",
+					"items": {
+					"type": "string"
+					},
+					"default": ["title","description","distributionId","downloadURL"]
+				}
+				,
+				"style": "form",
+				"explode": false
+				}
+			,
 			{
 				"in": "query",
 				"name": "_mediatype",
@@ -331,24 +408,51 @@
 			{
 				"in": "query",
 				"name": "q",
-				"description": "Search on query string",
+				"description": "The search query (type 'all' to return all collections)",
 				"required": true,
-				"example": "water"
+				"example": "water",				
+				"schema": {
+					"type": "string"
+				}
 			},
 			{
 				"in": "query",
 				"name": "pagesize",
 				"description": "The number of results to display per page (minimum is 50)",
 				"required": false,
+				"schema": {
+					"type": "integer",
+					"minimum": 50
+				},
 				"default": "50"
 			},
 			{
 				"in": "query",
 				"name": "page",
 				"description": "The page number to visit",
-				"required": false,				
+				"required": false,
+				"schema": {
+					"type": "integer",
+					"minimum": 1
+				},
 				"default": "1"
-			}									
+			},
+			{
+				"in": "query",
+				"name": "display",
+				"description": "The parameters to display (Type 'all' in a string item to display all parameters)",
+				"required": false,
+				"schema": {
+					"type": "array",
+					"items": {
+					"type": "string"
+					},
+					"default": ["acronym","title","description","URI","@id","@type"]
+				}
+				,
+				"style": "form",
+				"explode": false
+				}
 			]
 		  }
 		}
@@ -366,15 +470,22 @@
 			{
 				"in": "query",
 				"name": "q",
-				"description": "Search on query string",
+				"description": "The search query (type 'all' to return all concepts)",
 				"required": true,
-				"example": "water"
+				"example": "water",				
+				"schema": {
+					"type": "string"
+				}
 			},
 			{
 				"in": "query",
 				"name": "pagesize",
 				"description": "The number of results to display per page (minimum is 50)",
 				"required": false,
+				"schema": {
+					"type": "integer",
+					"minimum": 50
+				},
 				"default": "50"
 			},
 			{
@@ -382,8 +493,29 @@
 				"name": "page",
 				"description": "The page number to visit",
 				"required": false,				
+				"schema": {
+					"type": "integer",
+					"minimum": 1
+				},
 				"default": "1"
 			}
+			,
+			{
+				"in": "query",
+				"name": "display",
+				"description": "The parameters to display (Type 'all' in a string item to display all parameters)",
+				"required": false,
+				"schema": {
+					"type": "array",
+					"items": {
+					"type": "string"
+					},
+					"default": ["@id","sdo:name","sdo:inDefinedTermSet","sdo:termCode","@type"]
+				}
+				,
+				"style": "form",
+				"explode": false
+				}
 			]
 		  }
 		}
