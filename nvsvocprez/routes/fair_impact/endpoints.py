@@ -289,7 +289,7 @@ def metadata(request: Request):
                 regex(str(?cre), "<Q>", "i")
             )
         }
-    """.replace(        
+    """.replace(
         "<Q>", query_param.replace(" ", "\\\\ ")
     )
 
@@ -498,7 +498,7 @@ def content(request: Request):
             LIMIT <LIMIT>
             """.replace(
                 "<Q>", query_param.replace(" ", "\\\\ ")
-            )            
+            )
             .replace("<HOST>", host)
             .replace("<OFFSET>", str(start_index))
             .replace("<LIMIT>", str(page_size))
