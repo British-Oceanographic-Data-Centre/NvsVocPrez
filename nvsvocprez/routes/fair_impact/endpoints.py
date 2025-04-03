@@ -359,7 +359,7 @@ def metadata(request: Request):
         sparql_result = [{k: v["value"] for k, v in d.items()} for d in sparql_result]
 
         for item in sparql_result:
-            item["@id"] = item['URI']
+            item["@id"] = item["URI"]
             item["@type"] = ["https://w3id.org/mod#SemanticArtefact", "http://www.w3.org/2004/02/skos/core#Collection"]
 
         context = {
