@@ -111,7 +111,8 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
     json_ld = {"@context": artefacts_context, "@graph": graph_collection_items + graph_scheme_items}
 
     if do_filter is not None:
-        display_param = request.query_params.get("display", "all")
+        default_param = "acronym,URI,creator,publisher,title"
+        display_param = request.query_params.get("display", default_param)
 
         protected_fields = {"@id", "acronym"}
         filter_fields_in_graph_artefacts(json_ld, display_param, protected_fields)
@@ -197,7 +198,8 @@ def distributions(request: Request, artefactID: str, do_filter=None, do_paginati
     json_ld = {"@context": distributions_context}
     json_ld.update(graph_items)
 
-    display_param = request.query_params.get("display", "all")
+    default_param = "title, description, distributionId, downloadURL"
+    display_param = request.query_params.get("display", default_param)
     protected_fields = {"distributionId", "@id"}
 
     filter_fields_in_graph_artefacts(json_ld, display_param, protected_fields)
@@ -408,7 +410,8 @@ def metadata(request: Request):
             item["@type"] = ["https://w3id.org/mod#SemanticArtefact", "http://www.w3.org/2004/02/skos/core#Collection"]
 
 
-        display_param = request.query_params.get("display", "all")
+        default_param = "acronym, title, description, URI, @id, @type"
+        display_param = request.query_params.get("display", default_param)
         protected_fields = {"@id"}        
         graph = {"@graph": sparql_result}
         filter_fields_in_graph_artefacts(graph, display_param, protected_fields)
@@ -569,7 +572,8 @@ def content(request: Request):
             item["@type"] = ["sdo:DefinedTerm", "skos:Concept"]
             item.pop("skos_collection", [])
         
-        display_param = request.query_params.get("display", "all")
+        default_param = "@id, sdo:name, sdo:inDefinedTermSet, sdo:termCode, @type" 
+        display_param = request.query_params.get("display", default_param)
         protected_fields = {"@id"}        
         graph = {"@graph": sparql_result}
         filter_fields_in_graph_artefacts(graph, display_param, protected_fields)
@@ -661,7 +665,8 @@ def concepts_in_collection(request: Request, artefactID: str):
             "skos": "http://www.w3.org/2004/02/skos/core#",
         }
 
-        display_param = request.query_params.get("display", "all")
+        default_param = "@id, skos:prefLabel, @type"
+        display_param = request.query_params.get("display", default_param)
         protected_fields = {"@id"}        
         graph = {"@graph": sparql_result}
         filter_fields_in_graph_artefacts(graph, display_param, protected_fields)
