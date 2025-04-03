@@ -270,7 +270,7 @@ def metadata(request: Request):
     query_param = request.query_params.get("q")
 
     if query_param is None:
-       return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=200)
+        return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=200)
 
     # if query_param is None:
     #     new_url = str(request.url.include_query_params(q="all"))
@@ -329,14 +329,14 @@ def metadata(request: Request):
     sparql_result = []
 
     context = {
-            "@vocab": "http://purl.org/dc/terms/",
-            "acronym": "https://w3id.org/mod#acronym",
-            "URI": "https://w3id.org/mod#URI",
-            "identifier": "http://purl.org/dc/terms/identifier",
-            "title": "http://purl.org/dc/terms/title",
-            "description": "http://purl.org/dc/terms/description",
-            "@language": "en",
-        }
+        "@vocab": "http://purl.org/dc/terms/",
+        "acronym": "https://w3id.org/mod#acronym",
+        "URI": "https://w3id.org/mod#URI",
+        "identifier": "http://purl.org/dc/terms/identifier",
+        "title": "http://purl.org/dc/terms/title",
+        "description": "http://purl.org/dc/terms/description",
+        "@language": "en",
+    }
 
     if results_count > 0:
 
@@ -393,10 +393,10 @@ def metadata(request: Request):
             ORDER BY DESC(?Rank) 
             OFFSET <OFFSET>
             LIMIT <LIMIT>
-            """.replace("<QUERY_FILTER>", query_filter
-            ).replace(
-                "<Q>", query_param.replace(" ", "\\\\ ")
+            """.replace(
+                "<QUERY_FILTER>", query_filter
             )
+            .replace("<Q>", query_param.replace(" ", "\\\\ "))
             .replace("<HOST>", host)
             .replace("<OFFSET>", str(start_index))
             .replace("<LIMIT>", str(page_size))
@@ -409,10 +409,9 @@ def metadata(request: Request):
             item["@id"] = item["URI"]
             item["@type"] = ["https://w3id.org/mod#SemanticArtefact", "http://www.w3.org/2004/02/skos/core#Collection"]
 
-
         default_param = "acronym, title, description, URI, @id, @type"
         display_param = request.query_params.get("display", default_param)
-        protected_fields = {"@id"}        
+        protected_fields = {"@id"}
         graph = {"@graph": sparql_result}
         filter_fields_in_graph_artefacts(graph, display_param, protected_fields)
 
@@ -435,8 +434,8 @@ def content(request: Request):
     query_param = request.query_params.get("q")
 
     if query_param is None:
-       return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=200)
-    
+        return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=200)
+
     # if query_param is None:
     #     new_url = str(request.url.include_query_params(q="all"))
     #     return RedirectResponse(url=new_url)
@@ -476,7 +475,8 @@ def content(request: Request):
             ?x owl:deprecated ?depr . 
             FILTER(str(?depr) = "false") 
         }
-    """.replace("<TEXT_QUERY>", text_query
+    """.replace(
+        "<TEXT_QUERY>", text_query
     ).replace(
         "<Q>", query_param.replace(" ", "\\\\ ")
     )
@@ -545,10 +545,10 @@ def content(request: Request):
             ORDER BY DESC(?z) 
             OFFSET <OFFSET>
             LIMIT <LIMIT>
-            """.replace("<TEXT_QUERY>", text_query
-            ).replace(
-                "<Q>", query_param.replace(" ", "\\\\ ")
+            """.replace(
+                "<TEXT_QUERY>", text_query
             )
+            .replace("<Q>", query_param.replace(" ", "\\\\ "))
             .replace("<HOST>", host)
             .replace("<OFFSET>", str(start_index))
             .replace("<LIMIT>", str(page_size))
@@ -571,10 +571,10 @@ def content(request: Request):
             item["sdo:termCode"] = identifier_suffix
             item["@type"] = ["sdo:DefinedTerm", "skos:Concept"]
             item.pop("skos_collection", [])
-        
-        default_param = "@id, sdo:name, sdo:inDefinedTermSet, sdo:termCode, @type" 
+
+        default_param = "@id, sdo:name, sdo:inDefinedTermSet, sdo:termCode, @type"
         display_param = request.query_params.get("display", default_param)
-        protected_fields = {"@id"}        
+        protected_fields = {"@id"}
         graph = {"@graph": sparql_result}
         filter_fields_in_graph_artefacts(graph, display_param, protected_fields)
 
@@ -667,7 +667,7 @@ def concepts_in_collection(request: Request, artefactID: str):
 
         default_param = "@id, skos:prefLabel, @type"
         display_param = request.query_params.get("display", default_param)
-        protected_fields = {"@id"}        
+        protected_fields = {"@id"}
         graph = {"@graph": sparql_result}
         filter_fields_in_graph_artefacts(graph, display_param, protected_fields)
 
