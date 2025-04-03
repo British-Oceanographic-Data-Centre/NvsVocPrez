@@ -360,22 +360,19 @@ def metadata(request: Request):
 
         sparql_result = [{k: v["value"] for k, v in d.items()} for d in sparql_result]
 
-        for item in sparql_result:            
-            item["@id"] = f"{item['URI']}",
-            item["@type"] = [
-                     "https://w3id.org/mod#SemanticArtefact",
-                     "http://www.w3.org/2004/02/skos/core#Collection"
-            ]
+        for item in sparql_result:
+            item["@id"] = (f"{item['URI']}",)
+            item["@type"] = ["https://w3id.org/mod#SemanticArtefact", "http://www.w3.org/2004/02/skos/core#Collection"]
 
-        context = {            
+        context = {
             "@vocab": "http://purl.org/dc/terms/",
             "acronym": "https://w3id.org/mod#acronym",
             "URI": "https://w3id.org/mod#URI",
             "identifier": "http://purl.org/dc/terms/identifier",
             "title": "http://purl.org/dc/terms/title",
             "description": "http://purl.org/dc/terms/description",
-            "@language": "en"
-            }
+            "@language": "en",
+        }
 
         sparql_result = {**pgn, "@context": context, "@graph": sparql_result}
 
@@ -503,25 +500,22 @@ def content(request: Request):
         sparql_result = sparql_query(q_result)[1]
 
         key_mappings = {
-              "sdo_name": "sdo:name",
-              "dc_identifier": "@id",
+            "sdo_name": "sdo:name",
+            "dc_identifier": "@id",
         }
 
         sparql_result = [{key_mappings.get(k, k): v for k, v in d.items()} for d in sparql_result]
         sparql_result = [{k: v["value"] for k, v in d.items()} for d in sparql_result]
 
         for item in sparql_result:
-             identifier_suffix = item["@id"].split("::")[-1]
-             item["@id"] = f"{item['skos_collection']}{identifier_suffix}"
-             item["sdo:inDefinedTermSet"] = f"{item['skos_collection']}"
-             item["sdo:termCode"] = identifier_suffix
-             item["@type"] = ["sdo:DefinedTerm","skos:Concept"]
-             item.pop("skos_collection",[])
+            identifier_suffix = item["@id"].split("::")[-1]
+            item["@id"] = f"{item['skos_collection']}{identifier_suffix}"
+            item["sdo:inDefinedTermSet"] = f"{item['skos_collection']}"
+            item["sdo:termCode"] = identifier_suffix
+            item["@type"] = ["sdo:DefinedTerm", "skos:Concept"]
+            item.pop("skos_collection", [])
 
-        context = {
-            "sdo":"https://schema.org/",
-            "skos": "http://www.w3.org/2004/02/skos/core#"
-        }
+        context = {"sdo": "https://schema.org/", "skos": "http://www.w3.org/2004/02/skos/core#"}
 
         sparql_result = {**pgn, "@context": context, "@graph": sparql_result}
 
@@ -596,9 +590,9 @@ def concepts_in_collection(request: Request, artefactID: str):
         sparql_result = sparql_query(q_result)
         sparql_result = [{"@id": x["c"]["value"], "skos:prefLabel": x["pl"]["value"]} for x in sparql_result[1]]
 
-        for item in sparql_result:        
-             item["@type"] = "skos:Concept"
-        
+        for item in sparql_result:
+            item["@type"] = "skos:Concept"
+
         context = {
             "dc": "http://purl.org/dc/terms/",
             "grg": "http://www.isotc211.org/schemas/grg/",
