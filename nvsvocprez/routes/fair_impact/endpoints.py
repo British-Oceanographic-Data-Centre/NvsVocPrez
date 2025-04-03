@@ -14,7 +14,7 @@ from starlette.responses import JSONResponse
 
 import httpx
 
-from ..utils import sparql_query
+from ..utils import sparql_construct, sparql_query
 
 router = APIRouter()
 
@@ -320,11 +320,10 @@ def metadata(request: Request):
             PREFIX dc: <http://purl.org/dc/terms/>
 
             SELECT DISTINCT 
-                (?localnam AS ?Collection) 
-                (?dt AS ?Title) 
-                (?alt AS ?AlternativeLabel) 
-                (?desc AS ?Description) 
-                (?crex AS ?Governance) 
+                (?localnam AS ?skos_collection) 
+                (?dt AS ?dc_title) 
+                (?alt AS ?skos_altLabel) 
+                (?desc AS ?dc_description)                 
                 (?x AS ?URL) 
             WHERE { 
                 ?x a skos:Collection .
@@ -356,12 +355,41 @@ def metadata(request: Request):
             .replace("<LIMIT>", str(page_size))
         )
 
-        sparql_result = sparql_query(q_result)
-        sparql_result = {**pgn, "results": sparql_result[1]}
+        sparql_result = sparql_query(q_result)[1]
 
-    return sparql_result
+        key_mappings = {
+            'skos_prefLabel': 'skos:prefLabel',
+            'skos_altLabel': 'skos:altLabel',
+            'skos_definition': 'skos:definition',
+            'skos_collection': 'skos:collection',
+            'dc_identifier': 'dc:identifier',
+            'dc_title': 'dc:title',
+            'dc_description': 'dc:description',
+        }
 
+        sparql_result = [
+            {key_mappings.get(k, k): v for k, v in d.items()} 
+            for d in sparql_result
+        ]
+        
+        sparql_result = [
+            {k: v["value"] for k, v in d.items()} 
+            for d in sparql_result
+        ]
 
+        context = {
+            "dc": "http://purl.org/dc/terms/",
+            "grg": "http://www.isotc211.org/schemas/grg/",
+            "owl": "http://www.w3.org/2002/07/owl#",
+            "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+            "skos": "http://www.w3.org/2004/02/skos/core#"
+        }
+        
+        sparql_result = {**pgn, "@context": context,"@graph": sparql_result}
+                
+    return JSONResponse(content=sparql_result, status_code=200)
+
+    
 @router.get(
     "/search/content",
     **paths["/search/content"]["get"],
@@ -441,12 +469,12 @@ def content(request: Request):
             PREFIX dc: <http://purl.org/dc/terms/> 
 
             SELECT DISTINCT 
-                (?dci AS ?Identifier) 
-                (?pl AS ?PrefLabel) 
-                (?alt AS ?AlternativeLabel) 
-                (?def AS ?Definition) 
-                (?z AS ?Collection) 
-                (?dt AS ?Title) 
+                (?dci AS ?dc_identifier) 
+                (?pl AS ?skos_prefLabel) 
+                (?alt AS ?skos_altLabel) 
+                (?def AS ?skos_definition) 
+                (?z AS ?skos_collection) 
+
             WHERE { 
                 ?x text:query ('*<Q>*' 500000) . 
                 ?z skos:member ?x . 
@@ -482,11 +510,37 @@ def content(request: Request):
             .replace("<LIMIT>", str(page_size))
         )
 
-        sparql_result = sparql_query(q_result)
-        sparql_result = {**pgn, "results": sparql_result[1]}
+        sparql_result = sparql_query(q_result)[1]
 
-    return sparql_result
+        key_mappings = {
+            'skos_prefLabel': 'skos:prefLabel',
+            'skos_altLabel': 'skos:altLabel',
+            'skos_definition': 'skos:definition',
+            'skos_collection': 'skos:collection',
+            'dc_identifier': 'dc:identifier'
+        }
 
+        sparql_result = [
+            {key_mappings.get(k, k): v for k, v in d.items()} 
+            for d in sparql_result
+        ]
+        
+        sparql_result = [
+            {k: v["value"] for k, v in d.items()} 
+            for d in sparql_result
+        ]
+
+        context = {
+            "dc": "http://purl.org/dc/terms/",
+            "grg": "http://www.isotc211.org/schemas/grg/",
+            "owl": "http://www.w3.org/2002/07/owl#",
+            "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+            "skos": "http://www.w3.org/2004/02/skos/core#"
+        }
+        
+        sparql_result = {**pgn, "@context": context,"@graph": sparql_result}
+
+    return JSONResponse(content=sparql_result, status_code=200)
 
 @router.get("/artefacts/{artefactID}/resources/concepts", **paths["/artefacts/{artefactID}/resources/concepts"]["get"])
 @router.head("/artefacts/{artefactID}/resources/concepts", include_in_schema=False)
@@ -554,10 +608,19 @@ def concepts_in_collection(request: Request, artefactID: str):
         )
 
         sparql_result = sparql_query(q_result)
-        sparql_result = [{"uri": x["c"]["value"], "prefLabel": x["pl"]["value"]} for x in sparql_result[1]]
-        sparql_result = {**pgn, "results": sparql_result}
+        sparql_result = [{"@id": x["c"]["value"], "skos:prefLabel": x["pl"]["value"]} for x in sparql_result[1]]
 
-    return sparql_result
+        context = {
+            "dc": "http://purl.org/dc/terms/",
+            "grg": "http://www.isotc211.org/schemas/grg/",
+            "owl": "http://www.w3.org/2002/07/owl#",
+            "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+            "skos": "http://www.w3.org/2004/02/skos/core#"
+        }
+
+        sparql_result = {**pgn, "@context": context, "@graph": sparql_result}
+
+    return JSONResponse(content=sparql_result, status_code=200)
 
 
 def extract_collection_acronym(uri):
@@ -730,13 +793,16 @@ def pagination(page: int, page_count: int, page_size: int, total_count: int, pre
     prev_page_link = None if not prev_page else update_url_pagination(url, prev_page, page_size)
 
     page_links = {
-        "page": page,
-        "pageCount": page_count,
-        "pageSize": page_size,
-        "totalCount": total_count,
-        "prevPage": prev_page,
-        "nextPage": next_page,
-        "links": {"nextPage": next_page_link, "prevPage": prev_page_link},
+        "pagination" :
+        {
+            "page": page,
+            "pageCount": page_count,
+            "pageSize": page_size,
+            "totalCount": total_count,
+            "prevPage": prev_page,
+            "nextPage": next_page,
+            "links": {"nextPage": next_page_link, "prevPage": prev_page_link},
+        }
     }
     return page_links
 
