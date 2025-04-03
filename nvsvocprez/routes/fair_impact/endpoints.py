@@ -289,8 +289,8 @@ def metadata(request: Request):
                 regex(str(?cre), "<Q>", "i")
             )
         }
-    """.replace(
-        "<Q>", query_param
+    """.replace(        
+        "<Q>", query_param.replace(" ", "\\\\ ")
     )
 
     sparql_count_result = sparql_query(q_count)
@@ -348,7 +348,7 @@ def metadata(request: Request):
             OFFSET <OFFSET>
             LIMIT <LIMIT>
             """.replace(
-                "<Q>", query_param
+                "<Q>", query_param.replace(" ", "\\\\ ")
             )
             .replace("<HOST>", host)
             .replace("<OFFSET>", str(start_index))
@@ -430,7 +430,7 @@ def content(request: Request):
             FILTER(str(?depr) = "false") 
         }
     """.replace(
-        "<Q>", query_param
+        "<Q>", query_param.replace(" ", "\\\\ ")
     )
 
     sparql_count_result = sparql_query(q_count)
@@ -497,8 +497,8 @@ def content(request: Request):
             OFFSET <OFFSET>
             LIMIT <LIMIT>
             """.replace(
-                "<Q>", query_param
-            )
+                "<Q>", query_param.replace(" ", "\\\\ ")
+            )            
             .replace("<HOST>", host)
             .replace("<OFFSET>", str(start_index))
             .replace("<LIMIT>", str(page_size))
