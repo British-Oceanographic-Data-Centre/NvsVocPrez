@@ -323,8 +323,7 @@ def metadata(request: Request):
                 (?localnam AS ?acronym) 
                 (?dt AS ?title) 
                 (?desc AS ?description)                 
-                (?x AS ?URI) 
-                (?x AS ?identifier)
+                (?x AS ?URI)                 
                 
             WHERE { 
                 ?x a skos:Collection .
@@ -357,11 +356,10 @@ def metadata(request: Request):
         )
 
         sparql_result = sparql_query(q_result)[1]
-
         sparql_result = [{k: v["value"] for k, v in d.items()} for d in sparql_result]
 
         for item in sparql_result:
-            item["@id"] = (f"{item['URI']}",)
+            item["@id"] = item['URI']
             item["@type"] = ["https://w3id.org/mod#SemanticArtefact", "http://www.w3.org/2004/02/skos/core#Collection"]
 
         context = {
