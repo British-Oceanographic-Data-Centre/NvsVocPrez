@@ -143,7 +143,9 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
         subset_graph = json_ld["@graph"][start_index : end_index + 1]
         json_ld = {"@context": json_ld["@context"], "@graph": subset_graph}
 
-        json_header = {"@id": str(request.url).split("?")[0], "totalItems": graph_count, "itemsPerPage": page_size}
+        json_header = {"@id": str(request.url).split("?")[0], 
+                       "@type": "collection",
+                       "totalItems": graph_count, "itemsPerPage": page_size}
 
         json_ld = {
             **json_header,
@@ -169,7 +171,8 @@ def artefactId(request: Request, artefactID: str, do_filter="yes"):
         return JSONResponse(content={"error": "artefactID not found"}, status_code=200)
 
     json_ld = {}
-    json_ld = {"@context": artefacts_context}
+    json_type = {"@type": "collection"}
+    json_ld = {"@context": artefacts_context, **json_type}
     json_ld.update(graph_item[0])
 
     return JSONResponse(content=json_ld, status_code=200)
@@ -231,7 +234,7 @@ def distributions(request: Request, artefactID: str, do_filter=None, do_paginati
         subset_graph = json_ld["@graph"][start_index : end_index + 1]
         paged_json_ld = {"@context": json_ld["@context"], "@graph": subset_graph}
 
-        json_header = {"@id": str(request.url).split("?")[0], "totalItems": graph_count, "itemsPerPage": page_size}
+        json_header = {"@id": str(request.url).split("?")[0], "@type": "collection", "totalItems": graph_count, "itemsPerPage": page_size}
 
         paged_json_ld = {
             **json_header,
@@ -266,7 +269,8 @@ def distributionsId(request: Request, artefactID: str, distributionID: str):
 
     distribution_item = next(item for item in data["@graph"] if item["distributionId"] == distributionID)
 
-    json_ld = {"@context": distributions_context}
+    json_type = {"@type": "collection"}
+    json_ld = {"@context": distributions_context, **json_type}
     json_ld.update(distribution_item)
 
     return JSONResponse(content=json_ld, status_code=200)
@@ -427,12 +431,12 @@ def metadata(request: Request):
         graph = {"@graph": sparql_result}
         filter_fields_in_graph_artefacts(graph, display_param, protected_fields)
 
-        json_header = {"@id": str(request.url).split("?")[0], "totalItems": results_count, "itemsPerPage": page_size}
+        json_header = {"@id": str(request.url).split("?")[0], "@type": "collection","totalItems": results_count, "itemsPerPage": page_size}
 
         sparql_result = {**json_header, **pgn, "@context": context, **graph}
 
     else:
-        json_header = {"@id": str(request.url).split("?")[0], "totalItems": 0, "itemsPerPage": page_size}
+        json_header = {"@id": str(request.url).split("?")[0], "@type": "collection","totalItems": 0, "itemsPerPage": page_size}
         pgn = pagination(1, 1, 1, 0, None, None, 1, str(request.url))
         sparql_result = {**json_header, **pgn, "@context": context, "@graph": []}
 
@@ -593,11 +597,11 @@ def content(request: Request):
         graph = {"@graph": sparql_result}
         filter_fields_in_graph_artefacts(graph, display_param, protected_fields)
 
-        json_header = {"@id": str(request.url).split("?")[0], "totalItems": results_count, "itemsPerPage": page_size}
+        json_header = {"@id": str(request.url).split("?")[0], "@type": "collection","totalItems": results_count, "itemsPerPage": page_size}
 
         sparql_result = {**json_header, **pgn, "@context": context, **graph}
     else:
-        json_header = {"@id": str(request.url).split("?")[0], "totalItems": 0, "itemsPerPage": page_size}
+        json_header = {"@id": str(request.url).split("?")[0], "@type": "collection", "totalItems": 0, "itemsPerPage": page_size}
         pgn = pagination(1, 1, 1, 0, None, None, 1, str(request.url))
         sparql_result = {**json_header, **pgn, "@context": context, "@graph": []}
 
@@ -690,7 +694,7 @@ def concepts_in_collection(request: Request, artefactID: str):
         graph = {"@graph": sparql_result}
         filter_fields_in_graph_artefacts(graph, display_param, protected_fields)
 
-        json_header = {"@id": str(request.url).split("?")[0], "totalItems": results_count, "itemsPerPage": page_size}
+        json_header = {"@id": str(request.url).split("?")[0], "@type": "collection","totalItems": results_count, "itemsPerPage": page_size}
 
         sparql_result = {**json_header, **pgn, "@context": context, **graph}
 
