@@ -49,16 +49,14 @@ artefacts_context = {
     "includedInDataCatalog": "http://schema.org/includedInDataCatalog",
     "language": "http://purl.org/dc/terms/language",
     "@language": "en",
-
-    "hydra" : "http://www.w3.org/ns/hydra/core#",
-    "view" : "hydra:view",
-    "itemsPerPage" : "hydra:itemsPerPage",
-    "firstPage" : "hydra:first",
-    "previousPage" : "hydra:previous",
-    "lastPage" : "hydra:last",
-    "nextPage" : "hydra:next",
-    "totalItems" : "hydra:totalItems",
-
+    "hydra": "http://www.w3.org/ns/hydra/core#",
+    "view": "hydra:view",
+    "itemsPerPage": "hydra:itemsPerPage",
+    "firstPage": "hydra:first",
+    "previousPage": "hydra:previous",
+    "lastPage": "hydra:last",
+    "nextPage": "hydra:next",
+    "totalItems": "hydra:totalItems",
 }
 
 distributions_context = {
@@ -142,21 +140,17 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
         start_index = (page - 1) * page_size
         end_index = min(page * page_size - 1, graph_count - 1)
 
-        subset_graph = json_ld["@graph"][start_index : end_index + 1]        
+        subset_graph = json_ld["@graph"][start_index : end_index + 1]
         json_ld = {"@context": json_ld["@context"], "@graph": subset_graph}
 
-        json_header = {
-            "@id" : str(request.url).split("?")[0],
-            "totalItems" : graph_count,
-            "itemsPerPage" : page_size
-        }
+        json_header = {"@id": str(request.url).split("?")[0], "totalItems": graph_count, "itemsPerPage": page_size}
 
         json_ld = {
             **json_header,
             **pagination(page, page_count, page_size, graph_count, prev_page, next_page, page_count, str(request.url)),
             **json_ld,
         }
-        
+
     return JSONResponse(content=json_ld, status_code=200)
 
 
@@ -237,11 +231,7 @@ def distributions(request: Request, artefactID: str, do_filter=None, do_paginati
         subset_graph = json_ld["@graph"][start_index : end_index + 1]
         paged_json_ld = {"@context": json_ld["@context"], "@graph": subset_graph}
 
-        json_header = {
-            "@id" : str(request.url).split("?")[0],
-            "totalItems" : graph_count,
-            "itemsPerPage" : page_size 
-        }
+        json_header = {"@id": str(request.url).split("?")[0], "totalItems": graph_count, "itemsPerPage": page_size}
 
         paged_json_ld = {
             **json_header,
@@ -437,20 +427,12 @@ def metadata(request: Request):
         graph = {"@graph": sparql_result}
         filter_fields_in_graph_artefacts(graph, display_param, protected_fields)
 
-        json_header = {
-            "@id" : str(request.url).split("?")[0],
-            "totalItems" : results_count,
-            "itemsPerPage" : page_size
-        }
+        json_header = {"@id": str(request.url).split("?")[0], "totalItems": results_count, "itemsPerPage": page_size}
 
         sparql_result = {**json_header, **pgn, "@context": context, **graph}
 
     else:
-        json_header = {
-            "@id" : str(request.url).split("?")[0],
-            "totalItems" : 0,
-            "itemsPerPage" : page_size 
-        }
+        json_header = {"@id": str(request.url).split("?")[0], "totalItems": 0, "itemsPerPage": page_size}
         pgn = pagination(1, 1, 1, 0, None, None, 1, str(request.url))
         sparql_result = {**json_header, **pgn, "@context": context, "@graph": []}
 
@@ -611,19 +593,11 @@ def content(request: Request):
         graph = {"@graph": sparql_result}
         filter_fields_in_graph_artefacts(graph, display_param, protected_fields)
 
-        json_header = {
-            "@id" : str(request.url).split("?")[0],
-            "totalItems" : results_count,
-            "itemsPerPage" : page_size 
-        }
+        json_header = {"@id": str(request.url).split("?")[0], "totalItems": results_count, "itemsPerPage": page_size}
 
         sparql_result = {**json_header, **pgn, "@context": context, **graph}
     else:
-        json_header = {
-            "@id" : str(request.url).split("?")[0],
-            "totalItems" : 0,
-            "itemsPerPage" : page_size 
-        }
+        json_header = {"@id": str(request.url).split("?")[0], "totalItems": 0, "itemsPerPage": page_size}
         pgn = pagination(1, 1, 1, 0, None, None, 1, str(request.url))
         sparql_result = {**json_header, **pgn, "@context": context, "@graph": []}
 
@@ -716,11 +690,7 @@ def concepts_in_collection(request: Request, artefactID: str):
         graph = {"@graph": sparql_result}
         filter_fields_in_graph_artefacts(graph, display_param, protected_fields)
 
-        json_header = {
-            "@id" : str(request.url).split("?")[0],
-            "totalItems" : results_count,
-            "itemsPerPage" : page_size 
-        }
+        json_header = {"@id": str(request.url).split("?")[0], "totalItems": results_count, "itemsPerPage": page_size}
 
         sparql_result = {**json_header, **pgn, "@context": context, **graph}
 
@@ -892,27 +862,37 @@ def get_positive_int(value, default):
         return default
 
 
-def pagination(page: int, page_count: int, page_size: int, total_count: int, prev_page: int, next_page: int, last_page:int, url: str):
+def pagination(
+    page: int,
+    page_count: int,
+    page_size: int,
+    total_count: int,
+    prev_page: int,
+    next_page: int,
+    last_page: int,
+    url: str,
+):
     current_page_link = update_url_pagination(url, page, page_size)
     next_page_link = None if not next_page else update_url_pagination(url, next_page, page_size)
     prev_page_link = None if not prev_page else update_url_pagination(url, prev_page, page_size)
     first_page_link = update_url_pagination(url, 1, page_size)
     last_page_link = update_url_pagination(url, last_page, page_size)
-    
+
     page_links = {
-        "view": 
-        {
+        "view": {
             "@id": current_page_link,
             "@type": "hydra: PartialCollectionView",
             "first": first_page_link,
             "last": last_page_link,
             "next": next_page_link,
-            "previous": prev_page_link            
+            "previous": prev_page_link,
         }
     }
 
-    if page_links["view"].get("next") is None: page_links["view"].pop("next")
-    if page_links["view"].get("previous") is None: page_links["view"].pop("previous")
+    if page_links["view"].get("next") is None:
+        page_links["view"].pop("next")
+    if page_links["view"].get("previous") is None:
+        page_links["view"].pop("previous")
 
     return page_links
 
