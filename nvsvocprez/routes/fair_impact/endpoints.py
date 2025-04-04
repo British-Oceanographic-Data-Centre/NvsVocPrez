@@ -41,7 +41,6 @@ hydra_pagaination_context = {
 artefacts_context = {
     "@vocab": "http://purl.org/dc/terms/",
     "acronym": "https://w3id.org/mod#acronym",
-
     "accessRights": "http://purl.org/dc/terms/accessRights",
     "URI": "https://w3id.org/mod#URI",
     "identifier": "http://purl.org/dc/terms/identifier",
@@ -371,7 +370,6 @@ def metadata(request: Request):
         "title": "http://purl.org/dc/terms/title",
         "description": "http://purl.org/dc/terms/description",
         "@language": "en",
-        
         "hydra": "http://www.w3.org/ns/hydra/core#",
         "view": "hydra:view",
         "itemsPerPage": "hydra:itemsPerPage",
@@ -381,7 +379,6 @@ def metadata(request: Request):
         "nextPage": "hydra:next",
         "totalItems": "hydra:totalItems",
         "Collection": "hydra:Collection",
-
         "accessRights": "http://purl.org/dc/terms/accessRights",
         "URI": "https://w3id.org/mod#URI",
         "identifier": "http://purl.org/dc/terms/identifier",
@@ -401,8 +398,6 @@ def metadata(request: Request):
         "includedInDataCatalog": "http://schema.org/includedInDataCatalog",
         "language": "http://purl.org/dc/terms/language",
         "@language": "en",
-        
-
     }
 
     if results_count > 0:
@@ -581,7 +576,6 @@ def content(request: Request):
         "nextPage": "hydra:next",
         "totalItems": "hydra:totalItems",
         "Collection": "hydra:Collection",
-
         "accessRights": "http://purl.org/dc/terms/accessRights",
         "URI": "https://w3id.org/mod#URI",
         "identifier": "http://purl.org/dc/terms/identifier",
@@ -601,7 +595,6 @@ def content(request: Request):
         "includedInDataCatalog": "http://schema.org/includedInDataCatalog",
         "language": "http://purl.org/dc/terms/language",
         "@language": "en",
-
     }
 
     if results_count > 0:
