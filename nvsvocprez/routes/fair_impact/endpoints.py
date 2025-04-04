@@ -142,7 +142,7 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
 
         json_ld = paged_json_ld
 
-    return JSONResponse(content=json_ld, status_code=response.status_code)
+    return JSONResponse(content=json_ld, status_code=200)
 
 
 @router.get("/artefacts/{artefactID}", **paths["/artefacts/{artefactID}"]["get"])
@@ -847,15 +847,15 @@ def pagination(page: int, page_count: int, page_size: int, total_count: int, pre
     prev_page_link = None if not prev_page else update_url_pagination(url, prev_page, page_size)
 
     page_links = {
-        "pagination": {
+        #"pagination": {
             "page": page,
             "pageCount": page_count,
-            "pageSize": page_size,
+            #"pageSize": page_size,
             "totalCount": total_count,
             "prevPage": prev_page,
             "nextPage": next_page,
             "links": {"nextPage": next_page_link, "prevPage": prev_page_link},
-        }
+        #}
     }
     return page_links
 
