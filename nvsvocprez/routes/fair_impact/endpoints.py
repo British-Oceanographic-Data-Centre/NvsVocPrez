@@ -126,8 +126,8 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
     }
 
     if do_filter is not None:
-        # default_param = "acronym,URI,creator,publisher,title"
-        default_param = "all"
+        default_param = "acronym, accessRights, contactPoint, creator, description, identifier, keyword, title"
+        # default_param = "all"
         display_param = request.query_params.get("display", default_param)
 
         protected_fields = {"@id", "acronym"}
@@ -301,10 +301,55 @@ def distributionsId(request: Request, artefactID: str, distributionID: str):
 @router.head("/search/metadata", include_in_schema=False)
 def metadata(request: Request):
 
+    context = {
+        "@vocab": "http://purl.org/dc/terms/",
+        "acronym": "https://w3id.org/mod#acronym",
+        "URI": "https://w3id.org/mod#URI",
+        "identifier": "http://purl.org/dc/terms/identifier",
+        "title": "http://purl.org/dc/terms/title",
+        "description": "http://purl.org/dc/terms/description",
+        "@language": "en",
+        "hydra": "http://www.w3.org/ns/hydra/core#",
+        "view": "hydra:view",
+        "itemsPerPage": "hydra:itemsPerPage",
+        "firstPage": "hydra:first",
+        "previousPage": "hydra:previous",
+        "lastPage": "hydra:last",
+        "nextPage": "hydra:next",
+        "totalItems": "hydra:totalItems",
+        "Collection": "hydra:Collection",
+        "accessRights": "http://purl.org/dc/terms/accessRights",
+        "URI": "https://w3id.org/mod#URI",
+        "identifier": "http://purl.org/dc/terms/identifier",
+        "creator": "http://purl.org/dc/terms/creator",
+        "status": "https://w3id.org/mod#status",
+        "license": "http://purl.org/dc/terms/license",
+        "rightsHolder": "http://purl.org/dc/terms/rightsHolder",
+        "title": "http://purl.org/dc/terms/title",
+        "description": "http://purl.org/dc/terms/description",
+        "modified": "http://purl.org/dc/terms/modified",
+        "landingPage": "http://www.w3.org/ns/dcat#landingPage",
+        "bibliographicCitation": "http://purl.org/dc/terms/bibliographicCitation",
+        "contactPoint": "http://www.w3.org/ns/dcat#contactPoint",
+        "contributor": "http://purl.org/dc/terms/contributor",
+        "publisher": "http://purl.org/dc/terms/publisher",
+        "createdWith": "http://purl.org/pav/createdWith",
+        "includedInDataCatalog": "http://schema.org/includedInDataCatalog",
+        "language": "http://purl.org/dc/terms/language",
+        "@language": "en",
+    }
+
     query_param = request.query_params.get("q")
 
     if query_param is None:
-        return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=200)
+        json_header = {
+            "@id": str(request.url).split("?")[0],
+            "@type": "Collection",            
+        }
+        pgn = pagination(1, 1, 1, 0, None, None, 1, str(request.url))
+        sparql_result = {**json_header, **pgn, "@context": context, "@graph": [],"error": "query parameter 'q' not found"}
+        # return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=200)
+        return JSONResponse(content=sparql_result, status_code=200)
 
     # if query_param is None:
     #     new_url = str(request.url.include_query_params(q="all"))
@@ -361,44 +406,6 @@ def metadata(request: Request):
 
     results_count = int(count)
     sparql_result = []
-
-    context = {
-        "@vocab": "http://purl.org/dc/terms/",
-        "acronym": "https://w3id.org/mod#acronym",
-        "URI": "https://w3id.org/mod#URI",
-        "identifier": "http://purl.org/dc/terms/identifier",
-        "title": "http://purl.org/dc/terms/title",
-        "description": "http://purl.org/dc/terms/description",
-        "@language": "en",
-        "hydra": "http://www.w3.org/ns/hydra/core#",
-        "view": "hydra:view",
-        "itemsPerPage": "hydra:itemsPerPage",
-        "firstPage": "hydra:first",
-        "previousPage": "hydra:previous",
-        "lastPage": "hydra:last",
-        "nextPage": "hydra:next",
-        "totalItems": "hydra:totalItems",
-        "Collection": "hydra:Collection",
-        "accessRights": "http://purl.org/dc/terms/accessRights",
-        "URI": "https://w3id.org/mod#URI",
-        "identifier": "http://purl.org/dc/terms/identifier",
-        "creator": "http://purl.org/dc/terms/creator",
-        "status": "https://w3id.org/mod#status",
-        "license": "http://purl.org/dc/terms/license",
-        "rightsHolder": "http://purl.org/dc/terms/rightsHolder",
-        "title": "http://purl.org/dc/terms/title",
-        "description": "http://purl.org/dc/terms/description",
-        "modified": "http://purl.org/dc/terms/modified",
-        "landingPage": "http://www.w3.org/ns/dcat#landingPage",
-        "bibliographicCitation": "http://purl.org/dc/terms/bibliographicCitation",
-        "contactPoint": "http://www.w3.org/ns/dcat#contactPoint",
-        "contributor": "http://purl.org/dc/terms/contributor",
-        "publisher": "http://purl.org/dc/terms/publisher",
-        "createdWith": "http://purl.org/pav/createdWith",
-        "includedInDataCatalog": "http://schema.org/includedInDataCatalog",
-        "language": "http://purl.org/dc/terms/language",
-        "@language": "en",
-    }
 
     if results_count > 0:
 
