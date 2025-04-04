@@ -344,10 +344,16 @@ def metadata(request: Request):
     if query_param is None:
         json_header = {
             "@id": str(request.url).split("?")[0],
-            "@type": "Collection",            
+            "@type": "Collection",
         }
         pgn = pagination(1, 1, 1, 0, None, None, 1, str(request.url))
-        sparql_result = {**json_header, **pgn, "@context": context, "@graph": [],"error": "query parameter 'q' not found"}
+        sparql_result = {
+            **json_header,
+            **pgn,
+            "@context": context,
+            "@graph": [],
+            "error": "query parameter 'q' not found",
+        }
         # return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=200)
         return JSONResponse(content=sparql_result, status_code=200)
 
