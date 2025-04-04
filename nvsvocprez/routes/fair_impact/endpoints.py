@@ -79,7 +79,7 @@ distributions_context = {
     "accessURL": "http://www.w3.org/ns/dcat#accessURL",
     "downloadURL": "http://www.w3.org/ns/dcat#downloadURL",
     "language": "http://purl.org/dc/terms/language",
-    "@language": "en",    
+    "@language": "en",
 }
 
 distributions_meta = {
@@ -120,7 +120,10 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
     data = response.json()
     graph_scheme_items = get_scheme_graph_items(data)
 
-    json_ld = {"@context": {**artefacts_context, **hydra_pagaination_context}, "@graph": graph_collection_items + graph_scheme_items}
+    json_ld = {
+        "@context": {**artefacts_context, **hydra_pagaination_context},
+        "@graph": graph_collection_items + graph_scheme_items,
+    }
 
     if do_filter is not None:
         default_param = "acronym,URI,creator,publisher,title"
