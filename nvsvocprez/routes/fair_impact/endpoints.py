@@ -49,6 +49,7 @@ artefacts_context = {
     "includedInDataCatalog": "http://schema.org/includedInDataCatalog",
     "language": "http://purl.org/dc/terms/language",
     "@language": "en",
+
     "hydra": "http://www.w3.org/ns/hydra/core#",
     "view": "hydra:view",
     "itemsPerPage": "hydra:itemsPerPage",
@@ -57,6 +58,7 @@ artefacts_context = {
     "lastPage": "hydra:last",
     "nextPage": "hydra:next",
     "totalItems": "hydra:totalItems",
+    "Collection": "hydra:Collection"
 }
 
 distributions_context = {
@@ -76,6 +78,16 @@ distributions_context = {
     "downloadURL": "http://www.w3.org/ns/dcat#downloadURL",
     "language": "http://purl.org/dc/terms/language",
     "@language": "en",
+
+    "hydra": "http://www.w3.org/ns/hydra/core#",
+    "view": "hydra:view",
+    "itemsPerPage": "hydra:itemsPerPage",
+    "firstPage": "hydra:first",
+    "previousPage": "hydra:previous",
+    "lastPage": "hydra:last",
+    "nextPage": "hydra:next",
+    "totalItems": "hydra:totalItems",
+    "Collection": "hydra:Collection"
 }
 
 distributions_meta = {
@@ -145,7 +157,7 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
 
         json_header = {
             "@id": str(request.url).split("?")[0],
-            "@type": "collection",
+            "@type": "Collection",
             "totalItems": graph_count,
             "itemsPerPage": page_size,
         }
@@ -239,7 +251,7 @@ def distributions(request: Request, artefactID: str, do_filter=None, do_paginati
 
         json_header = {
             "@id": str(request.url).split("?")[0],
-            "@type": "collection",
+            "@type": "Collection",
             "totalItems": graph_count,
             "itemsPerPage": page_size,
         }
@@ -277,7 +289,7 @@ def distributionsId(request: Request, artefactID: str, distributionID: str):
 
     distribution_item = next(item for item in data["@graph"] if item["distributionId"] == distributionID)
 
-    json_type = {"@type": "collection"}
+    json_type = {"@type": "Collection"}
     json_ld = {"@context": distributions_context, **json_type}
     json_ld.update(distribution_item)
 
@@ -360,6 +372,17 @@ def metadata(request: Request):
         "title": "http://purl.org/dc/terms/title",
         "description": "http://purl.org/dc/terms/description",
         "@language": "en",
+
+        "hydra": "http://www.w3.org/ns/hydra/core#",
+        "view": "hydra:view",
+        "itemsPerPage": "hydra:itemsPerPage",
+        "firstPage": "hydra:first",
+        "previousPage": "hydra:previous",
+        "lastPage": "hydra:last",
+        "nextPage": "hydra:next",
+        "totalItems": "hydra:totalItems",
+        "Collection": "hydra:Collection"
+
     }
 
     if results_count > 0:
@@ -441,7 +464,7 @@ def metadata(request: Request):
 
         json_header = {
             "@id": str(request.url).split("?")[0],
-            "@type": "collection",
+            "@type": "Collection",
             "totalItems": results_count,
             "itemsPerPage": page_size,
         }
@@ -451,7 +474,7 @@ def metadata(request: Request):
     else:
         json_header = {
             "@id": str(request.url).split("?")[0],
-            "@type": "collection",
+            "@type": "Collection",
             "totalItems": 0,
             "itemsPerPage": page_size,
         }
@@ -524,7 +547,19 @@ def content(request: Request):
     results_count = int(count)
     sparql_result = []
 
-    context = {"sdo": "https://schema.org/", "skos": "http://www.w3.org/2004/02/skos/core#"}
+    context = {"sdo": "https://schema.org/", 
+               "skos": "http://www.w3.org/2004/02/skos/core#",
+
+                "hydra": "http://www.w3.org/ns/hydra/core#",
+                "view": "hydra:view",
+                "itemsPerPage": "hydra:itemsPerPage",
+                "firstPage": "hydra:first",
+                "previousPage": "hydra:previous",
+                "lastPage": "hydra:last",
+                "nextPage": "hydra:next",
+                "totalItems": "hydra:totalItems",
+                "Collection": "hydra:Collection"               
+               }
 
     if results_count > 0:
 
@@ -617,7 +652,7 @@ def content(request: Request):
 
         json_header = {
             "@id": str(request.url).split("?")[0],
-            "@type": "collection",
+            "@type": "Collection",
             "totalItems": results_count,
             "itemsPerPage": page_size,
         }
@@ -626,7 +661,7 @@ def content(request: Request):
     else:
         json_header = {
             "@id": str(request.url).split("?")[0],
-            "@type": "collection",
+            "@type": "Collection",
             "totalItems": 0,
             "itemsPerPage": page_size,
         }
@@ -714,6 +749,17 @@ def concepts_in_collection(request: Request, artefactID: str):
             "owl": "http://www.w3.org/2002/07/owl#",
             "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
             "skos": "http://www.w3.org/2004/02/skos/core#",
+
+            "hydra": "http://www.w3.org/ns/hydra/core#",
+            "view": "hydra:view",
+            "itemsPerPage": "hydra:itemsPerPage",
+            "firstPage": "hydra:first",
+            "previousPage": "hydra:previous",
+            "lastPage": "hydra:last",
+            "nextPage": "hydra:next",
+            "totalItems": "hydra:totalItems",
+            "Collection": "hydra:Collection"
+
         }
 
         default_param = "@id, skos:prefLabel, @type"
@@ -724,7 +770,7 @@ def concepts_in_collection(request: Request, artefactID: str):
 
         json_header = {
             "@id": str(request.url).split("?")[0],
-            "@type": "collection",
+            "@type": "Collection",
             "totalItems": results_count,
             "itemsPerPage": page_size,
         }
