@@ -41,6 +41,7 @@ hydra_pagaination_context = {
 artefacts_context = {
     "@vocab": "http://purl.org/dc/terms/",
     "acronym": "https://w3id.org/mod#acronym",
+
     "accessRights": "http://purl.org/dc/terms/accessRights",
     "URI": "https://w3id.org/mod#URI",
     "identifier": "http://purl.org/dc/terms/identifier",
@@ -370,6 +371,7 @@ def metadata(request: Request):
         "title": "http://purl.org/dc/terms/title",
         "description": "http://purl.org/dc/terms/description",
         "@language": "en",
+        
         "hydra": "http://www.w3.org/ns/hydra/core#",
         "view": "hydra:view",
         "itemsPerPage": "hydra:itemsPerPage",
@@ -379,6 +381,28 @@ def metadata(request: Request):
         "nextPage": "hydra:next",
         "totalItems": "hydra:totalItems",
         "Collection": "hydra:Collection",
+
+        "accessRights": "http://purl.org/dc/terms/accessRights",
+        "URI": "https://w3id.org/mod#URI",
+        "identifier": "http://purl.org/dc/terms/identifier",
+        "creator": "http://purl.org/dc/terms/creator",
+        "status": "https://w3id.org/mod#status",
+        "license": "http://purl.org/dc/terms/license",
+        "rightsHolder": "http://purl.org/dc/terms/rightsHolder",
+        "title": "http://purl.org/dc/terms/title",
+        "description": "http://purl.org/dc/terms/description",
+        "modified": "http://purl.org/dc/terms/modified",
+        "landingPage": "http://www.w3.org/ns/dcat#landingPage",
+        "bibliographicCitation": "http://purl.org/dc/terms/bibliographicCitation",
+        "contactPoint": "http://www.w3.org/ns/dcat#contactPoint",
+        "contributor": "http://purl.org/dc/terms/contributor",
+        "publisher": "http://purl.org/dc/terms/publisher",
+        "createdWith": "http://purl.org/pav/createdWith",
+        "includedInDataCatalog": "http://schema.org/includedInDataCatalog",
+        "language": "http://purl.org/dc/terms/language",
+        "@language": "en",
+        
+
     }
 
     if results_count > 0:
@@ -557,6 +581,27 @@ def content(request: Request):
         "nextPage": "hydra:next",
         "totalItems": "hydra:totalItems",
         "Collection": "hydra:Collection",
+
+        "accessRights": "http://purl.org/dc/terms/accessRights",
+        "URI": "https://w3id.org/mod#URI",
+        "identifier": "http://purl.org/dc/terms/identifier",
+        "creator": "http://purl.org/dc/terms/creator",
+        "status": "https://w3id.org/mod#status",
+        "license": "http://purl.org/dc/terms/license",
+        "rightsHolder": "http://purl.org/dc/terms/rightsHolder",
+        "title": "http://purl.org/dc/terms/title",
+        "description": "http://purl.org/dc/terms/description",
+        "modified": "http://purl.org/dc/terms/modified",
+        "landingPage": "http://www.w3.org/ns/dcat#landingPage",
+        "bibliographicCitation": "http://purl.org/dc/terms/bibliographicCitation",
+        "contactPoint": "http://www.w3.org/ns/dcat#contactPoint",
+        "contributor": "http://purl.org/dc/terms/contributor",
+        "publisher": "http://purl.org/dc/terms/publisher",
+        "createdWith": "http://purl.org/pav/createdWith",
+        "includedInDataCatalog": "http://schema.org/includedInDataCatalog",
+        "language": "http://purl.org/dc/terms/language",
+        "@language": "en",
+
     }
 
     if results_count > 0:
