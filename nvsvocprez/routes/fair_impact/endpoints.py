@@ -126,7 +126,8 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
     }
 
     if do_filter is not None:
-        default_param = "acronym,URI,creator,publisher,title"
+        # default_param = "acronym,URI,creator,publisher,title"
+        default_param = "all"
         display_param = request.query_params.get("display", default_param)
 
         protected_fields = {"@id", "acronym"}
@@ -221,7 +222,8 @@ def distributions(request: Request, artefactID: str, do_filter=None, do_paginati
     json_ld = {"@context": {**artefacts_context, **hydra_pagaination_context}}
     json_ld.update(graph_items)
 
-    default_param = "title, description, distributionId, downloadURL"
+    # default_param = "title, description, distributionId, downloadURL"
+    default_param = "all"
     display_param = request.query_params.get("display", default_param)
     protected_fields = {"distributionId", "@id"}
 
@@ -450,7 +452,9 @@ def metadata(request: Request):
             item["@id"] = item["URI"]
             item["@type"] = ["https://w3id.org/mod#SemanticArtefact", "http://www.w3.org/2004/02/skos/core#Collection"]
 
-        default_param = "acronym, title, description, URI, @id, @type"
+        # default_param = "acronym, title, description, URI, @id, @type"
+        default_param = "all"
+
         display_param = request.query_params.get("display", default_param)
         protected_fields = {"@id"}
         graph = {"@graph": sparql_result}
@@ -638,7 +642,8 @@ def content(request: Request):
             item["@type"] = ["sdo:DefinedTerm", "skos:Concept"]
             item.pop("skos_collection", [])
 
-        default_param = "@id, sdo:name, sdo:inDefinedTermSet, sdo:termCode, @type"
+        # default_param = "@id, sdo:name, sdo:inDefinedTermSet, sdo:termCode, @type"
+        default_param = "all"
         display_param = request.query_params.get("display", default_param)
         protected_fields = {"@id"}
         graph = {"@graph": sparql_result}
@@ -754,7 +759,8 @@ def concepts_in_collection(request: Request, artefactID: str):
             "Collection": "hydra:Collection",
         }
 
-        default_param = "@id, skos:prefLabel, @type"
+        # default_param = "@id, skos:prefLabel, @type"
+        default_param = "all"
         display_param = request.query_params.get("display", default_param)
         protected_fields = {"@id"}
         graph = {"@graph": sparql_result}
