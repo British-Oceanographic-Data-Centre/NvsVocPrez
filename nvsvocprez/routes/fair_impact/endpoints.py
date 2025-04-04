@@ -27,6 +27,17 @@ timeout = 60
 
 host = os.getenv("SYSTEM_URI", "https://vocab.nerc.ac.uk")
 
+hydra_pagaination_context = {
+    "hydra": "http://www.w3.org/ns/hydra/core#",
+    "view": "hydra:view",
+    "itemsPerPage": "hydra:itemsPerPage",
+    "firstPage": "hydra:first",
+    "previousPage": "hydra:previous",
+    "lastPage": "hydra:last",
+    "nextPage": "hydra:next",
+    "totalItems": "hydra:totalItems",
+}
+
 artefacts_context = {
     "@vocab": "http://purl.org/dc/terms/",
     "acronym": "https://w3id.org/mod#acronym",
@@ -49,14 +60,6 @@ artefacts_context = {
     "includedInDataCatalog": "http://schema.org/includedInDataCatalog",
     "language": "http://purl.org/dc/terms/language",
     "@language": "en",
-    "hydra": "http://www.w3.org/ns/hydra/core#",
-    "view": "hydra:view",
-    "itemsPerPage": "hydra:itemsPerPage",
-    "firstPage": "hydra:first",
-    "previousPage": "hydra:previous",
-    "lastPage": "hydra:last",
-    "nextPage": "hydra:next",
-    "totalItems": "hydra:totalItems",
     "Collection": "hydra:Collection",
 }
 
@@ -76,16 +79,7 @@ distributions_context = {
     "accessURL": "http://www.w3.org/ns/dcat#accessURL",
     "downloadURL": "http://www.w3.org/ns/dcat#downloadURL",
     "language": "http://purl.org/dc/terms/language",
-    "@language": "en",
-    "hydra": "http://www.w3.org/ns/hydra/core#",
-    "view": "hydra:view",
-    "itemsPerPage": "hydra:itemsPerPage",
-    "firstPage": "hydra:first",
-    "previousPage": "hydra:previous",
-    "lastPage": "hydra:last",
-    "nextPage": "hydra:next",
-    "totalItems": "hydra:totalItems",
-    "Collection": "hydra:Collection",
+    "@language": "en",    
 }
 
 distributions_meta = {
@@ -126,7 +120,7 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
     data = response.json()
     graph_scheme_items = get_scheme_graph_items(data)
 
-    json_ld = {"@context": artefacts_context, "@graph": graph_collection_items + graph_scheme_items}
+    json_ld = {"@context": {**artefacts_context, **hydra_pagaination_context}, "@graph": graph_collection_items + graph_scheme_items}
 
     if do_filter is not None:
         default_param = "acronym,URI,creator,publisher,title"
@@ -220,7 +214,8 @@ def distributions(request: Request, artefactID: str, do_filter=None, do_paginati
 
     graph_items = {"@graph": distributions_json_ld}
 
-    json_ld = {"@context": distributions_context}
+    # json_ld = {"@context": distributions_context}
+    json_ld = {"@context": {**artefacts_context, **hydra_pagaination_context}}
     json_ld.update(graph_items)
 
     default_param = "title, description, distributionId, downloadURL"
