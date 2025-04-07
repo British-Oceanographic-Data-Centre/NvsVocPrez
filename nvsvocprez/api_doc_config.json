@@ -91,7 +91,7 @@
 					"items": {
 					"type": "string"
 					},
-					"default": ["acronym", "accessRights", "contactPoint", "creator", "description", "identifier", "keyword", "title"]
+					"default": ["@type", "acronym", "accessRights", "contactPoint", "creator", "description", "identifier", "keyword", "title"]
 				}
 				,
 				"style": "form",
@@ -167,7 +167,7 @@
 					"items": {
 					"type": "string"
 					},
-					"default": ["acronym", "accessRights", "contactPoint", "creator", "description", "identifier", "keyword", "title"]
+					"default": ["@type", "acronym", "accessRights", "contactPoint", "creator", "description", "identifier", "keyword", "title"]
 				}
 				,
 				"style": "form",
