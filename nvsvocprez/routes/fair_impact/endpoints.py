@@ -140,7 +140,7 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
     }
 
     if do_filter is not None:
-        display_param = request.query_params.get("display", artefacts_default_params)        
+        display_param = request.query_params.get("display", artefacts_default_params)
         filter_params_in_graph_artefacts(json_ld, display_param, artefacts_protected_params)
 
     if do_pagination is not None:
@@ -159,9 +159,11 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
         end_index = min(page * page_size - 1, graph_count - 1)
 
         subset_graph = json_ld["@graph"][start_index : end_index + 1]
-        json_ld = {"@context": json_ld["@context"], 
-                   **pagination(page, page_count, page_size, graph_count, prev_page, next_page, page_count, str(request.url)), 
-                   "@graph": subset_graph}
+        json_ld = {
+            "@context": json_ld["@context"],
+            **pagination(page, page_count, page_size, graph_count, prev_page, next_page, page_count, str(request.url)),
+            "@graph": subset_graph,
+        }
 
         json_header = {
             "@id": str(request.url).split("?")[0],
@@ -197,7 +199,7 @@ def artefactId(request: Request, artefactID: str, do_filter="yes"):
     json_ld.update(graph_item[0])
 
     if "@context" in json_ld and "Collection" in json_ld["@context"]:
-        del json_ld["@context"]["Collection"]    
+        del json_ld["@context"]["Collection"]
 
     return JSONResponse(content=json_ld, status_code=200)
 
@@ -208,8 +210,8 @@ def distributions(request: Request, artefactID: str, do_filter=None, do_paginati
 
     response = artefactId(request, artefactID, do_filter)
 
-    if (error := errorResponse(response)):
-        return JSONResponse(content={"error": error}, status_code=200)    
+    if error := errorResponse(response):
+        return JSONResponse(content={"error": error}, status_code=200)
 
     body = response.body
     data = json.loads(body.decode("utf-8"))
@@ -253,9 +255,11 @@ def distributions(request: Request, artefactID: str, do_filter=None, do_paginati
         end_index = min(page * page_size - 1, graph_count - 1)
 
         subset_graph = json_ld["@graph"][start_index : end_index + 1]
-        paged_json_ld = {"@context": json_ld["@context"],
-                         **pagination(page, page_count, page_size, graph_count, prev_page, next_page, page_count, str(request.url)), 
-                         "@graph": subset_graph}
+        paged_json_ld = {
+            "@context": json_ld["@context"],
+            **pagination(page, page_count, page_size, graph_count, prev_page, next_page, page_count, str(request.url)),
+            "@graph": subset_graph,
+        }
 
         json_header = {
             "@id": str(request.url).split("?")[0],
@@ -263,10 +267,7 @@ def distributions(request: Request, artefactID: str, do_filter=None, do_paginati
             "totalItems": graph_count,
         }
 
-        paged_json_ld = {
-            **paged_json_ld,            
-            **json_header                      
-        }
+        paged_json_ld = {**paged_json_ld, **json_header}
 
         json_ld = paged_json_ld
         json_ld["@context"]["Collection"] = "hydra:Collection"
@@ -282,9 +283,9 @@ def distributions(request: Request, artefactID: str, do_filter=None, do_paginati
 def distributionsId(request: Request, artefactID: str, distributionID: str):
 
     response = distributions(request, artefactID)
-    
-    if (error := errorResponse(response)):
-        return JSONResponse(content={"error": error}, status_code=200)    
+
+    if error := errorResponse(response):
+        return JSONResponse(content={"error": error}, status_code=200)
 
     valid_ids = [str(i) for i in range(1, len(distributions_config) + 1)]
 
@@ -481,8 +482,8 @@ def metadata(request: Request):
             "@type": "Collection",
             "totalItems": results_count,
         }
-        
-        sparql_result = {"@context": {**context, **hydra_pagination_context},**pgn, **graph, **json_header}
+
+        sparql_result = {"@context": {**context, **hydra_pagination_context}, **pgn, **graph, **json_header}
 
     else:
         json_header = {
@@ -490,7 +491,7 @@ def metadata(request: Request):
             "@type": "Collection",
             "totalItems": 0,
         }
-        pgn = pagination(1, 1, 1, 0, None, None, 1, str(request.url))        
+        pgn = pagination(1, 1, 1, 0, None, None, 1, str(request.url))
         sparql_result = {"@context": context, **pgn, "@graph": [], **json_header}
 
     return JSONResponse(content=sparql_result, status_code=200)
@@ -677,15 +678,20 @@ def content(request: Request):
             "totalItems": results_count,
         }
 
-        sparql_result = {"@context": {**context, **hydra_pagination_context},**pgn , **graph, **json_header}
+        sparql_result = {"@context": {**context, **hydra_pagination_context}, **pgn, **graph, **json_header}
     else:
         json_header = {
             "@id": str(request.url).split("?")[0],
             "@type": "Collection",
-            "totalItems": 0,            
+            "totalItems": 0,
         }
-        pgn = pagination(1, 1, 1, 0, None, None, 1, str(request.url))        
-        sparql_result = {"@context": {**artefacts_context, **hydra_pagination_context},**pgn,  "@graph": [], **json_header }
+        pgn = pagination(1, 1, 1, 0, None, None, 1, str(request.url))
+        sparql_result = {
+            "@context": {**artefacts_context, **hydra_pagination_context},
+            **pgn,
+            "@graph": [],
+            **json_header,
+        }
 
     return JSONResponse(content=sparql_result, status_code=200)
 
@@ -696,7 +702,7 @@ def concepts_in_collection(request: Request, artefactID: str):
 
     response = artefactId(request, artefactID)
 
-    if (error := errorResponse(response)):
+    if error := errorResponse(response):
         return JSONResponse(content={"error": error}, status_code=200)
 
     q_count = """
@@ -772,15 +778,17 @@ def concepts_in_collection(request: Request, artefactID: str):
             "totalItems": results_count,
         }
 
-        sparql_result = {"@context": {**artefacts_context, **hydra_pagination_context},**pgn, **graph, **json_header}
+        sparql_result = {"@context": {**artefacts_context, **hydra_pagination_context}, **pgn, **graph, **json_header}
         sparql_result["@context"]["Collection"] = "hydra:Collection"
 
     return JSONResponse(content=sparql_result, status_code=200)
 
+
 def errorResponse(r: JSONResponse):
     body = r.body
     data = json.loads(body.decode("utf-8"))
-    return data.get('error', None)
+    return data.get("error", None)
+
 
 def extract_collection_acronym(uri):
     match = re.search(r"/collection/(.*?)/current/", uri)
