@@ -986,6 +986,7 @@ def filter_fields_in_graph_artefacts(json_data: dict, fields_to_display: str, pr
         for key in keys_to_remove:
             item.pop(key, None)
 
+
 def get_positive_pagesize_int(value, default):
     try:
         value = int(value)
@@ -993,11 +994,13 @@ def get_positive_pagesize_int(value, default):
     except (ValueError, TypeError):
         return default
 
+
 def get_positive_page_int(value, default):
     try:
         return max(int(value), default)
     except (ValueError, TypeError):
         return default
+
 
 def pagination(
     page: int,
