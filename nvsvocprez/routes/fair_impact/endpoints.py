@@ -29,12 +29,12 @@ host = os.getenv("SYSTEM_URI", "https://vocab.nerc.ac.uk")
 
 hydra_pagination_context = {
     "hydra": "http://www.w3.org/ns/hydra/core#",
-    "view": "http://www.w3.org/ns/hydra/core#:view",
-    "firstPage": "http://www.w3.org/ns/hydra/core#:first",
-    "previousPage": "http://www.w3.org/ns/hydra/core#:previous",
-    "lastPage": "http://www.w3.org/ns/hydra/core#:last",
-    "nextPage": "http://www.w3.org/ns/hydra/core#:next",
-    "totalItems": "http://www.w3.org/ns/hydra/core#:totalItems",
+    "view": "http://www.w3.org/ns/hydra/core#view",
+    "firstPage": "http://www.w3.org/ns/hydra/core#first",
+    "previousPage": "http://www.w3.org/ns/hydra/core#previous",
+    "lastPage": "http://www.w3.org/ns/hydra/core#last",
+    "nextPage": "http://www.w3.org/ns/hydra/core#next",
+    "totalItems": "http://www.w3.org/ns/hydra/core#totalItems",
 }
 
 artefacts_context = {
@@ -318,7 +318,7 @@ def metadata(request: Request):
         "title": "http://purl.org/dc/terms/title",
         "description": "http://purl.org/dc/terms/description",
         "@language": "en",
-        "Collection": "http://www.w3.org/ns/hydra/core#:Collection",
+        "Collection": "http://www.w3.org/ns/hydra/core#Collection",
         "accessRights": "http://purl.org/dc/terms/accessRights",
         "URI": "https://w3id.org/mod#URI",
         "identifier": "http://purl.org/dc/terms/identifier",
@@ -563,7 +563,7 @@ def content(request: Request):
     context = {
         "sdo": "https://schema.org/",
         "skos": "http://www.w3.org/2004/02/skos/core#",
-        "Collection": "http://www.w3.org/ns/hydra/core#:Collection",
+        "Collection": "http://www.w3.org/ns/hydra/core#Collection",
         "accessRights": "http://purl.org/dc/terms/accessRights",
         "URI": "https://w3id.org/mod#URI",
         "identifier": "http://purl.org/dc/terms/identifier",
