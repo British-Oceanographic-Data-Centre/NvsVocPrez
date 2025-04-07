@@ -30,12 +30,12 @@ host = os.getenv("SYSTEM_URI", "https://vocab.nerc.ac.uk")
 hydra_pagaination_context = {
     "hydra": "http://www.w3.org/ns/hydra/core#",
     "view": "hydra:view",
-    "itemsPerPage": "hydra:itemsPerPage",
-    "firstPage": "hydra:first",
-    "previousPage": "hydra:previous",
-    "lastPage": "hydra:last",
-    "nextPage": "hydra:next",
-    "totalItems": "hydra:totalItems",
+    # "itemsPerPage": "hydra:itemsPerPage",
+    "firstPage": "http://www.w3.org/ns/hydra/core#:first",
+    "previousPage": "http://www.w3.org/ns/hydra/core#:previous",
+    "lastPage": "http://www.w3.org/ns/hydra/core#:last",
+    "nextPage": "http://www.w3.org/ns/hydra/core#:next",
+    "totalItems": "http://www.w3.org/ns/hydra/core#:totalItems",
 }
 
 artefacts_context = {
@@ -130,12 +130,12 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
         # default_param = "all"
         display_param = request.query_params.get("display", default_param)
 
-        protected_fields = {"@id", "acronym"}
+        protected_fields = {"@id", "acronym", "@type"}
         filter_fields_in_graph_artefacts(json_ld, display_param, protected_fields)
 
     if do_pagination is not None:
-        page_size = get_positive_int(request.query_params.get("pagesize"), 50)
-        page = get_positive_int(request.query_params.get("page"), 1)
+        page_size = get_positive_pagesize_int(request.query_params.get("pagesize"), 50)
+        page = get_positive_page_int(request.query_params.get("page"), 1)
 
         graph_count = len(json_ld.get("@graph", []))
         page_size = min(page_size, graph_count)
@@ -155,7 +155,7 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
             "@id": str(request.url).split("?")[0],
             "@type": "Collection",
             "totalItems": graph_count,
-            "itemsPerPage": page_size,
+            # "itemsPerPage": page_size,
         }
 
         json_ld = {
@@ -230,8 +230,8 @@ def distributions(request: Request, artefactID: str, do_filter=None, do_paginati
     filter_fields_in_graph_artefacts(json_ld, display_param, protected_fields)
 
     if do_pagination is not None:
-        page_size = get_positive_int(request.query_params.get("pagesize"), 50)
-        page = get_positive_int(request.query_params.get("page"), 1)
+        page_size = get_positive_pagesize_int(request.query_params.get("pagesize"), 50)
+        page = get_positive_page_int(request.query_params.get("page"), 1)
 
         graph_count = len(json_ld.get("@graph", []))
         page_size = min(page_size, graph_count)
@@ -251,7 +251,7 @@ def distributions(request: Request, artefactID: str, do_filter=None, do_paginati
             "@id": str(request.url).split("?")[0],
             "@type": "Collection",
             "totalItems": graph_count,
-            "itemsPerPage": page_size,
+            # "itemsPerPage": page_size,
         }
 
         paged_json_ld = {
@@ -311,7 +311,7 @@ def metadata(request: Request):
         "@language": "en",
         "hydra": "http://www.w3.org/ns/hydra/core#",
         "view": "hydra:view",
-        "itemsPerPage": "hydra:itemsPerPage",
+        # "itemsPerPage": "hydra:itemsPerPage",
         "firstPage": "hydra:first",
         "previousPage": "hydra:previous",
         "lastPage": "hydra:last",
@@ -344,10 +344,16 @@ def metadata(request: Request):
     if query_param is None:
         json_header = {
             "@id": str(request.url).split("?")[0],
-            "@type": "Collection",            
+            "@type": "Collection",
         }
         pgn = pagination(1, 1, 1, 0, None, None, 1, str(request.url))
-        sparql_result = {**json_header, **pgn, "@context": context, "@graph": [],"error": "query parameter 'q' not found"}
+        sparql_result = {
+            **json_header,
+            **pgn,
+            "@context": context,
+            "@graph": [],
+            "error": "query parameter 'q' not found",
+        }
         # return JSONResponse(content={"error": "query parameter 'q' not found"}, status_code=200)
         return JSONResponse(content=sparql_result, status_code=200)
 
@@ -409,8 +415,8 @@ def metadata(request: Request):
 
     if results_count > 0:
 
-        page_size = get_positive_int(request.query_params.get("pagesize"), 50)
-        page = get_positive_int(request.query_params.get("page"), 1)
+        page_size = get_positive_pagesize_int(request.query_params.get("pagesize"), 50)
+        page = get_positive_page_int(request.query_params.get("page"), 1)
 
         page_size = min(page_size, results_count)
         page_count = math.ceil(results_count / page_size)
@@ -490,7 +496,7 @@ def metadata(request: Request):
             "@id": str(request.url).split("?")[0],
             "@type": "Collection",
             "totalItems": results_count,
-            "itemsPerPage": page_size,
+            # "itemsPerPage": page_size,
         }
 
         sparql_result = {**json_header, **pgn, "@context": context, **graph}
@@ -500,7 +506,7 @@ def metadata(request: Request):
             "@id": str(request.url).split("?")[0],
             "@type": "Collection",
             "totalItems": 0,
-            "itemsPerPage": page_size,
+            # "itemsPerPage": page_size,
         }
         pgn = pagination(1, 1, 1, 0, None, None, 1, str(request.url))
         sparql_result = {**json_header, **pgn, "@context": context, "@graph": []}
@@ -576,7 +582,7 @@ def content(request: Request):
         "skos": "http://www.w3.org/2004/02/skos/core#",
         "hydra": "http://www.w3.org/ns/hydra/core#",
         "view": "hydra:view",
-        "itemsPerPage": "hydra:itemsPerPage",
+        # "itemsPerPage": "hydra:itemsPerPage",
         "firstPage": "hydra:first",
         "previousPage": "hydra:previous",
         "lastPage": "hydra:last",
@@ -606,8 +612,8 @@ def content(request: Request):
 
     if results_count > 0:
 
-        page_size = get_positive_int(request.query_params.get("pagesize"), 50)
-        page = get_positive_int(request.query_params.get("page"), 1)
+        page_size = get_positive_pagesize_int(request.query_params.get("pagesize"), 50)
+        page = get_positive_page_int(request.query_params.get("page"), 1)
 
         page_size = min(page_size, results_count)
         page_count = math.ceil(results_count / page_size)
@@ -698,7 +704,7 @@ def content(request: Request):
             "@id": str(request.url).split("?")[0],
             "@type": "Collection",
             "totalItems": results_count,
-            "itemsPerPage": page_size,
+            # "itemsPerPage": page_size,
         }
 
         sparql_result = {**json_header, **pgn, "@context": context, **graph}
@@ -707,7 +713,7 @@ def content(request: Request):
             "@id": str(request.url).split("?")[0],
             "@type": "Collection",
             "totalItems": 0,
-            "itemsPerPage": page_size,
+            # "itemsPerPage": page_size,
         }
         pgn = pagination(1, 1, 1, 0, None, None, 1, str(request.url))
         sparql_result = {**json_header, **pgn, "@context": context, "@graph": []}
@@ -749,8 +755,8 @@ def concepts_in_collection(request: Request, artefactID: str):
 
     if results_count > 0:
 
-        page_size = get_positive_int(request.query_params.get("pagesize"), 50)
-        page = get_positive_int(request.query_params.get("page"), 1)
+        page_size = get_positive_pagesize_int(request.query_params.get("pagesize"), 50)
+        page = get_positive_page_int(request.query_params.get("page"), 1)
 
         page_size = min(page_size, results_count)
         page_count = math.ceil(results_count / page_size)
@@ -795,7 +801,7 @@ def concepts_in_collection(request: Request, artefactID: str):
             "skos": "http://www.w3.org/2004/02/skos/core#",
             "hydra": "http://www.w3.org/ns/hydra/core#",
             "view": "hydra:view",
-            "itemsPerPage": "hydra:itemsPerPage",
+            # "itemsPerPage": "hydra:itemsPerPage",
             "firstPage": "hydra:first",
             "previousPage": "hydra:previous",
             "lastPage": "hydra:last",
@@ -815,7 +821,7 @@ def concepts_in_collection(request: Request, artefactID: str):
             "@id": str(request.url).split("?")[0],
             "@type": "Collection",
             "totalItems": results_count,
-            "itemsPerPage": page_size,
+            # "itemsPerPage": page_size,
         }
 
         sparql_result = {**json_header, **pgn, "@context": context, **graph}
@@ -980,13 +986,18 @@ def filter_fields_in_graph_artefacts(json_data: dict, fields_to_display: str, pr
         for key in keys_to_remove:
             item.pop(key, None)
 
+def get_positive_pagesize_int(value, default):
+    try:
+        value = int(value)
+        return value if value > 0 else default
+    except (ValueError, TypeError):
+        return default
 
-def get_positive_int(value, default):
+def get_positive_page_int(value, default):
     try:
         return max(int(value), default)
     except (ValueError, TypeError):
         return default
-
 
 def pagination(
     page: int,
@@ -1007,18 +1018,18 @@ def pagination(
     page_links = {
         "view": {
             "@id": current_page_link,
-            "@type": "hydra: PartialCollectionView",
-            "first": first_page_link,
-            "last": last_page_link,
-            "next": next_page_link,
-            "previous": prev_page_link,
+            "@type": "hydra:PartialCollectionView",
+            "firstPage": first_page_link,
+            "lastPage": last_page_link,
+            "nextPage": next_page_link,
+            "previousPage": prev_page_link,
         }
     }
 
-    if page_links["view"].get("next") is None:
-        page_links["view"].pop("next")
-    if page_links["view"].get("previous") is None:
-        page_links["view"].pop("previous")
+    if page_links["view"].get("nextPage") is None:
+        page_links["view"].pop("nextPage")
+    if page_links["view"].get("previousPage") is None:
+        page_links["view"].pop("previousPage")
 
     return page_links
 
