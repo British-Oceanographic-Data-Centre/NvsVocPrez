@@ -70,6 +70,7 @@ def collections(request: Request):
             )
 
         def _render_sparql_response_rdf(self, sparql_response):
+
             if sparql_response[0]:
                 return Response(
                     (
@@ -118,6 +119,7 @@ def collections(request: Request):
                         },
                     )
                 elif self.mediatype in RDF_MEDIATYPES:
+
                     query = """
                         PREFIX dc: <http://purl.org/dc/terms/>
                         PREFIX grg: <http://www.isotc211.org/schemas/grg/>
@@ -607,23 +609,92 @@ class ConceptRenderer(Renderer):
             }}         
         """
 
+        mappings_deprecated_q = f"""
+            PREFIX sssom: <https://w3id.org/sssom/schema/>
+            PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+            PREFIX reg: <http://purl.org/linked-data/registry#>
+
+            SELECT ?murl ?p ?obj WHERE {{
+                BIND (<{self.instance_uri}> AS ?concept)
+                ?murl sssom:subject_id ?concept .
+
+                ?murl reg:status reg:statusDeprecated .
+                #?murl reg:status reg:statusValid .
+
+                ?murl sssom:object_id ?obj .
+                ?murl sssom:predicate_id ?p .
+                {exclude_filters}
+            }}
+        """
+
+        mappings_deprecated_r = sparql_query(mappings_deprecated_q)
+        concepts_with_deprecated_mappings = []
+
+        for x in mappings_deprecated_r[1]:
+            object = x["obj"]["value"]            
+
+            if object[-1] != "/":
+                object += "/"
+            predicate = x["p"]["value"]
+            if predicate[-1] != "/":
+                predicate += "/"
+            key = object + predicate
+
+            concepts_with_deprecated_mappings.append(key)
+
+        concepts_with_deprecated_mappings = [item.rstrip('/') for item in concepts_with_deprecated_mappings]
+
+
+
+
+
         mappings_q = f"""
             PREFIX sssom: <https://w3id.org/sssom/schema/>
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
             PREFIX owl: <http://www.w3.org/2002/07/owl#>
+            PREFIX reg: <http://purl.org/linked-data/registry#>
             {prefixes}
             SELECT ?murl ?p ?obj WHERE {{
                 BIND (<{self.instance_uri}> AS ?concept)
                 ?murl sssom:subject_id ?concept .
+
+                ?murl reg:status reg:statusValid .
+
                 ?murl sssom:object_id ?obj .
                 ?murl sssom:predicate_id ?p .
                 {exclude_filters}
             }}
         """
         mappings_r = sparql_query(mappings_q)
+
         keyed_mappings = {}
+        concepts_with_valid_mappings = []
+
+        mapping_relations = ['http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
+                     'https://qudt.org/2.1/schema/qudt#hasQuantityKind',
+                    'https://w3id.org/env/puv#chemicalObject',
+                    'https://w3id.org/iadopt/ont#hasProperty',
+                    'https://w3id.org/iadopt/ont#hasObjectOfInterest',
+                    'https://w3id.org/iadopt/ont#hasMatrix',
+                    'https://w3id.org/iadopt/ont#hasContextObject',
+                    'https://w3id.org/iadopt/ont#hasConstraint',
+                    'http://www.w3.org/2004/02/skos/core#narrower',
+                    'http://www.w3.org/2004/02/skos/core#broader',
+                    'http://www.w3.org/2004/02/skos/core#related',
+                    'http://www.w3.org/2002/07/owl#sameAs',
+                    'http://www.w3.org/2004/02/skos/core#closeMatch',
+                    'https://w3id.org/env/puv#property',
+                    'https://w3id.org/env/puv#statistic',
+                    'https://w3id.org/env/puv#matrix',
+                    'https://w3id.org/iadopt/ont#hasApplicableProperty',
+                    'https://w3id.org/iadopt/ont#hasApplicableObjectOfInterest',
+                    'https://w3id.org/iadopt/ont#hasApplicableMatrix',
+                    'https://w3id.org/iadopt/ont#hasApplicableContextObject']
+
         for x in mappings_r[1]:
-            object = x["obj"]["value"]
+            object = x["obj"]["value"]            
+
             # For consistency, ensure all URls have a trailing slash
             if object[-1] != "/":
                 object += "/"
@@ -631,9 +702,14 @@ class ConceptRenderer(Renderer):
             if predicate[-1] != "/":
                 predicate += "/"
             key = object + predicate
+
+            concepts_with_valid_mappings.append(key)
             keyed_mappings[key] = x["murl"]["value"]
 
         r = sparql_query(q)
+
+        concepts_with_valid_mappings = [item.rstrip('/') for item in concepts_with_valid_mappings]
+
         if not r[0]:
             return PlainTextResponse(
                 "There was an error obtaining the Concept RDF from the Triplestore",
@@ -721,6 +797,7 @@ class ConceptRenderer(Renderer):
         for x in r[1]:
             p = x["p"]["value"]
             o = x["o"]["value"]
+
             o_label = x["o_label"]["value"] if x.get("o_label") is not None else None
             o_notation = x["o_notation"]["value"] if x.get("o_notation") is not None else None
             mapping_url = ""
@@ -734,6 +811,15 @@ class ConceptRenderer(Renderer):
                 mapping_url = keyed_mappings.get(key)
             except:
                 pass
+
+
+            # if p.rstrip('/') in mapping_relations:
+            #     if f"{o.rstrip('/') + '/'}{p}".rstrip('/') not in concepts_with_valid_mappings:                    
+            #         continue
+
+            if p.rstrip('/') in mapping_relations:
+                if f"{o.rstrip('/') + '/'}{p}".rstrip('/') in concepts_with_deprecated_mappings:
+                    continue                
 
             context["collection_systemUri"] = x["collection_systemUri"]["value"]
             context["collection_label"] = x["collection_label"]["value"]
@@ -951,6 +1037,98 @@ class ConceptRenderer(Renderer):
         for ontology in self.ontologies.values():
             exclude_filters += f'FILTER (!STRSTARTS(STR(?p), "{ontology["url"]}"))\n'
 
+        
+
+        # q = f"""
+        #     PREFIX dc: <http://purl.org/dc/terms/>
+        #     PREFIX dce: <http://purl.org/dc/elements/1.1/>
+        #     PREFIX owl: <http://www.w3.org/2002/07/owl#>
+        #     PREFIX pav: <http://purl.org/pav/>
+        #     PREFIX prov: <https://www.w3.org/ns/prov#>
+        #     PREFIX sssom: <https://w3id.org/sssom/schema/>
+        #     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        #     PREFIX void: <http://rdfs.org/ns/void#>
+        #     PREFIX reg: <http://purl.org/linked-data/registry#>
+
+        #     CONSTRUCT {{
+        #       <{self.instance_uri}> ?p ?o .
+
+        #     #   # remove provenance, for now
+        #     #   ?s ?p2 ?o2 .              
+        #     #   ?s sssom:subject_id <{self.instance_uri}> ;
+        #     #   prov:has_provenance ?m .
+
+        #        ?s ?p2 ?o2 .              
+        #        ?s sssom:subject_id <{self.instance_uri}> ;
+        #        prov:has_provenance ?m .            
+
+
+        #     #   ?s ?p2 ?o2 .              
+        #     #   ?s sssom:subject_id <{self.instance_uri}> ;
+        #     #      ?s reg:status reg:statusValid . 
+
+        #     }}
+        #     WHERE {{
+        #         <{self.instance_uri}> ?p ?o .
+
+        #         # # remove provenance, for now
+        #         #  OPTIONAL {{
+        #         #      ?s sssom:subject_id <{self.instance_uri}> ;
+        #         #         prov:has_provenance ?m .
+                         
+        #         #      # {{ ?s ?p2 ?o2 }}
+        #         #  }}
+
+        #         # ?s ?p2 ?o2 .              
+        #         # ?s sssom:subject_id <{self.instance_uri}> ;
+        #         #  ?s reg:status reg:statusValid . 
+
+        #         # exclude altprof properties from NVS view
+        #         {exclude_filters}
+        #     }}
+        # """
+
+        mappings_deprecated_q = f"""
+            PREFIX sssom: <https://w3id.org/sssom/schema/>
+            PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+            PREFIX reg: <http://purl.org/linked-data/registry#>
+
+            SELECT ?murl ?p ?obj WHERE {{
+                BIND (<{self.instance_uri}> AS ?concept)
+                ?murl sssom:subject_id ?concept .
+
+                ?murl reg:status reg:statusDeprecated .
+                #?murl reg:status reg:statusValid .
+
+                ?murl sssom:object_id ?obj .
+                ?murl sssom:predicate_id ?p .
+                {exclude_filters}
+            }}
+        """
+
+        mappings_r = sparql_query(mappings_deprecated_q)
+
+        deprecated_mappings = []
+        
+        for x in mappings_r[1]:
+            deprecated_mappings.append(
+                (
+                    x["obj"]["value"], 
+                    x["p"]["value"].rstrip('/').replace("http://www.w3.org/2002/07/owl#","owl:")
+                    .replace("http://www.w3.org/2004/02/skos/core#","skos:")
+                 )
+            )
+
+        deprecated_m_filter = ""
+        for m in deprecated_mappings:
+            deprecated_m_filter = deprecated_m_filter + f"FILTER (!(?p = {m[1]} && ?o = <{m[0]}>)) "
+
+        filter_out_where_deprecated_mappings = f"""
+            <{self.instance_uri}> ?p ?o .
+            {deprecated_m_filter}
+        """
+
         q = f"""
             PREFIX dc: <http://purl.org/dc/terms/>
             PREFIX dce: <http://purl.org/dc/elements/1.1/>
@@ -960,30 +1138,26 @@ class ConceptRenderer(Renderer):
             PREFIX sssom: <https://w3id.org/sssom/schema/>
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
             PREFIX void: <http://rdfs.org/ns/void#>
+            PREFIX reg: <http://purl.org/linked-data/registry#>
+            PREFIX owl: <http://www.w3.org/2002/07/owl#>
 
             CONSTRUCT {{
               <{self.instance_uri}> ?p ?o .
 
-              # remove provenance, for now
-              # ?s ?p2 ?o2 .              
-              # ?s sssom:subject_id <{self.instance_uri}> ;
-              #   prov:has_provenance ?m .              
             }}
             WHERE {{
-                <{self.instance_uri}> ?p ?o .
+                <{self.instance_uri}> ?p ?o .           
+                          
 
-                # remove provenance, for now
-                # OPTIONAL {{
-                #     ?s sssom:subject_id <{self.instance_uri}> ;
-                #        prov:has_provenance ?m .
-                #         
-                #     # {{ ?s ?p2 ?o2 }}
-                # }}
+                #FILTER (!(?p = owl#sameAs && ?o = <http://environment.data.gov.au/def/object/copper>))                
 
+                {filter_out_where_deprecated_mappings}
+                  
                 # exclude altprof properties from NVS view
                 {exclude_filters}
             }}
         """
+
         return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
 
     def _render_skos_rdf(self):
