@@ -125,50 +125,50 @@ def artefacts(request: Request, do_filter="yes", do_pagination="yes"):
         response = client.get(f"{host}/collection?_mediatype=application/ld+json&_profile=nvs", timeout=timeout)
 
     data = response.json()
-    graph_collection_items = get_collection_graph_items(data)
+    member_collection_items = get_collection_member_items(data)
 
     # Schemes
     with httpx.Client(follow_redirects=True) as client:
         response = client.get(f"{host}/scheme?_mediatype=application/ld+json&_profile=nvs", timeout=timeout)
 
     data = response.json()
-    graph_scheme_items = get_scheme_graph_items(data)
+    member_scheme_items = get_scheme_member_items(data)
 
     json_ld = {
         "@context": {**artefacts_context, **hydra_pagination_context},
-        "@graph": graph_collection_items + graph_scheme_items,
+        "member": member_collection_items + member_scheme_items,
     }
 
     if do_filter is not None:
         display_param = request.query_params.get("display", artefacts_default_params)
-        filter_params_in_graph_artefacts(json_ld, display_param, artefacts_protected_params)
+        filter_params_in_member_artefacts(json_ld, display_param, artefacts_protected_params)
 
     if do_pagination is not None:
         page_size = get_positive_pagesize_int(request.query_params.get("pagesize"), 50)
         page = get_positive_page_int(request.query_params.get("page"), 1)
 
-        graph_count = len(json_ld.get("@graph", []))
-        page_size = min(page_size, graph_count)
-        page_count = math.ceil(graph_count / page_size)
+        member_count = len(json_ld.get("member", []))
+        page_size = min(page_size, member_count)
+        page_count = math.ceil(member_count / page_size)
 
         page = min(page, page_count)
         prev_page = None if page == 1 else max(1, page - 1)
         next_page = None if page == page_count else page + 1
 
         start_index = (page - 1) * page_size
-        end_index = min(page * page_size - 1, graph_count - 1)
+        end_index = min(page * page_size - 1, member_count - 1)
 
-        subset_graph = json_ld["@graph"][start_index : end_index + 1]
+        subset_member = json_ld["member"][start_index : end_index + 1]
         json_ld = {
             "@context": json_ld["@context"],
-            **pagination(page, page_count, page_size, graph_count, prev_page, next_page, page_count, str(request.url)),
-            "@graph": subset_graph,
+            **pagination(page, page_count, page_size, member_count, prev_page, next_page, page_count, str(request.url)),
+            "member": subset_member,
         }
 
         json_header = {
             "@id": str(request.url).split("?")[0],
             "@type": "Collection",
-            "totalItems": graph_count,
+            "totalItems": member_count,
         }
 
         json_ld = {
@@ -188,15 +188,15 @@ def artefactId(request: Request, artefactID: str, do_filter="yes"):
     body = response.body
     data = json.loads(body.decode("utf-8"))
 
-    graph_item = [item for item in data["@graph"] if item.get("acronym") == artefactID]
+    member_item = [item for item in data["member"] if item.get("acronym") == artefactID]
 
-    if not graph_item:
+    if not member_item:
         return JSONResponse(content={"error": f"artefactID {artefactID} not found"}, status_code=200)
 
     json_ld = {}
     json_type = {"@type": "collection"}
     json_ld = {"@context": artefacts_context, **json_type}
-    json_ld.update(graph_item[0])
+    json_ld.update(member_item[0])
 
     if "@context" in json_ld and "Collection" in json_ld["@context"]:
         del json_ld["@context"]["Collection"]
@@ -231,40 +231,40 @@ def distributions(request: Request, artefactID: str, do_filter=None, do_paginati
         item["byteSize"] = get_response_bytesize(item["downloadURL"])
         del item["mediaType"]
 
-    graph_items = {"@graph": distributions_json_ld}
+    member_items = {"member": distributions_json_ld}
 
     json_ld = {"@context": {**artefacts_context, **hydra_pagination_context}}
-    json_ld.update(graph_items)
+    json_ld.update(member_items)
 
     display_param = request.query_params.get("display", distributions_default_params)
-    filter_params_in_graph_artefacts(json_ld, display_param, distributions_protected_params)
+    filter_params_in_member_artefacts(json_ld, display_param, distributions_protected_params)
 
     if do_pagination is not None:
         page_size = get_positive_pagesize_int(request.query_params.get("pagesize"), 50)
         page = get_positive_page_int(request.query_params.get("page"), 1)
 
-        graph_count = len(json_ld.get("@graph", []))
-        page_size = min(page_size, graph_count)
-        page_count = math.ceil(graph_count / page_size)
+        member_count = len(json_ld.get("member", []))
+        page_size = min(page_size, member_count)
+        page_count = math.ceil(member_count / page_size)
 
         page = min(page, page_count)
         prev_page = None if page == 1 else max(1, page - 1)
         next_page = None if page == page_count else page + 1
 
         start_index = (page - 1) * page_size
-        end_index = min(page * page_size - 1, graph_count - 1)
+        end_index = min(page * page_size - 1, member_count - 1)
 
-        subset_graph = json_ld["@graph"][start_index : end_index + 1]
+        subset_member = json_ld["member"][start_index : end_index + 1]
         paged_json_ld = {
             "@context": json_ld["@context"],
-            **pagination(page, page_count, page_size, graph_count, prev_page, next_page, page_count, str(request.url)),
-            "@graph": subset_graph,
+            **pagination(page, page_count, page_size, member_count, prev_page, next_page, page_count, str(request.url)),
+            "member": subset_member,
         }
 
         json_header = {
             "@id": str(request.url).split("?")[0],
             "@type": "Collection",
-            "totalItems": graph_count,
+            "totalItems": member_count,
         }
 
         paged_json_ld = {**paged_json_ld, **json_header}
@@ -295,7 +295,7 @@ def distributionsId(request: Request, artefactID: str, distributionID: str):
     body = response.body
     data = json.loads(body.decode("utf-8"))
 
-    distribution_item = next(item for item in data["@graph"] if item["distributionId"] == distributionID)
+    distribution_item = next(item for item in data["member"] if item["distributionId"] == distributionID)
 
     json_ld = {"@context": distributions_context}
     json_ld.update(distribution_item)
@@ -474,8 +474,8 @@ def metadata(request: Request):
 
         display_param = request.query_params.get("display", search_metadata_default_params)
 
-        graph = {"@graph": sparql_result}
-        filter_params_in_graph_artefacts(graph, display_param, search_metadata_protected_params)
+        member = {"member": sparql_result}
+        filter_params_in_member_artefacts(member, display_param, search_metadata_protected_params)
 
         json_header = {
             "@id": str(request.url).split("?")[0],
@@ -483,7 +483,7 @@ def metadata(request: Request):
             "totalItems": results_count,
         }
 
-        sparql_result = {"@context": {**context, **hydra_pagination_context}, **pgn, **graph, **json_header}
+        sparql_result = {"@context": {**context, **hydra_pagination_context}, **pgn, **member, **json_header}
 
     else:
         json_header = {
@@ -492,7 +492,7 @@ def metadata(request: Request):
             "totalItems": 0,
         }
         pgn = pagination(1, 1, 1, 0, None, None, 1, str(request.url))
-        sparql_result = {"@context": context, **pgn, "@graph": [], **json_header}
+        sparql_result = {"@context": context, **pgn, "member": [], **json_header}
 
     return JSONResponse(content=sparql_result, status_code=200)
 
@@ -669,8 +669,8 @@ def content(request: Request):
             item.pop("skos_collection", [])
 
         display_param = request.query_params.get("display", search_content_default_params)
-        graph = {"@graph": sparql_result}
-        filter_params_in_graph_artefacts(graph, display_param, search_content_protected_params)
+        member = {"member": sparql_result}
+        filter_params_in_member_artefacts(member, display_param, search_content_protected_params)
 
         json_header = {
             "@id": str(request.url).split("?")[0],
@@ -678,7 +678,7 @@ def content(request: Request):
             "totalItems": results_count,
         }
 
-        sparql_result = {"@context": {**context, **hydra_pagination_context}, **pgn, **graph, **json_header}
+        sparql_result = {"@context": {**context, **hydra_pagination_context}, **pgn, **member, **json_header}
     else:
         json_header = {
             "@id": str(request.url).split("?")[0],
@@ -689,7 +689,7 @@ def content(request: Request):
         sparql_result = {
             "@context": {**artefacts_context, **hydra_pagination_context},
             **pgn,
-            "@graph": [],
+            "member": [],
             **json_header,
         }
 
@@ -769,8 +769,8 @@ def concepts_in_collection(request: Request, artefactID: str):
             item["@type"] = "skos:Concept"
 
         display_param = request.query_params.get("display", resouces_concepts_default_params)
-        graph = {"@graph": sparql_result}
-        filter_params_in_graph_artefacts(graph, display_param, resouces_concepts_protected_params)
+        member = {"member": sparql_result}
+        filter_params_in_member_artefacts(member, display_param, resouces_concepts_protected_params)
 
         json_header = {
             "@id": str(request.url).split("?")[0],
@@ -778,7 +778,7 @@ def concepts_in_collection(request: Request, artefactID: str):
             "totalItems": results_count,
         }
 
-        sparql_result = {"@context": {**artefacts_context, **hydra_pagination_context}, **pgn, **graph, **json_header}
+        sparql_result = {"@context": {**artefacts_context, **hydra_pagination_context}, **pgn, **member, **json_header}
         sparql_result["@context"]["Collection"] = "hydra:Collection"
 
     return JSONResponse(content=sparql_result, status_code=200)
@@ -807,8 +807,8 @@ def parse_date(date_str):
         return datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f")
 
 
-def get_collection_graph_items(data: dict):
-    graph_items = []
+def get_collection_member_items(data: dict):
+    member_items = []
 
     for item in data.get("@graph", []):
         uri = item.get("@id")
@@ -828,7 +828,7 @@ def get_collection_graph_items(data: dict):
             f"]"
         )
 
-        graph_items.append(
+        member_items.append(
             {
                 "acronym": extract_collection_acronym(uri),
                 "accessRights": "public",
@@ -868,11 +868,11 @@ def get_collection_graph_items(data: dict):
             }
         )
 
-    return graph_items
+    return member_items
 
 
-def get_scheme_graph_items(data: dict):
-    graph_items = []
+def get_scheme_member_items(data: dict):
+    member_items = []
 
     for item in data.get("@graph", []):
         uri = item.get("@id")
@@ -886,7 +886,7 @@ def get_scheme_graph_items(data: dict):
             f"]"
         )
 
-        graph_items.append(
+        member_items.append(
             {
                 "acronym": extract_scheme_acronym(uri),
                 "accessRights": "public",
@@ -925,7 +925,7 @@ def get_scheme_graph_items(data: dict):
             }
         )
 
-    return graph_items
+    return member_items
 
 
 def get_response_bytesize(url):
@@ -935,14 +935,14 @@ def get_response_bytesize(url):
         return len(response.content)
 
 
-def filter_params_in_graph_artefacts(json_data: dict, fields_to_display: str, protected_params: str) -> str:
+def filter_params_in_member_artefacts(json_data: dict, fields_to_display: str, protected_params: str) -> str:
 
     fields_to_display = [field.strip() for field in fields_to_display.split(",")]
 
     if "all" in fields_to_display:
         return
 
-    for item in json_data.get("@graph", []):
+    for item in json_data.get("member", []):
         keys_to_remove = [key for key in item if key not in fields_to_display and key not in protected_params]
         for key in keys_to_remove:
             item.pop(key, None)
