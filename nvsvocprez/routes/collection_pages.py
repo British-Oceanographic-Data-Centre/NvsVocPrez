@@ -632,7 +632,7 @@ class ConceptRenderer(Renderer):
         concepts_with_deprecated_mappings = []
 
         for x in mappings_deprecated_r[1]:
-            object = x["obj"]["value"]            
+            object = x["obj"]["value"]
 
             if object[-1] != "/":
                 object += "/"
@@ -643,11 +643,7 @@ class ConceptRenderer(Renderer):
 
             concepts_with_deprecated_mappings.append(key)
 
-        concepts_with_deprecated_mappings = [item.rstrip('/') for item in concepts_with_deprecated_mappings]
-
-
-
-
+        concepts_with_deprecated_mappings = [item.rstrip("/") for item in concepts_with_deprecated_mappings]
 
         mappings_q = f"""
             PREFIX sssom: <https://w3id.org/sssom/schema/>
@@ -671,29 +667,31 @@ class ConceptRenderer(Renderer):
         keyed_mappings = {}
         concepts_with_valid_mappings = []
 
-        mapping_relations = ['http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
-                     'https://qudt.org/2.1/schema/qudt#hasQuantityKind',
-                    'https://w3id.org/env/puv#chemicalObject',
-                    'https://w3id.org/iadopt/ont#hasProperty',
-                    'https://w3id.org/iadopt/ont#hasObjectOfInterest',
-                    'https://w3id.org/iadopt/ont#hasMatrix',
-                    'https://w3id.org/iadopt/ont#hasContextObject',
-                    'https://w3id.org/iadopt/ont#hasConstraint',
-                    'http://www.w3.org/2004/02/skos/core#narrower',
-                    'http://www.w3.org/2004/02/skos/core#broader',
-                    'http://www.w3.org/2004/02/skos/core#related',
-                    'http://www.w3.org/2002/07/owl#sameAs',
-                    'http://www.w3.org/2004/02/skos/core#closeMatch',
-                    'https://w3id.org/env/puv#property',
-                    'https://w3id.org/env/puv#statistic',
-                    'https://w3id.org/env/puv#matrix',
-                    'https://w3id.org/iadopt/ont#hasApplicableProperty',
-                    'https://w3id.org/iadopt/ont#hasApplicableObjectOfInterest',
-                    'https://w3id.org/iadopt/ont#hasApplicableMatrix',
-                    'https://w3id.org/iadopt/ont#hasApplicableContextObject']
+        mapping_relations = [
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "https://qudt.org/2.1/schema/qudt#hasQuantityKind",
+            "https://w3id.org/env/puv#chemicalObject",
+            "https://w3id.org/iadopt/ont#hasProperty",
+            "https://w3id.org/iadopt/ont#hasObjectOfInterest",
+            "https://w3id.org/iadopt/ont#hasMatrix",
+            "https://w3id.org/iadopt/ont#hasContextObject",
+            "https://w3id.org/iadopt/ont#hasConstraint",
+            "http://www.w3.org/2004/02/skos/core#narrower",
+            "http://www.w3.org/2004/02/skos/core#broader",
+            "http://www.w3.org/2004/02/skos/core#related",
+            "http://www.w3.org/2002/07/owl#sameAs",
+            "http://www.w3.org/2004/02/skos/core#closeMatch",
+            "https://w3id.org/env/puv#property",
+            "https://w3id.org/env/puv#statistic",
+            "https://w3id.org/env/puv#matrix",
+            "https://w3id.org/iadopt/ont#hasApplicableProperty",
+            "https://w3id.org/iadopt/ont#hasApplicableObjectOfInterest",
+            "https://w3id.org/iadopt/ont#hasApplicableMatrix",
+            "https://w3id.org/iadopt/ont#hasApplicableContextObject",
+        ]
 
         for x in mappings_r[1]:
-            object = x["obj"]["value"]            
+            object = x["obj"]["value"]
 
             # For consistency, ensure all URls have a trailing slash
             if object[-1] != "/":
@@ -708,7 +706,7 @@ class ConceptRenderer(Renderer):
 
         r = sparql_query(q)
 
-        concepts_with_valid_mappings = [item.rstrip('/') for item in concepts_with_valid_mappings]
+        concepts_with_valid_mappings = [item.rstrip("/") for item in concepts_with_valid_mappings]
 
         if not r[0]:
             return PlainTextResponse(
@@ -812,14 +810,13 @@ class ConceptRenderer(Renderer):
             except:
                 pass
 
-
             # if p.rstrip('/') in mapping_relations:
-            #     if f"{o.rstrip('/') + '/'}{p}".rstrip('/') not in concepts_with_valid_mappings:                    
+            #     if f"{o.rstrip('/') + '/'}{p}".rstrip('/') not in concepts_with_valid_mappings:
             #         continue
 
-            if p.rstrip('/') in mapping_relations:
-                if f"{o.rstrip('/') + '/'}{p}".rstrip('/') in concepts_with_deprecated_mappings:
-                    continue                
+            if p.rstrip("/") in mapping_relations:
+                if f"{o.rstrip('/') + '/'}{p}".rstrip("/") in concepts_with_deprecated_mappings:
+                    continue
 
             context["collection_systemUri"] = x["collection_systemUri"]["value"]
             context["collection_label"] = x["collection_label"]["value"]
@@ -1037,8 +1034,6 @@ class ConceptRenderer(Renderer):
         for ontology in self.ontologies.values():
             exclude_filters += f'FILTER (!STRSTARTS(STR(?p), "{ontology["url"]}"))\n'
 
-        
-
         # q = f"""
         #     PREFIX dc: <http://purl.org/dc/terms/>
         #     PREFIX dce: <http://purl.org/dc/elements/1.1/>
@@ -1054,18 +1049,17 @@ class ConceptRenderer(Renderer):
         #       <{self.instance_uri}> ?p ?o .
 
         #     #   # remove provenance, for now
-        #     #   ?s ?p2 ?o2 .              
+        #     #   ?s ?p2 ?o2 .
         #     #   ?s sssom:subject_id <{self.instance_uri}> ;
         #     #   prov:has_provenance ?m .
 
-        #        ?s ?p2 ?o2 .              
+        #        ?s ?p2 ?o2 .
         #        ?s sssom:subject_id <{self.instance_uri}> ;
-        #        prov:has_provenance ?m .            
+        #        prov:has_provenance ?m .
 
-
-        #     #   ?s ?p2 ?o2 .              
+        #     #   ?s ?p2 ?o2 .
         #     #   ?s sssom:subject_id <{self.instance_uri}> ;
-        #     #      ?s reg:status reg:statusValid . 
+        #     #      ?s reg:status reg:statusValid .
 
         #     }}
         #     WHERE {{
@@ -1075,13 +1069,13 @@ class ConceptRenderer(Renderer):
         #         #  OPTIONAL {{
         #         #      ?s sssom:subject_id <{self.instance_uri}> ;
         #         #         prov:has_provenance ?m .
-                         
+
         #         #      # {{ ?s ?p2 ?o2 }}
         #         #  }}
 
-        #         # ?s ?p2 ?o2 .              
+        #         # ?s ?p2 ?o2 .
         #         # ?s sssom:subject_id <{self.instance_uri}> ;
-        #         #  ?s reg:status reg:statusValid . 
+        #         #  ?s reg:status reg:statusValid .
 
         #         # exclude altprof properties from NVS view
         #         {exclude_filters}
@@ -1110,14 +1104,16 @@ class ConceptRenderer(Renderer):
         mappings_r = sparql_query(mappings_deprecated_q)
 
         deprecated_mappings = []
-        
+
         for x in mappings_r[1]:
             deprecated_mappings.append(
                 (
-                    x["obj"]["value"], 
-                    x["p"]["value"].rstrip('/').replace("http://www.w3.org/2002/07/owl#","owl:")
-                    .replace("http://www.w3.org/2004/02/skos/core#","skos:")
-                 )
+                    x["obj"]["value"],
+                    x["p"]["value"]
+                    .rstrip("/")
+                    .replace("http://www.w3.org/2002/07/owl#", "owl:")
+                    .replace("http://www.w3.org/2004/02/skos/core#", "skos:"),
+                )
             )
 
         deprecated_m_filter = ""
