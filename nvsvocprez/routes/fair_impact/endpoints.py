@@ -96,9 +96,9 @@ distributions_meta = {
 }
 
 distributions_config = [
-    {"distributionId": "1", "hasSyntax": "http://www.w3.org/ns/formats/RDF_XML", "mediaType": "application/rdf+xml"},
-    {"distributionId": "2", "hasSyntax": "http://www.w3.org/ns/formats/Turtle", "mediaType": "text/turtle"},
-    {"distributionId": "3", "hasSyntax": "http://www.w3.org/ns/formats/JSON-LD", "mediaType": "application/ld+json"},
+    {"distributionId": 1, "hasSyntax": "http://www.w3.org/ns/formats/RDF_XML", "mediaType": "application/rdf+xml"},
+    {"distributionId": 2, "hasSyntax": "http://www.w3.org/ns/formats/Turtle", "mediaType": "text/turtle"},
+    {"distributionId": 3, "hasSyntax": "http://www.w3.org/ns/formats/JSON-LD", "mediaType": "application/ld+json"},
 ]
 
 artefacts_default_params = "acronym, accessRights, contactPoint, creator, description, identifier, keyword, title"
@@ -280,14 +280,14 @@ def distributions(request: Request, artefactID: str, do_filter=None, do_paginati
     **paths["/artefacts/{artefactID}/distributions/{distributionID}"]["get"],
 )
 @router.head("/artefacts/{artefactID}/distributions/{distributionID}", include_in_schema=False)
-def distributionsId(request: Request, artefactID: str, distributionID: str):
+def distributionsId(request: Request, artefactID: str, distributionID: int):
 
     response = distributions(request, artefactID)
 
     if error := errorResponse(response):
         return JSONResponse(content={"error": error}, status_code=200)
 
-    valid_ids = [str(i) for i in range(1, len(distributions_config) + 1)]
+    valid_ids = list(range(1, len(distributions_config) + 1))
 
     if distributionID not in valid_ids:
         return JSONResponse(content={"error": f"distributionID {distributionID} not found"}, status_code=200)
