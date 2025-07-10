@@ -2,7 +2,7 @@
 
 {% block content %}
   <h2>What is the NERC Vocabulary Server (NVS)?</h2>
-  <p>The NVS is a service providing access to centrally managed and uniquely identified lists of terms for annotating data in the marine and related earth science domains. It is managed by the British Oceanographic Data Centre (BODC) at the National Oceanography Centre (NOC). It is funded by the UK Research and Innovation Natural Environment Research Council (UKRI-NERC) as part of its Environmental Data Services (EDS) national capabilities, with additional funding from European projects. Standardised controlled vocabularies are used by data creators, data managers, and tool developers for indexing, annotating and searching for data, enabling greater interoperability, and reuse.</p>
+  <p>The NVS is a service providing access to centrally managed and uniquely identified lists of terms for annotating data in the marine and related earth science domains. It is managed by the British Oceanographic Data Centre (BODC) at the National Oceanography Centre (NOC). It is funded by the UK Research and Innovation Natural Environment Research Council (UKRI-NERC) as part of its Environmental Data Services (EDS) national capabilities, with additional funding from European projects. Standardised controlled vocabularies are used by data creators, data managers, and tool developers for indexing, annotating, and searching for data, enabling greater interoperability and reuse.</p>
   <h2>Vocabularies and Thesauri</h2>
   <p>The NVS uses the <a href="https://www.w3.org/">W3C</a>'s <a href="https://www.w3.org/2004/02/skos/">SKOS</a> to represent knowledge for computer interpretation.</p>
   <p>In the NVS, each vocabulary is a SKOS collection (e.g. <a href="https://vocab.nerc.ac.uk/collection/L22/current/">https://vocab.nerc.ac.uk/collection/L22/current/</a>) that has many terms that are SKOS concepts (e.g. <a href="https://vocab.nerc.ac.uk/collection/L22/current/TOOL1248/">https://vocab.nerc.ac.uk/collection/L22/current/TOOL1248/</a>).</p>
@@ -11,7 +11,7 @@
   <p>We have several tools for querying existing vocabulary collections:</p>
   <ul>
     <li><b><a href="https://www.bodc.ac.uk/resources/vocabularies/vocabulary_search/">NVS Vocab Search</a></b>: Searches entire NVS content (options to search for terms in a given collection, in any collection, search for entire collections, or explore mappings)</li>
-    <li><b><a href="https://www.bodc.ac.uk/resources/vocabularies/vocabulary_search/">SeaDataNet Search</a></b>: Focuses on collections used by SeaDataNet</li>
+    <li><b><a href="https://vocab.seadatanet.org/search">SeaDataNet Search</a></b>: Focuses on collections used by SeaDataNet</li>
     <li><b><a href="https://vocab.seadatanet.org/p01-facet-search">SDN Facet search</a></b>: Searches <a href="https://www.bodc.ac.uk/resources/vocabularies/parameter_codes/">P01</a> codes with filters</li>
     <li><b><a href="https://vocab.seadatanet.org/v_bodc_vocab_v2/vocab_relations.asp?lib=P08">SDN parameter discovery</a></b>: Displays relationships among collections</li>
     <li><b><a href="http://vocab.nerc.ac.uk/nvs_atom.xml">NVS Feed</a></b>: Provides updates on concept collections</li>
@@ -23,7 +23,7 @@
   <ul>
     <li><a href="http://vocab.nerc.ac.uk/sparql/">SPARQL</a></li>
     <li><a href="http://vocab.nerc.ac.uk/vocab2.wsdl">SOAP</a></li>
-    <li><a href="https://vocab.nerc.ac.uk/docs">RESTful APIs</a></li>
+    <li><a href="https://vocab.nerc.ac.uk/doc/api">RESTful APIs</a></li>
   </ul>
   <p>You can access NVS collections, concepts, and schemes as RDF in different serialisations (e.g., RDF/XML, Turtle, or JSON) using content negotiation.</p>
   <p>Use the appropriate header to automatically access RDF as shown below:</p>
@@ -41,21 +41,12 @@
   <p>Alternatively, requests can be sent via email to the <a href="mailto:vocab.services@bodc.ac.uk">Vocabulary Team</a>.</p>
   <p>New terms can also be submitted for approval to be included in the Parameter Usage Vocabulary (PUV) collection, P01, through the Vocab Builder tool:</p>
   <ul>
-    <li><b><a href="http://BODC Vocab Builder">BODC Vocab Builder</a></b>: Searches and submits P01 codes</li>
+    <li><b><a href="https://www.bodc.ac.uk/resources/vocabularies/vocabulary_builder/">BODC Vocab Builder</a></b>: Searches and submits P01 codes</li>
   </ul>
   <p>The Vocab Editor tool can be used by external governance groups to add or amend existing terms and mappings related to collections under their governance:</p>
   <ul>
     <li><b><a href="http://vocab.nerc.ac.uk/editor/">Vocab Editor</a></b>: Allows authorised vocabulary management</li>
   </ul>
   <p>Further help and guidance can be found in our guides resources <a href="https://github.com/nvs-vocabs/Guides-and-Resources">repository</a>.</p>
-  <h2>Content Negotiation</h2>
-  <p>You can access NVS collections, concepts and schemes as RDF in different serializations using content negotiation.</p>
-  <p>Use the appropriate header to automatically access RDF as shown below:</p>
-  <ul>
-    <li>Accept: application/rdf+xml to access NVS as RDF/XML e.g.<br /><code>curl -L -H "Accept: application/rdf+xml" "http://vocab.nerc.ac.uk/collection/L22/current"</code></li>
-    <li>Accept: text/turtle</li>
-    <li>Accept: application/ld+json</li>
-    <li>Accept: application/json</li>
-  </ul>
   {% include 'alt_link.html' %}
 {% endblock %}
