@@ -2,7 +2,7 @@
 {% block content %}
   <div style="display:grid; grid-template-columns: 80% auto;">
     <div style="grid-column: 1;">
-      <h1>Mapping</h1>
+	    <h1>Mapping{% if "statusDeprecated" in status %}<sup style="color:red;">DEPRECATED</sup>{% endif %}</h1>
       <h3>An RDF mapping statement</h3>
       <table class="metadata concept">
         <tr>
