@@ -38,7 +38,7 @@ def sparql_query(query: str):
         data=query,
         headers={"Content-Type": "application/sparql-query"},
         auth=(page_configs.SPARQL_USERNAME, page_configs.SPARQL_PASSWORD),
-        timeout=60.0,
+        timeout=600.0,
     )
     if 200 <= r.status_code < 300:
         return True, r.json()["results"]["bindings"]
@@ -52,7 +52,7 @@ def sparql_construct(query: str, rdf_mediatype="text/turtle"):
         data=query,
         headers={"Content-Type": "application/sparql-query", "Accept": rdf_mediatype},
         auth=(page_configs.SPARQL_USERNAME, page_configs.SPARQL_PASSWORD),
-        timeout=90.0,
+        timeout=600.0,
     )
     if 200 <= r.status_code < 300:
         return True, r.content
