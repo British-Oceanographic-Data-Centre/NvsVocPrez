@@ -35,6 +35,12 @@
     <li>Accept: application/ld+json</li>
     <li>Accept: application/json</li>
   </ul>
+  <h2>Collection Versioning in NVS</h2>
+  <p>
+  Each NVS collection is versioned and the version identifier is recorded using the <code>owl:versionInfo</code> property. While only the current version is exposed via the user interface, all historical versions remain resolvable via persistent URLs. To access a specific version, replace <code>/current/</code> in the collection URI with the required numeric version identifier (e.g. <code>/3/</code>).
+  Example: <a href="https://vocab.nerc.ac.uk/collection/L05/3/">https://vocab.nerc.ac.uk/collection/L05/3/</a>
+Opening a link to a specific version of a collection, will return the RDF/XML serialisation directly.
+  </p>
   <h2>Submit new/edit existing vocabularies</h2>
   <p>If you are unable to find a term matching your requirements in an existing collection, new terms can be submitted via our Git repositories. These can be found by substituting {TN} with the collection identifier in the following URL <a href="https://github.com/nvs-vocabs/{TN}/issues">https://github.com/nvs-vocabs/{TN}/issues</a>, for example <a href="https://github.com/nvs-vocabs/L22/issues">https://github.com/nvs-vocabs/L22/issues</a>. Alternatively, this <a href="https://docs.google.com/forms/d/e/1FAIpQLSe-ZTKJZmNT5FmyPRFsPsNt2hpB_gb6MAmm7Zp-7GSMpn5NFA/viewform?entry.1396013310">Google Form</a> can be used to automatically submit Git tickets for new term requests for various collections.</p>
   <p>Some collections have external governance structures, so new terms may need to be forwarded to a particular community for approval before they can be added to the collection, therefore we advise making requests for new terms as soon as is practicable. The Team responsible for creating and curating controlled vocabularies will advise on how the term should be modelled, and discussion for this is typically carried out on the Git ticket.</p>
