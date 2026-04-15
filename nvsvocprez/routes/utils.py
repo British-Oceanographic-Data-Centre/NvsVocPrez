@@ -31,7 +31,7 @@ config_ = config.verify_env_file()
 
 # Shared cache across worker processes
 cache_dir = os.path.expanduser("~/ords_cache")
-ords_cache = diskcache.Cache(cache_dir, size_limit=12*1024*1024)
+ords_cache = diskcache.Cache(cache_dir, size_limit=12 * 1024 * 1024)
 
 
 def get_user_status(request, login_status=config_.get("LOGIN_ENABLE")):
@@ -248,7 +248,7 @@ def exists_triple(s: str):
     return True if bool(int(count)) else False
 
 
-@ords_cache.memoize(expire=604800, tag='ords')
+@ords_cache.memoize(expire=604800, tag="ords")
 def get_ontologies() -> Dict:
     """Get ontologies from livbodcsos ords endpoint.
 
@@ -268,7 +268,7 @@ def get_ontologies() -> Dict:
         return {}  # Return blank dict to avoid internal server error.
 
 
-@ords_cache.memoize(expire=604800, tag='ords')
+@ords_cache.memoize(expire=604800, tag="ords")
 def get_alt_profiles() -> Dict:
     """Get alt profiles from livbodcsos ords endpoint.
 
@@ -389,7 +389,7 @@ def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict):
     return query
 
 
-@ords_cache.memoize(expire=604800, tag='ords')
+@ords_cache.memoize(expire=604800, tag="ords")
 def get_external_mappings(collection_id: str) -> Dict:
     """Get external mappings title from livbodcsos ords endpoint.
 
