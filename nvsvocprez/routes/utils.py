@@ -1,6 +1,7 @@
 """Utility functions used in rendering pages."""
 
 import logging
+
 logging.basicConfig(level=logging.INFO)
 from typing import Dict, List, Literal
 import httpx
@@ -15,7 +16,6 @@ from utilities import config
 from bs4 import BeautifulSoup
 import sys
 from cachetools import cached, TTLCache
-
 
 api_home_dir = Path(__file__).parent
 collections_pickle = Path(api_home_dir / "cache" / "collections.pickle")
@@ -384,7 +384,7 @@ def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict):
     return query
 
 
-@cached(cache=TTLCache(maxsize=12*1024*1024, ttl=604800, getsizeof=lambda x: sys.getsizeof(str(x))))
+@cached(cache=TTLCache(maxsize=12 * 1024 * 1024, ttl=604800, getsizeof=lambda x: sys.getsizeof(str(x))))
 def get_external_mappings(collection_id: str) -> Dict:
     """Get external mappings title from livbodcsos ords endpoint.
 

@@ -370,9 +370,7 @@ def metadata(request: Request):
                 regex(str(?cre), "<Q>", "i")
             )
         }
-    """.replace(
-        "<Q>", query_param.replace(" ", "\\\\ ")
-    )
+    """.replace("<Q>", query_param.replace(" ", "\\\\ "))
 
     q_count_all = """
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -456,9 +454,7 @@ def metadata(request: Request):
             ORDER BY DESC(?Rank) 
             OFFSET <OFFSET>
             LIMIT <LIMIT>
-            """.replace(
-                "<QUERY_FILTER>", query_filter
-            )
+            """.replace("<QUERY_FILTER>", query_filter)
             .replace("<Q>", query_param.replace(" ", "\\\\ "))
             .replace("<HOST>", host)
             .replace("<OFFSET>", str(start_index))
@@ -548,11 +544,7 @@ def content(request: Request):
             ?x owl:deprecated ?depr . 
             FILTER(str(?depr) = "false") 
         }
-    """.replace(
-        "<TEXT_QUERY>", text_query
-    ).replace(
-        "<Q>", query_param.replace(" ", "\\\\ ")
-    )
+    """.replace("<TEXT_QUERY>", text_query).replace("<Q>", query_param.replace(" ", "\\\\ "))
 
     sparql_count_result = sparql_query(q_count)
     count = sparql_count_result[1][0][".1"]["value"]
@@ -641,9 +633,7 @@ def content(request: Request):
             ORDER BY DESC(?z) 
             OFFSET <OFFSET>
             LIMIT <LIMIT>
-            """.replace(
-                "<TEXT_QUERY>", text_query
-            )
+            """.replace("<TEXT_QUERY>", text_query)
             .replace("<Q>", query_param.replace(" ", "\\\\ "))
             .replace("<HOST>", host)
             .replace("<OFFSET>", str(start_index))
@@ -716,11 +706,7 @@ def concepts_in_collection(request: Request, artefactID: str):
             FILTER(LANG(?pl) = "en")
 
         }  
-    """.replace(
-        "<artefactID>", artefactID
-    ).replace(
-        "<HOST>", host
-    )
+    """.replace("<artefactID>", artefactID).replace("<HOST>", host)
 
     sparql_count_result = sparql_query(q_count)
     count = sparql_count_result[1][0]["count"]["value"]
@@ -754,9 +740,7 @@ def concepts_in_collection(request: Request, artefactID: str):
         }
         OFFSET <OFFSET>
         LIMIT <LIMIT>
-        """.replace(
-                "<artefactID>", artefactID
-            )
+        """.replace("<artefactID>", artefactID)
             .replace("<HOST>", host)
             .replace("<OFFSET>", str(start_index))
             .replace("<LIMIT>", str(page_size))

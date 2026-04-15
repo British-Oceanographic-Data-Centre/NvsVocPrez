@@ -17,7 +17,6 @@ import connegp
 from pathlib import Path
 from routes import utils
 
-
 api_home_dir = Path(__file__).parent.parent
 templates = Jinja2Templates(str(api_home_dir / "view" / "templates"))
 

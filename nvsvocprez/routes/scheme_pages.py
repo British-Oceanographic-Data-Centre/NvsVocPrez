@@ -349,11 +349,7 @@ def scheme(
                   FILTER(lang(?pl) = "en" || lang(?pl) = "")                                    
                 }
                 ORDER BY ?pl
-                """.replace(
-                "xxx", self.instance_uri
-            ).replace(
-                "acc_dep", acc_dep_map.get(acc_dep)
-            )
+                """.replace("xxx", self.instance_uri).replace("acc_dep", acc_dep_map.get(acc_dep))
             try:
                 r = sparql_query(q)
 
@@ -374,9 +370,7 @@ def scheme(
                         FILTER(lang(?pl) = "en" || lang(?pl) = "") 
                     }}
                     ORDER BY ?pl
-                    """.format(
-                    vocab_uri=self.instance_uri
-                )
+                    """.format(vocab_uri=self.instance_uri)
 
                 concepts = [(concept["systemUri"]["value"], concept["pl"]["value"]) for concept in sparql_query(q)]
 
@@ -384,9 +378,7 @@ def scheme(
                 return """<p><strong><em>This concept hierarchy cannot be displayed</em></strong><p>
                             <p>The flat list of all this Scheme's Concepts is:</p>
                             <p>{}</p>
-                        """.format(
-                    concepts_html
-                )
+                        """.format(concepts_html)
 
         def render(self):
             if self.profile == "nvs":
@@ -469,11 +461,7 @@ def scheme(
                             }                            
                         }
                         ORDER BY ?pl
-                        """.replace(
-                        "xxx", self.instance_uri
-                    ).replace(
-                        "acc_dep", acc_dep_map.get(acc_dep)
-                    )
+                        """.replace("xxx", self.instance_uri).replace("acc_dep", acc_dep_map.get(acc_dep))
                     return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile == "dd":
                 q = """
@@ -492,9 +480,7 @@ def scheme(
                         FILTER(lang(?pl) = "en" || lang(?pl) = "")
                     }
                     ORDER BY ?pl                
-                    """.replace(
-                    "xxx", self.instance_uri
-                )
+                    """.replace("xxx", self.instance_uri)
                 r = sparql_query(q)
                 return JSONResponse(
                     [
@@ -565,9 +551,7 @@ def scheme(
                         FILTER(lang(?c_def) = "en" || lang(?c_def) = "")
                     }
                     ORDER BY ?pl
-                    """.replace(
-                    "xxx", self.instance_uri
-                )
+                    """.replace("xxx", self.instance_uri)
                 return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile == "vocpub":
                 q = """
@@ -634,9 +618,7 @@ def scheme(
                         FILTER(lang(?c_def) = "en" || lang(?c_def) = "")
                     }
                     ORDER BY ?pl
-                    """.replace(
-                    "xxx", self.instance_uri
-                )
+                    """.replace("xxx", self.instance_uri)
                 return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
 
             alt = super().render()
