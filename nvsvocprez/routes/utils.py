@@ -389,11 +389,7 @@ def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict):
     return query
 
 
-<<<<<<< HEAD
-@cached(cache=TTLCache(maxsize=12 * 1024 * 1024, ttl=604800, getsizeof=lambda x: sys.getsizeof(str(x))))
-=======
 @ords_cache.memoize(expire=604800, tag='ords')
->>>>>>> eacb195 (switch to using disk cache as this can be shared between multiple workers)
 def get_external_mappings(collection_id: str) -> Dict:
     """Get external mappings title from livbodcsos ords endpoint.
 
