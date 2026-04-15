@@ -13,3 +13,4 @@ requests==2.27.1
 starlette
 itsdangerous
 beautifulsoup4==4.12.2
+cachetools==5.3.3

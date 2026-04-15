@@ -46,7 +46,6 @@ from rdflib import Graph, URIRef
 from rdflib import Literal as RdfLiteral, Namespace
 from rdflib.namespace import DC, DCTERMS, ORG, OWL, RDF, RDFS, SKOS, VOID
 
-
 #### Initial Setup ####
 # NOTE: This should be refactored into a function/Class
 api_home_dir = Path(__file__).parent
@@ -174,9 +173,7 @@ def standard_name(request: Request, concept_id: str = None):
                         FILTER(lang(?def) = "en" || lang(?def) = "")
                 }
                 ORDER BY ?pl
-                """.replace(
-                "xxx", self.instance_uri
-            ).replace(
+                """.replace("xxx", self.instance_uri).replace(
                 "acc_dep", acc_dep_map.get(acc_dep_or_concept).replace("?c", "?x")
             )
 
@@ -263,9 +260,7 @@ def standard_name(request: Request, concept_id: str = None):
                           
                             BIND (IRI(CONCAT("DATA_URI/standard_name/", STR(?pl), "/")) AS ?m)
                         }
-                        """.replace(
-                        "DATA_URI", DATA_URI
-                    )
+                        """.replace("DATA_URI", DATA_URI)
                     return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile == "dd":
                 q = """
@@ -280,11 +275,7 @@ def standard_name(request: Request, concept_id: str = None):
                         BIND (REPLACE(?xpl, "_", " ") AS ?pl)
                     }
                     ORDER BY ?pl                
-                    """.replace(
-                    "xxx", self.instance_uri
-                ).replace(
-                    "DATA_URI", DATA_URI
-                )
+                    """.replace("xxx", self.instance_uri).replace("DATA_URI", DATA_URI)
                 r = sparql_query(q)
                 return JSONResponse([{"uri": x["c"]["value"], "prefLabel": x["pl"]["value"]} for x in r[1]])
             elif self.profile == "skos":
@@ -310,11 +301,7 @@ def standard_name(request: Request, concept_id: str = None):
                         BIND (REPLACE(?xc_pl, "_", " ") AS ?c_pl)                        
                     }
                     ORDER BY ?prefLabel
-                    """.replace(
-                    "xxx", self.instance_uri
-                ).replace(
-                    "DATA_URI", DATA_URI
-                )
+                    """.replace("xxx", self.instance_uri).replace("DATA_URI", DATA_URI)
                 return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
             elif self.profile == "vocpub":
                 q = """
@@ -349,11 +336,7 @@ def standard_name(request: Request, concept_id: str = None):
                         BIND (STRDT(REPLACE(STRBEFORE(?date, "."), " ", "T"), xsd:dateTime) AS ?modified)
                     }
                     ORDER BY ?xc                    
-                    """.replace(
-                    "xxx", self.instance_uri
-                ).replace(
-                    "DATA_URI", DATA_URI
-                )
+                    """.replace("xxx", self.instance_uri).replace("DATA_URI", DATA_URI)
                 return self._render_sparql_response_rdf(sparql_construct(q, self.mediatype))
 
             self.instance_uri = f"{DATA_URI}/standard_name/"

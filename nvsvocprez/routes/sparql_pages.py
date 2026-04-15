@@ -78,9 +78,7 @@ def _get_sparql_service_description(rdf_fmt="text/turtle"):
                 ]
             ]
         .
-    """.format(
-        SYSTEM_URI + "/sparql"
-    )
+    """.format(SYSTEM_URI + "/sparql")
     grf = Graph().parse(data=sd_ttl)
     if rdf_fmt in RDF_MEDIATYPES:
         return grf.serialize(format=rdf_fmt)
