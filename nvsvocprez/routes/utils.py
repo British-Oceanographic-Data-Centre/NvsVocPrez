@@ -1,6 +1,7 @@
 """Utility functions used in rendering pages."""
 
 import logging
+logging.basicConfig(level=logging.INFO)
 from typing import Dict, List, Literal
 import httpx
 from . import page_configs
@@ -12,6 +13,8 @@ import re
 from pyldapi.profile import Profile
 from utilities import config
 from bs4 import BeautifulSoup
+import sys
+from cachetools import cached, TTLCache
 
 
 api_home_dir = Path(__file__).parent
@@ -240,11 +243,13 @@ def exists_triple(s: str):
     return True if bool(int(count)) else False
 
 
+@cached(cache=TTLCache(maxsize=1, ttl=604800))
 def get_ontologies() -> Dict:
     """Get ontologies from livbodcsos ords endpoint.
 
     Returns (Dict): Dict of parsed ontology data. {ontology_prefix : {ontology_object}, ...}.
     """
+    logging.info("get_ontologies: CALLING ORDS")
     if page_configs.ORDS_ENDPOINT_URL is None:
         logging.error("Environment variable ORDS_ENDPOINT_URL is not set.")
         return {}
@@ -258,11 +263,13 @@ def get_ontologies() -> Dict:
         return {}  # Return blank dict to avoid internal server error.
 
 
+@cached(cache=TTLCache(maxsize=1, ttl=604800))
 def get_alt_profiles() -> Dict:
     """Get alt profiles from livbodcsos ords endpoint.
 
     Returns (Dict): Dict of parsed alt profile data. {alt_profile_url : {alt_profile_object}, ...}.
     """
+    logging.info("get_alt_profiles: CALLING ORDS")
     if page_configs.ORDS_ENDPOINT_URL is None:
         logging.error("Environment variable ORDS_ENDPOINT_URL is not set.")
         return {}
@@ -377,11 +384,13 @@ def get_collection_query(profile: Profile, instance_uri: str, ontologies: Dict):
     return query
 
 
+@cached(cache=TTLCache(maxsize=12*1024*1024, ttl=604800, getsizeof=lambda x: sys.getsizeof(str(x))))
 def get_external_mappings(collection_id: str) -> Dict:
     """Get external mappings title from livbodcsos ords endpoint.
 
     Returns (Dict): Dict of parsed external mappings data.
     """
+    logging.info("get_external_mappings: CALLING ORDS for collection_id=%s", collection_id)
     if page_configs.ORDS_ENDPOINT_URL is None:
         logging.error("Environment variable ORDS_ENDPOINT_URL is not set.")
         return {}
