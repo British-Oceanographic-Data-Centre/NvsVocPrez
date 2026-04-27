@@ -49,6 +49,58 @@ body {
     padding-left: 120px;
 }
 
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+.dropdown > a {
+    cursor: default;
+    text-decoration: none;
+}
+.dropdown > a:hover {
+    text-decoration: none;
+}
+.dropdown-child {
+    display: none;
+    position: absolute;
+    left: -7px;
+    transition: all 0.5s ease;
+    background-color: rgb(19, 50, 77);
+    min-width: 150px;
+    text-align: left;
+    padding-top: 10px;
+    z-index: 10;
+}
+.dropdown-child a {
+    padding: 10px 15px;
+    text-decoration: none;
+    display: block;
+    color: white;
+    white-space: nowrap;
+}
+.dropdown:hover .dropdown-child {
+    display: block;
+}
+
+#header-title .dropdown {
+    float: right;
+}
+
+#header-title .dropdown-child {
+    left: auto;
+    right: 0;
+}
+
+#header-title .dropdown > a {
+    float: none;
+    margin-left: 0;
+    cursor: default;
+}
+#header-title .dropdown > a:hover {
+    color: white;
+    text-decoration: none;
+}
+
 #header-title a {
     display: inline-block;
     background-color: rgb(19, 50, 77);
