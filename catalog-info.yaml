@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: NvsVocPrez
+  description: A custom implementation of VocPrez for the NERC Vocabulary Service (NVS).
+  annotations:
+    github.com/project-slug: 'British-Oceanographic-Data-Centre/NvsVocPrez'
+    backstage.io/source-location: url:https://github.com/British-Oceanographic-Data-Centre/NvsVocPrez/
+spec:
+  type: service
+  lifecycle: experimental
+  owner: guest
