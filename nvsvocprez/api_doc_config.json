@@ -510,7 +510,7 @@
 					"items": {
 					"type": "string"
 					},
-					"default": ["@id","sdo:name","sdo:description","sdo:alternateName","sdo:inDefinedTermSet","sdo:termCode","owl:deprecated","@type","skos:broader","skos:narrower","skos:related"]
+					"default": ["@id","skos:prefLabel","skos:definition","skos:altLabel","sdo:inDefinedTermSet","sdo:termCode","owl:deprecated","@type","skos:broader","skos:narrower","owl:sameAs"]
 				}
 				,
 				"style": "form",

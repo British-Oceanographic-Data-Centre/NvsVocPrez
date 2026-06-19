@@ -556,7 +556,6 @@ def content(request: Request):
     sparql_result = []
 
     context = {
-        "sdo": "https://schema.org/",
         "skos": "http://www.w3.org/2004/02/skos/core#",
         "owl": "http://www.w3.org/2002/07/owl#",
         "Collection": "http://www.w3.org/ns/hydra/core#Collection",
@@ -598,6 +597,7 @@ def content(request: Request):
 
         q_result = (
             """
+            PREFIX sdo: <http://schema.org/> 
             PREFIX lang: <http://ontologi.es/lang/core#> 
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
             PREFIX text: <http://jena.apache.org/text#> 
@@ -608,10 +608,10 @@ def content(request: Request):
             SELECT DISTINCT 
                 (?x AS ?concept_uri)
                 (?dci AS ?dc_identifier) 
-                (?pl AS ?sdo_name)                  
+                (?pl AS ?skos_prefLabel)                  
                 (?z AS ?skos_collection) 
-                (?alt AS ?sdo_alternateName)
-                (?def AS ?sdo_description)
+                (?alt AS ?skos_altLabel)
+                (?def AS ?skos_definition)
                 (?depr AS ?owl_deprecated)
 
             WHERE { 
@@ -654,10 +654,10 @@ def content(request: Request):
         sparql_result = sparql_query(q_result)[1]
 
         key_mappings = {
-            "sdo_name": "sdo:name",
+            "skos_prefLabel": "skos:prefLabel",
             "dc_identifier": "@id",
-            "sdo_alternateName": "sdo:alternateName",
-            "sdo_description": "sdo:description",
+            "skos_altLabel": "skos:altLabel",
+            "skos_definition": "skos:definition",
             "owl_deprecated": "owl:deprecated",
         }
 
@@ -681,20 +681,20 @@ def content(request: Request):
             item["sdo:termCode"] = identifier_suffix
             item["@type"] = ["sdo:DefinedTerm", "skos:Concept"]
             item.pop("skos_collection", [])
-            if "sdo:alternateName" in item:
-                val = item["sdo:alternateName"]
+            if "skos:altLabel" in item:
+                val = item["skos:altLabel"]
                 if isinstance(val, dict):
                     if not val.get("@value"):
-                        item.pop("sdo:alternateName", None)
+                        item.pop("skos:altLabel", None)
                 elif not val:
-                    item.pop("sdo:alternateName", None)
-            if "sdo:description" in item:
-                val = item["sdo:description"]
+                    item.pop("skos:altLabel", None)
+            if "skos:definition" in item:
+                val = item["skos:definition"]
                 if isinstance(val, dict):
                     if not val.get("@value"):
-                        item.pop("sdo:description", None)
+                        item.pop("skos:definition", None)
                 elif not val:
-                    item.pop("sdo:description", None)
+                    item.pop("skos:definition", None)
             if "owl:deprecated" in item:
                 item["owl:deprecated"] = item["owl:deprecated"].lower() == "true"
 
@@ -702,21 +702,23 @@ def content(request: Request):
         if concept_uris:
             mappings_query = """
                 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+                PREFIX owl: <http://www.w3.org/2002/07/owl#>
                 SELECT ?concept ?relation ?object
                 WHERE {
                     VALUES ?concept {
                         <CONCEPT_URIS>
                     }
                     VALUES ?relation {
-                        skos:broader skos:narrower skos:related
+                        skos:broader skos:narrower owl:sameAs 
                     }
                     ?concept ?relation ?object .
                     FILTER(!isLiteral(?object) || lang(?object) = "en" || lang(?object) = "")
                 }
             """.replace("<CONCEPT_URIS>", " ".join(concept_uris))
             
-            mappings_success, mappings_result = sparql_query(mappings_query)
-            if mappings_success:
+            mappings_res = sparql_query(mappings_query)
+            if mappings_res[0]:
+                mappings_result = mappings_res[1]
                 mappings_by_concept = {}
                 for row in mappings_result:
                     c = row["concept"]["value"]
@@ -724,6 +726,7 @@ def content(request: Request):
                     o = row["object"]["value"]
                     
                     rel_key = r.replace("http://www.w3.org/2004/02/skos/core#", "skos:")
+                    rel_key = rel_key.replace("http://www.w3.org/2002/07/owl#", "owl:")
                     
                     if c not in mappings_by_concept:
                         mappings_by_concept[c] = {}
