@@ -527,7 +527,10 @@ def content(request: Request):
 
             OPTIONAL { 
                 ?x skos:altLabel ?alt 
-                FILTER(langMatches(lang(?alt), "")) 
+                FILTER(
+                    langMatches(lang(?alt), "en") || 
+                    langMatches(lang(?alt), "")
+                ) 
             } 
             
             OPTIONAL { 
@@ -553,8 +556,8 @@ def content(request: Request):
     sparql_result = []
 
     context = {
-        "sdo": "https://schema.org/",
         "skos": "http://www.w3.org/2004/02/skos/core#",
+        "owl": "http://www.w3.org/2002/07/owl#",
         "Collection": "http://www.w3.org/ns/hydra/core#Collection",
         "accessRights": "http://purl.org/dc/terms/accessRights",
         "URI": "https://w3id.org/mod#URI",
@@ -594,6 +597,7 @@ def content(request: Request):
 
         q_result = (
             """
+            PREFIX sdo: <http://schema.org/> 
             PREFIX lang: <http://ontologi.es/lang/core#> 
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
             PREFIX text: <http://jena.apache.org/text#> 
@@ -602,9 +606,13 @@ def content(request: Request):
             PREFIX dc: <http://purl.org/dc/terms/> 
 
             SELECT DISTINCT 
+                (?x AS ?concept_uri)
                 (?dci AS ?dc_identifier) 
-                (?pl AS ?sdo_name)                  
+                (?pl AS ?skos_prefLabel)                  
                 (?z AS ?skos_collection) 
+                (?alt AS ?skos_altLabel)
+                (?def AS ?skos_definition)
+                (?depr AS ?owl_deprecated)
 
             WHERE { 
                 <TEXT_QUERY>
@@ -613,7 +621,10 @@ def content(request: Request):
                 
                 OPTIONAL { 
                     ?x skos:altLabel ?alt 
-                    FILTER(langMatches(lang(?alt), "")) 
+                    FILTER(
+                        langMatches(lang(?alt), "en") || 
+                        langMatches(lang(?alt), "")
+                    ) 
                 } 
                 
                 OPTIONAL { 
@@ -643,12 +654,25 @@ def content(request: Request):
         sparql_result = sparql_query(q_result)[1]
 
         key_mappings = {
-            "sdo_name": "sdo:name",
+            "skos_prefLabel": "skos:prefLabel",
             "dc_identifier": "@id",
+            "skos_altLabel": "skos:altLabel",
+            "skos_definition": "skos:definition",
+            "owl_deprecated": "owl:deprecated",
         }
 
         sparql_result = [{key_mappings.get(k, k): v for k, v in d.items()} for d in sparql_result]
-        sparql_result = [{k: v["value"] for k, v in d.items()} for d in sparql_result]
+
+        new_result = []
+        for d in sparql_result:
+            new_item = {}
+            for k, v in d.items():
+                if isinstance(v, dict) and v.get("xml:lang") == "en":
+                    new_item[k] = {"@language": "en", "@value": v["value"]}
+                else:
+                    new_item[k] = v["value"] if isinstance(v, dict) else v
+            new_result.append(new_item)
+        sparql_result = new_result
 
         for item in sparql_result:
             identifier_suffix = item["@id"].split("::")[-1]
@@ -657,6 +681,68 @@ def content(request: Request):
             item["sdo:termCode"] = identifier_suffix
             item["@type"] = ["sdo:DefinedTerm", "skos:Concept"]
             item.pop("skos_collection", [])
+            if "skos:altLabel" in item:
+                val = item["skos:altLabel"]
+                if isinstance(val, dict):
+                    if not val.get("@value"):
+                        item.pop("skos:altLabel", None)
+                elif not val:
+                    item.pop("skos:altLabel", None)
+            if "skos:definition" in item:
+                val = item["skos:definition"]
+                if isinstance(val, dict):
+                    if not val.get("@value"):
+                        item.pop("skos:definition", None)
+                elif not val:
+                    item.pop("skos:definition", None)
+            if "owl:deprecated" in item:
+                item["owl:deprecated"] = item["owl:deprecated"].lower() == "true"
+
+        concept_uris = [f"<{item['concept_uri']}>" for item in sparql_result if "concept_uri" in item]
+        if concept_uris:
+            mappings_query = """
+                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+                PREFIX owl: <http://www.w3.org/2002/07/owl#>
+                SELECT ?concept ?relation ?object
+                WHERE {
+                    VALUES ?concept {
+                        <CONCEPT_URIS>
+                    }
+                    VALUES ?relation {
+                        skos:broader skos:narrower owl:sameAs 
+                    }
+                    ?concept ?relation ?object .
+                    FILTER(!isLiteral(?object) || lang(?object) = "en" || lang(?object) = "")
+                }
+            """.replace("<CONCEPT_URIS>", " ".join(concept_uris))
+
+            mappings_res = sparql_query(mappings_query)
+            if mappings_res[0]:
+                mappings_result = mappings_res[1]
+                mappings_by_concept = {}
+                for row in mappings_result:
+                    c = row["concept"]["value"]
+                    r = row["relation"]["value"]
+                    o = row["object"]["value"]
+
+                    rel_key = r.replace("http://www.w3.org/2004/02/skos/core#", "skos:")
+                    rel_key = rel_key.replace("http://www.w3.org/2002/07/owl#", "owl:")
+
+                    if c not in mappings_by_concept:
+                        mappings_by_concept[c] = {}
+                    if rel_key not in mappings_by_concept[c]:
+                        mappings_by_concept[c][rel_key] = []
+
+                    mappings_by_concept[c][rel_key].append({"@id": o})
+
+                for item in sparql_result:
+                    cid = item.get("concept_uri")
+                    if cid in mappings_by_concept:
+                        for rel, objs in mappings_by_concept[cid].items():
+                            item[rel] = objs
+
+        for item in sparql_result:
+            item.pop("concept_uri", None)
 
         display_param = request.query_params.get("display", search_content_default_params)
         member = {"member": sparql_result}
