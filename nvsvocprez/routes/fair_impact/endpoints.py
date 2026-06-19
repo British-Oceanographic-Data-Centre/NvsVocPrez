@@ -662,7 +662,7 @@ def content(request: Request):
         }
 
         sparql_result = [{key_mappings.get(k, k): v for k, v in d.items()} for d in sparql_result]
-        
+
         new_result = []
         for d in sparql_result:
             new_item = {}
@@ -715,7 +715,7 @@ def content(request: Request):
                     FILTER(!isLiteral(?object) || lang(?object) = "en" || lang(?object) = "")
                 }
             """.replace("<CONCEPT_URIS>", " ".join(concept_uris))
-            
+
             mappings_res = sparql_query(mappings_query)
             if mappings_res[0]:
                 mappings_result = mappings_res[1]
@@ -724,23 +724,23 @@ def content(request: Request):
                     c = row["concept"]["value"]
                     r = row["relation"]["value"]
                     o = row["object"]["value"]
-                    
+
                     rel_key = r.replace("http://www.w3.org/2004/02/skos/core#", "skos:")
                     rel_key = rel_key.replace("http://www.w3.org/2002/07/owl#", "owl:")
-                    
+
                     if c not in mappings_by_concept:
                         mappings_by_concept[c] = {}
                     if rel_key not in mappings_by_concept[c]:
                         mappings_by_concept[c][rel_key] = []
-                        
+
                     mappings_by_concept[c][rel_key].append({"@id": o})
-                
+
                 for item in sparql_result:
                     cid = item.get("concept_uri")
                     if cid in mappings_by_concept:
                         for rel, objs in mappings_by_concept[cid].items():
                             item[rel] = objs
-                            
+
         for item in sparql_result:
             item.pop("concept_uri", None)
 
